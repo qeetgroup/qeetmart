@@ -16,6 +16,7 @@ app.use(helmet());
 app.use(cors({
   origin: true, // Configure based on your frontend URLs
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
