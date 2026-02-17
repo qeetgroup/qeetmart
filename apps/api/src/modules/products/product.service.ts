@@ -1,29 +1,80 @@
 import { CreateProductDTO, UpdateProductDTO, ProductDTO } from '@qeetmart/shared';
+import { prisma } from '../../common/prisma.js';
 
-// TODO: Implement database operations when Prisma is set up
+const toProductDTO = (product: {
+  id: string;
+  name: string;
+  description: string;
+  price: any; // Decimal from Prisma
+  stock: number;
+  categoryId: string;
+  imageUrl: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}): ProductDTO => ({
+  id: product.id,
+  name: product.name,
+  description: product.description,
+  price: Number(product.price),
+  stock: product.stock,
+  categoryId: product.categoryId,
+  imageUrl: product.imageUrl ?? undefined,
+  createdAt: product.createdAt,
+  updatedAt: product.updatedAt,
+});
+
 export const productService = {
   async getAll(): Promise<ProductDTO[]> {
-    // TODO: Replace with Prisma query
-    throw new Error('Database not configured. Please set up Prisma first.');
+    const products = await prisma.product.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    return products.map(toProductDTO);
   },
 
-  async getById(_id: string): Promise<ProductDTO | null> {
-    // TODO: Replace with Prisma query
-    throw new Error('Database not configured. Please set up Prisma first.');
+  async getById(id: string): Promise<ProductDTO | null> {
+    const product = await prisma.product.findUnique({
+      where: { id },
+    });
+    return product ? toProductDTO(product) : null;
   },
 
-  async create(_data: CreateProductDTO): Promise<ProductDTO> {
-    // TODO: Replace with Prisma query
-    throw new Error('Database not configured. Please set up Prisma first.');
+  async create(data: CreateProductDTO): Promise<ProductDTO> {
+    const product = await prisma.product.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        stock: data.stock,
+        categoryId: data.categoryId,
+        imageUrl: data.imageUrl,
+      },
+    });
+    return toProductDTO(product);
   },
 
-  async update(_id: string, _data: UpdateProductDTO): Promise<ProductDTO | null> {
-    // TODO: Replace with Prisma query
-    throw new Error('Database not configured. Please set up Prisma first.');
+  async update(id: string, data: UpdateProductDTO): Promise<ProductDTO | null> {
+    const product = await prisma.product.update({
+      where: { id },
+      data: {
+        ...(data.name && { name: data.name }),
+        ...(data.description && { description: data.description }),
+        ...(data.price !== undefined && { price: data.price }),
+        ...(data.stock !== undefined && { stock: data.stock }),
+        ...(data.categoryId && { categoryId: data.categoryId }),
+        ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+      },
+    });
+    return toProductDTO(product);
   },
 
-  async delete(_id: string): Promise<boolean> {
-    // TODO: Replace with Prisma query
-    throw new Error('Database not configured. Please set up Prisma first.');
+  async delete(id: string): Promise<boolean> {
+    try {
+      await prisma.product.delete({
+        where: { id },
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
   },
 };

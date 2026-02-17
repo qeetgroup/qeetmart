@@ -3,27 +3,21 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { errorHandler } from './common/error-handler.js';
-import { productRoutes } from './modules/products/product.routes.js';
-import { orderRoutes } from './modules/orders/order.routes.js';
-import { userRoutes } from './modules/users/user.routes.js';
-import { paymentRoutes } from './modules/payments/payment.routes.js';
-import { inventoryRoutes } from './modules/inventory/inventory.routes.js';
+import { v1Routes } from './routes/v1.routes.js';
 
 const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: true, // Configure based on your frontend URLs
-}));
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 1 * 60 * 1000,
+  max: 100, 
 });
 app.use('/api/', limiter);
 
@@ -32,12 +26,12 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API routes
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/inventory', inventoryRoutes);
+// API versioned routes
+// v1 routes: /api/v1/*
+app.use('/api/v1', v1Routes);
+
+// Future: v2 routes can be added here
+// app.use('/api/v2', v2Routes);
 
 // Error handler (must be last)
 app.use(errorHandler);
