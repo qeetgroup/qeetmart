@@ -1,0 +1,29 @@
+{
+  "name": "@qeetmart/root",
+  "version": "0.0.1",
+  "description": "Ecommerce Application",
+  "homepage": "https://github.com/qeetgroup/qeetmart#readme",
+  "bugs": {
+    "url": "https://github.com/qeetgroup/qeetmart/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qeetgroup/qeetmart.git"
+  },
+  "license": "MIT",
+  "author": "Qeet Group",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev:api": "pnpm --filter @qeetmart/api dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:admin": "pnpm --filter admin dev",
+    "build:api": "pnpm --filter @qeetmart/api build",
+    "build:shared": "pnpm --filter @qeetmart/shared build",
+    "build": "pnpm build:shared && pnpm build:api",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
