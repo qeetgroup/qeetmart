@@ -37,7 +37,7 @@ app.use('/api/v1', v1Routes);
 app.use(errorHandler);
 
 // Start server
-const port = Number(process.env['PORT']) || 3001;
+const port = Number(process.env['PORT']) || 4001;
 const host = process.env['HOST'] || '0.0.0.0';
 
 app.listen(port, host, () => {

@@ -3,7 +3,7 @@
 ## Base URL
 
 ```
-http://localhost:3001/api/v1
+http://localhost:4001/api/v1
 ```
 
 ## Authentication

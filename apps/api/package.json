@@ -17,8 +17,10 @@
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.0",
+    "@prisma/client": "^7.4.0",
     "@qeetmart/shared": "workspace:*",
     "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
     "express": "^4.21.1",
     "express-rate-limit": "^7.4.1",
     "helmet": "^8.0.0",

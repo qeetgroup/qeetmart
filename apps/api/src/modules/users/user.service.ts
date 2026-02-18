@@ -34,6 +34,7 @@ export const userService = {
 
   async create(data: CreateUserDTO): Promise<UserDTO> {
     // TODO: Hash password with bcrypt before storing
+    console.log("Creating user:", data);
     const user = await prisma.user.create({
       data: {
         email: data.email,
