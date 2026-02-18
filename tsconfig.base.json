@@ -28,7 +28,7 @@
       "baseUrl": ".",
       "module": "nodenext",
       "moduleResolution": "nodenext",
-      "resolveJsonModule": true,
+      "resolveJsonModule": true, 
       "resolvePackageJsonExports": true,
       "resolvePackageJsonImports": true,
       "paths": {
