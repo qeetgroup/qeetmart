@@ -1,0 +1,29 @@
+{
+  "name": "@qeetmart/api-gateway",
+  "version": "0.0.1",
+  "description": "API Gateway for Qeetmart microservices",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@qeetmart/shared": "workspace:*",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
+    "helmet": "^8.0.0",
+    "http-proxy-middleware": "^3.0.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.19.11",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  }
+}
