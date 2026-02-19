@@ -38,12 +38,34 @@ export const userController = {
 
   async create(req: Request, res: Response): Promise<void> {
     try {
+      // Validate required fields
+      const { email, name, password } = req.body;
+      if (!email || !name || !password) {
+        res.status(400).json({
+          success: false,
+          error: { message: 'Missing required fields: email, name, and password are required', code: 'VALIDATION_ERROR' },
+        });
+        return;
+      }
+
       const user = await userService.create(req.body);
       res.status(201).json({ success: true, data: user });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create user';
+      const errorCode = (error as any)?.code || 'INTERNAL_ERROR';
+      
+      // Handle Prisma unique constraint violation (duplicate email)
+      if ((error as any)?.code === 'P2002') {
+        res.status(409).json({
+          success: false,
+          error: { message: 'Email already exists', code: 'DUPLICATE_EMAIL' },
+        });
+        return;
+      }
+      
       res.status(500).json({
         success: false,
-        error: { message: 'Failed to create user', code: 'INTERNAL_ERROR' },
+        error: { message: errorMessage, code: errorCode },
       });
     }
   },
