@@ -2,8 +2,11 @@
 ├── .gitignore
 ├── .idea
 │  ├── .gitignore
+│  ├── compiler.xml
+│  ├── encodings.xml
 │  ├── inspectionProfiles
 │  │  └── Project_Default.xml
+│  ├── jarRepositories.xml
 │  ├── misc.xml
 │  ├── modules.xml
 │  ├── qeetmart.iml
@@ -93,7 +96,53 @@
 │  │  │    └── v1.routes.ts
 │  │  └── tsconfig.json
 │  ├── mobile
-│  │  └── .gitkeep
+│  │  ├── .gitignore
+│  │  ├── .vscode
+│  │  │  ├── extensions.json
+│  │  │  └── settings.json
+│  │  ├── app
+│  │  │  ├── _layout.tsx
+│  │  │  ├── (tabs)
+│  │  │  │  ├── _layout.tsx
+│  │  │  │  ├── explore.tsx
+│  │  │  │  └── index.tsx
+│  │  │  └── modal.tsx
+│  │  ├── app.json
+│  │  ├── assets
+│  │  │  └── images
+│  │  │    ├── android-icon-background.png
+│  │  │    ├── android-icon-foreground.png
+│  │  │    ├── android-icon-monochrome.png
+│  │  │    ├── favicon.png
+│  │  │    ├── icon.png
+│  │  │    ├── partial-react-logo.png
+│  │  │    ├── react-logo.png
+│  │  │    ├── react-logo@2x.png
+│  │  │    ├── react-logo@3x.png
+│  │  │    └── splash-icon.png
+│  │  ├── components
+│  │  │  ├── external-link.tsx
+│  │  │  ├── haptic-tab.tsx
+│  │  │  ├── hello-wave.tsx
+│  │  │  ├── parallax-scroll-view.tsx
+│  │  │  ├── themed-text.tsx
+│  │  │  ├── themed-view.tsx
+│  │  │  └── ui
+│  │  │    ├── collapsible.tsx
+│  │  │    ├── icon-symbol.ios.tsx
+│  │  │    └── icon-symbol.tsx
+│  │  ├── constants
+│  │  │  └── theme.ts
+│  │  ├── eslint.config.js
+│  │  ├── hooks
+│  │  │  ├── use-color-scheme.ts
+│  │  │  ├── use-color-scheme.web.ts
+│  │  │  └── use-theme-color.ts
+│  │  ├── package.json
+│  │  ├── README.md
+│  │  ├── scripts
+│  │  │  └── reset-project.js
+│  │  └── tsconfig.json
 │  └── web
 │    ├── .gitignore
 │    ├── eslint.config.mjs
@@ -119,12 +168,29 @@
 │  ├── API_CONTRACTS.md
 │  ├── ARCHITECTURE_GUIDE.md
 │  ├── IMPLEMENTATION_STEPS.md
-│  └── LANGUAGE_COMPARISON.md
+│  ├── LANGUAGE_COMPARISON.md
+│  └── PROJECT_ANALYSIS.md
 ├── LICENSE
 ├── micros
 │  ├── .DS_Store
 │  ├── .gitkeep
 │  ├── api-gateway
+│  │  ├── .gitignore
+│  │  ├── package.json
+│  │  ├── README.md
+│  │  ├── src
+│  │  │  ├── config
+│  │  │  │  └── services.ts
+│  │  │  ├── index.ts
+│  │  │  ├── middleware
+│  │  │  │  ├── auth.middleware.ts
+│  │  │  │  ├── error-handler.middleware.ts
+│  │  │  │  └── logging.middleware.ts
+│  │  │  ├── routes
+│  │  │  │  └── gateway.routes.ts
+│  │  │  └── utils
+│  │  │    └── health-check.ts
+│  │  └── tsconfig.json
 │  ├── auth-service
 │  │  ├── .gitattributes
 │  │  ├── .gitignore
