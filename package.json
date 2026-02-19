@@ -17,9 +17,11 @@
   "scripts": {
     "generate:tree": "struct -i .next -i target -i dist -i .pnpm-store -o project.tree",
     "dev:api": "pnpm --filter @qeetmart/api dev",
+    "dev:gateway": "pnpm --filter @qeetmart/api-gateway dev",
     "dev:web": "pnpm --filter web dev",
     "dev:admin": "pnpm --filter admin dev",
     "build:api": "pnpm --filter @qeetmart/api build",
+    "build:gateway": "pnpm --filter @qeetmart/api-gateway build",
     "build:shared": "pnpm --filter @qeetmart/shared build",
     "build": "pnpm build:shared && pnpm build:api"
   },
