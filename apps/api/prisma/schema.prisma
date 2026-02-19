@@ -125,7 +125,7 @@ model Payment {
   amount        Decimal       @db.Decimal(10, 2)
   status        PaymentStatus @default(pending)
   method        PaymentMethod
-  transactionId String?
+  transactionId String
   createdAt     DateTime      @default(now())
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
