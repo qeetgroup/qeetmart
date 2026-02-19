@@ -1,0 +1,219 @@
+├── .DS_Store
+├── .gitignore
+├── .idea
+│  ├── .gitignore
+│  ├── inspectionProfiles
+│  │  └── Project_Default.xml
+│  ├── misc.xml
+│  ├── modules.xml
+│  ├── qeetmart.iml
+│  ├── vcs.xml
+│  └── workspace.xml
+├── apps
+│  ├── admin
+│  │  ├── .gitignore
+│  │  ├── eslint.config.js
+│  │  ├── index.html
+│  │  ├── package.json
+│  │  ├── public
+│  │  │  └── vite.svg
+│  │  ├── README.md
+│  │  ├── src
+│  │  │  ├── App.css
+│  │  │  ├── App.tsx
+│  │  │  ├── assets
+│  │  │  │  └── react.svg
+│  │  │  ├── index.css
+│  │  │  └── main.tsx
+│  │  ├── tsconfig.app.json
+│  │  ├── tsconfig.json
+│  │  ├── tsconfig.node.json
+│  │  └── vite.config.ts
+│  ├── api
+│  │  ├── .env
+│  │  ├── .gitignore
+│  │  ├── docs
+│  │  │  ├── API.md
+│  │  │  └── BACKEND_SETUP.md
+│  │  ├── generated
+│  │  │  └── prisma
+│  │  │    ├── browser.ts
+│  │  │    ├── client.ts
+│  │  │    ├── commonInputTypes.ts
+│  │  │    ├── enums.ts
+│  │  │    ├── internal
+│  │  │    │  ├── class.ts
+│  │  │    │  ├── prismaNamespace.ts
+│  │  │    │  └── prismaNamespaceBrowser.ts
+│  │  │    ├── models
+│  │  │    │  ├── Category.ts
+│  │  │    │  ├── Inventory.ts
+│  │  │    │  ├── Order.ts
+│  │  │    │  ├── OrderItem.ts
+│  │  │    │  ├── Payment.ts
+│  │  │    │  ├── Product.ts
+│  │  │    │  └── User.ts
+│  │  │    └── models.ts
+│  │  ├── package.json
+│  │  ├── prisma
+│  │  │  ├── migrations
+│  │  │  │  ├── 20260217031036_init
+│  │  │  │  │  └── migration.sql
+│  │  │  │  └── migration_lock.toml
+│  │  │  └── schema.prisma
+│  │  ├── prisma.config.ts
+│  │  ├── README.md
+│  │  ├── src
+│  │  │  ├── common
+│  │  │  │  ├── error-handler.ts
+│  │  │  │  └── prisma.ts
+│  │  │  ├── index.ts
+│  │  │  ├── modules
+│  │  │  │  ├── inventory
+│  │  │  │  │  ├── inventory.controller.ts
+│  │  │  │  │  ├── inventory.routes.ts
+│  │  │  │  │  └── inventory.service.ts
+│  │  │  │  ├── orders
+│  │  │  │  │  ├── order.controller.ts
+│  │  │  │  │  ├── order.routes.ts
+│  │  │  │  │  └── order.service.ts
+│  │  │  │  ├── payments
+│  │  │  │  │  ├── payment.controller.ts
+│  │  │  │  │  ├── payment.routes.ts
+│  │  │  │  │  └── payment.service.ts
+│  │  │  │  ├── products
+│  │  │  │  │  ├── product.controller.ts
+│  │  │  │  │  ├── product.routes.ts
+│  │  │  │  │  └── product.service.ts
+│  │  │  │  └── users
+│  │  │  │    ├── user.controller.ts
+│  │  │  │    ├── user.routes.ts
+│  │  │  │    └── user.service.ts
+│  │  │  └── routes
+│  │  │    └── v1.routes.ts
+│  │  └── tsconfig.json
+│  ├── mobile
+│  │  └── .gitkeep
+│  └── web
+│    ├── .gitignore
+│    ├── eslint.config.mjs
+│    ├── next-env.d.ts
+│    ├── next.config.ts
+│    ├── package.json
+│    ├── postcss.config.mjs
+│    ├── public
+│    │  ├── file.svg
+│    │  ├── globe.svg
+│    │  ├── next.svg
+│    │  ├── vercel.svg
+│    │  └── window.svg
+│    ├── README.md
+│    ├── src
+│    │  └── app
+│    │    ├── favicon.ico
+│    │    ├── globals.css
+│    │    ├── layout.tsx
+│    │    └── page.tsx
+│    └── tsconfig.json
+├── docs
+│  ├── API_CONTRACTS.md
+│  ├── ARCHITECTURE_GUIDE.md
+│  ├── IMPLEMENTATION_STEPS.md
+│  └── LANGUAGE_COMPARISON.md
+├── LICENSE
+├── micros
+│  ├── .DS_Store
+│  ├── .gitkeep
+│  ├── api-gateway
+│  ├── auth-service
+│  │  ├── .gitattributes
+│  │  ├── .gitignore
+│  │  ├── .idea
+│  │  │  ├── .gitignore
+│  │  │  ├── compiler.xml
+│  │  │  ├── encodings.xml
+│  │  │  ├── jarRepositories.xml
+│  │  │  ├── misc.xml
+│  │  │  ├── vcs.xml
+│  │  │  └── workspace.xml
+│  │  ├── .mvn
+│  │  │  └── wrapper
+│  │  │    └── maven-wrapper.properties
+│  │  ├── compose.yaml
+│  │  ├── HELP.md
+│  │  ├── mvnw
+│  │  ├── mvnw.cmd
+│  │  ├── pom.xml
+│  │  └── src
+│  │    ├── main
+│  │    │  ├── java
+│  │    │  │  └── com
+│  │    │  │    └── qeetmart
+│  │    │  │      └── auth
+│  │    │  │        └── AuthServiceApplication.java
+│  │    │  └── resources
+│  │    │    ├── application.properties
+│  │    │    ├── db
+│  │    │    │  └── migration
+│  │    │    ├── static
+│  │    │    └── templates
+│  │    └── test
+│  │      └── java
+│  │        └── com
+│  │          └── qeetmart
+│  │            └── auth
+│  │              └── AuthServiceApplicationTests.java
+│  ├── product-service
+│  └── user-service
+│    ├── .gitattributes
+│    ├── .gitignore
+│    ├── .idea
+│    │  ├── .gitignore
+│    │  ├── misc.xml
+│    │  └── workspace.xml
+│    ├── .mvn
+│    │  └── wrapper
+│    │    └── maven-wrapper.properties
+│    ├── compose.yaml
+│    ├── HELP.md
+│    ├── mvnw
+│    ├── mvnw.cmd
+│    ├── pom.xml
+│    └── src
+│      ├── main
+│      │  ├── java
+│      │  │  └── com
+│      │  │    └── qeetmart
+│      │  │      └── user
+│      │  │        └── UserServiceApplication.java
+│      │  └── resources
+│      │    ├── application.properties
+│      │    ├── db
+│      │    │  └── migration
+│      │    ├── static
+│      │    └── templates
+│      └── test
+│        └── java
+│          └── com
+│            └── qeetmart
+│              └── user
+│                └── UserServiceApplicationTests.java
+├── package.json
+├── packages
+│  ├── lib
+│  └── shared
+│    ├── package.json
+│    ├── src
+│    │  ├── contracts
+│    │  │  └── index.ts
+│    │  ├── index.ts
+│    │  └── types
+│    │    └── index.ts
+│    ├── tsconfig.json
+│    └── tsconfig.tsbuildinfo
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── project.tree
+├── README.md
+├── tsconfig.base.json
+└── tsconfig.json
