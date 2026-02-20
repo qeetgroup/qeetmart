@@ -35,10 +35,33 @@
 │  │  ├── src
 │  │  │  ├── app
 │  │  │  │  ├── app-router.tsx
+│  │  │  │  ├── layout.tsx
 │  │  │  │  ├── lazy-routes.ts
-│  │  │  │  └── navigation.ts
+│  │  │  │  ├── navigation.ts
+│  │  │  │  └── routes
+│  │  │  │    ├── analytics
+│  │  │  │    │  └── index.tsx
+│  │  │  │    ├── dashboard
+│  │  │  │    │  └── index.tsx
+│  │  │  │    ├── insights
+│  │  │  │    │  └── index.tsx
+│  │  │  │    ├── notifications
+│  │  │  │    │  └── index.tsx
+│  │  │  │    ├── orders
+│  │  │  │    │  └── index.tsx
+│  │  │  │    ├── products
+│  │  │  │    │  └── index.tsx
+│  │  │  │    └── roles
+│  │  │  │      └── index.tsx
 │  │  │  ├── assets
 │  │  │  ├── components
+│  │  │  │  ├── analytics
+│  │  │  │  │  ├── kpi-card.tsx
+│  │  │  │  │  ├── KpiCard.tsx
+│  │  │  │  │  ├── orders-stream.tsx
+│  │  │  │  │  ├── OrdersStream.tsx
+│  │  │  │  │  ├── sales-chart.tsx
+│  │  │  │  │  └── SalesChart.tsx
 │  │  │  │  ├── charts
 │  │  │  │  │  ├── inventory-stock-chart.tsx
 │  │  │  │  │  ├── orders-trend-chart.tsx
@@ -49,11 +72,19 @@
 │  │  │  │  │  ├── error-state.tsx
 │  │  │  │  │  ├── route-fallback.tsx
 │  │  │  │  │  └── table-skeleton.tsx
+│  │  │  │  ├── filters
+│  │  │  │  │  ├── date-filter.tsx
+│  │  │  │  │  ├── DateFilter.tsx
+│  │  │  │  │  ├── search-input.tsx
+│  │  │  │  │  └── SearchInput.tsx
 │  │  │  │  ├── forms
 │  │  │  │  │  ├── login-form.tsx
 │  │  │  │  │  ├── order-details-dialog.tsx
 │  │  │  │  │  └── product-form-dialog.tsx
+│  │  │  │  ├── insights
+│  │  │  │  │  └── predictive-insight-card.tsx
 │  │  │  │  ├── layout
+│  │  │  │  │  ├── app-breadcrumbs.tsx
 │  │  │  │  │  ├── app-header.tsx
 │  │  │  │  │  ├── app-sidebar.tsx
 │  │  │  │  │  ├── dashboard-layout.tsx
@@ -62,12 +93,14 @@
 │  │  │  │  └── ui
 │  │  │  │    ├── avatar.tsx
 │  │  │  │    ├── badge.tsx
+│  │  │  │    ├── breadcrumb.tsx
 │  │  │  │    ├── button.tsx
 │  │  │  │    ├── card.tsx
 │  │  │  │    ├── dialog.tsx
 │  │  │  │    ├── dropdown-menu.tsx
 │  │  │  │    ├── input.tsx
 │  │  │  │    ├── label.tsx
+│  │  │  │    ├── pagination.tsx
 │  │  │  │    ├── select.tsx
 │  │  │  │    ├── separator.tsx
 │  │  │  │    ├── sheet.tsx
@@ -79,6 +112,16 @@
 │  │  │  ├── guards
 │  │  │  │  ├── permission-gate.tsx
 │  │  │  │  └── protected-route.tsx
+│  │  │  ├── hooks
+│  │  │  │  ├── index.ts
+│  │  │  │  ├── use-analytics.ts
+│  │  │  │  ├── use-debounced-value.ts
+│  │  │  │  ├── use-insights.ts
+│  │  │  │  ├── use-notifications.ts
+│  │  │  │  ├── use-orders.ts
+│  │  │  │  ├── use-products.ts
+│  │  │  │  ├── use-roles.ts
+│  │  │  │  └── use-tenants.ts
 │  │  │  ├── index.css
 │  │  │  ├── lib
 │  │  │  │  ├── query-client.ts
@@ -86,33 +129,44 @@
 │  │  │  ├── main.tsx
 │  │  │  ├── pages
 │  │  │  │  ├── admins-page.tsx
+│  │  │  │  ├── analytics-page.tsx
 │  │  │  │  ├── auth
 │  │  │  │  │  ├── forbidden-page.tsx
 │  │  │  │  │  └── login-page.tsx
 │  │  │  │  ├── customers-page.tsx
 │  │  │  │  ├── dashboard-page.tsx
+│  │  │  │  ├── insights-page.tsx
 │  │  │  │  ├── inventory-page.tsx
 │  │  │  │  ├── not-found-page.tsx
+│  │  │  │  ├── notifications-page.tsx
 │  │  │  │  ├── orders-page.tsx
 │  │  │  │  ├── products-page.tsx
+│  │  │  │  ├── roles-page.tsx
 │  │  │  │  └── settings-page.tsx
 │  │  │  ├── providers
 │  │  │  │  ├── query-provider.tsx
 │  │  │  │  └── theme-provider.tsx
 │  │  │  ├── services
 │  │  │  │  ├── admins-service.ts
+│  │  │  │  ├── analytics-service.ts
 │  │  │  │  ├── auth-service.ts
 │  │  │  │  ├── customers-service.ts
 │  │  │  │  ├── dashboard-service.ts
 │  │  │  │  ├── index.ts
+│  │  │  │  ├── insights-service.ts
 │  │  │  │  ├── inventory-service.ts
 │  │  │  │  ├── mock-data.ts
 │  │  │  │  ├── mock-db.ts
+│  │  │  │  ├── notifications-service.ts
 │  │  │  │  ├── orders-service.ts
 │  │  │  │  ├── products-service.ts
+│  │  │  │  ├── realtime-service.ts
+│  │  │  │  ├── roles-service.ts
+│  │  │  │  ├── tenants-service.ts
 │  │  │  │  └── types.ts
 │  │  │  └── stores
 │  │  │    ├── auth-store.ts
+│  │  │    ├── tenant-store.ts
 │  │  │    └── ui-store.ts
 │  │  ├── tailwind.config.js
 │  │  ├── tsconfig.app.json

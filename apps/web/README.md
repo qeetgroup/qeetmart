@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QeetMart Web Storefront
 
-## Getting Started
+Production-grade eCommerce storefront foundation built in `apps/web`.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router)
+- TypeScript
+- Tailwind CSS v4
+- shadcn-style UI primitives
+- React Query (TanStack Query)
+- Zustand (cart/session/wishlist persistence)
+- Mock API + in-memory DB
+
+## Feature Coverage
+
+- Home page with hero, category grid, featured carousel, trending, recommendations, and promo banners
+- Product listing (`/products`) with URL-synced filters, sorting, pagination, sticky desktop filters, mobile drawer filters, loading skeletons, and empty state
+- Category route (`/products/category/[category]`)
+- Product detail (`/products/[slug]`) with image gallery, zoom, variants, cart actions, buy now, delivery estimate, rating breakdown, reviews, trust badges, share actions, similar products, and JSON-LD
+- Cart (`/cart`) with quantity updates, coupon validation, free shipping indicator, summary, and localStorage persistence
+- Checkout (`/checkout`) with 5-step flow, validation, delivery/payment selection, order creation, and confirmation
+- Authentication (`/auth/login`, `/auth/signup`) with mock JWT session
+- Protected account dashboard (`/account`) with order history, profile, address management, wishlist, logout
+- Wishlist page (`/wishlist`) persisted per user
+- Global UX: sticky header, mega menu, debounced search + autocomplete, breadcrumbs, theme toggle, route transitions, route loading/error boundaries
+
+## Mock API Layer
+
+Located in `src/lib/api/`:
+
+- `mock-db.ts` (in-memory DB)
+- `sample-data.ts` (100+ products, 10+ categories, reviews)
+- `products-api.ts`
+- `categories-api.ts`
+- `cart-api.ts`
+- `orders-api.ts`
+- `auth-api.ts`
+- `reviews-api.ts`
+
+## Key Architecture Folders
+
+- `src/app` route structure (App Router)
+- `src/components/layout` header/footer/mega menu/shell
+- `src/components/product` PLP/PDP components
+- `src/components/cart` cart + mini cart drawer
+- `src/components/checkout` multi-step checkout
+- `src/components/account` dashboard + wishlist views
+- `src/components/search` debounced autocomplete UI
+- `src/components/providers` query/theme providers
+- `src/store` Zustand stores
+- `src/lib` APIs, hooks, query client, constants, utilities
+- `src/types` domain types
+
+## Run Locally
+
+From repository root:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm --filter web dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Validation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm --filter web lint
+pnpm --filter web build
+```
 
-## Learn More
+## Demo Login
 
-To learn more about Next.js, take a look at the following resources:
+Use seeded demo account:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Email: `demo@qeetmart.com`
+- Password: `demo123`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Data is mock-only and in-memory; restart clears runtime-created orders/users.
+- Client persistence is handled via localStorage-backed Zustand stores.
