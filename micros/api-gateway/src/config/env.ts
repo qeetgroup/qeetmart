@@ -19,7 +19,10 @@ const envSchema = z.object({
     .min(1)
     .default('Too many requests from this IP, please try again later.'),
   GATEWAY_PROXY_TIMEOUT_MS: z.coerce.number().int().positive().default(5000),
-  REQUIRE_AUTH: booleanString.default('false'),
+  REQUIRE_AUTH: booleanString.default('true'),
+  JWT_SECRET: z.string().trim().min(1).optional(),
+  JWT_ISSUER: z.string().trim().min(1).optional(),
+  JWT_AUDIENCE: z.string().trim().min(1).optional(),
 });
 
 type ParsedEnv = z.infer<typeof envSchema>;
@@ -57,6 +60,10 @@ if (allowAllOrigins && requestedCorsCredentials) {
   console.warn('CORS_CREDENTIALS=true is ignored when CORS_ORIGINS=*');
 }
 
+if (env.REQUIRE_AUTH === 'true' && !env.JWT_SECRET) {
+  throw new Error('JWT_SECRET is required when REQUIRE_AUTH=true');
+}
+
 export const gatewayConfig = {
   port: env.PORT,
   host: env.HOST,
@@ -65,6 +72,11 @@ export const gatewayConfig = {
   urlencodedExtended: env.URLENCODED_EXTENDED === 'true',
   requireAuth: env.REQUIRE_AUTH === 'true',
   proxyTimeoutMs: env.GATEWAY_PROXY_TIMEOUT_MS,
+  jwt: {
+    secret: env.JWT_SECRET,
+    issuer: env.JWT_ISSUER,
+    audience: env.JWT_AUDIENCE,
+  },
   cors: {
     allowAllOrigins,
     origins: allowAllOrigins ? [] : corsOrigins,

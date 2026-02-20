@@ -1,0 +1,36 @@
+---
+title: Contribution Guide
+description: How qeetmart engineers propose, review, and publish documentation changes safely.
+section: Contributing
+lastUpdated: 2026-02-20
+---
+
+## Contribution standards
+
+- Keep docs and code changes in the same PR.
+- Use concrete commands, not abstract instructions.
+- Document environment variables and defaults for every new service/config.
+- Add or update runbooks for operationally meaningful behavior changes.
+
+## Required PR checklist
+
+- [ ] Updated docs pages for behavior changes
+- [ ] Updated OpenAPI contract if API changed
+- [ ] Ran docs drift and content validation
+- [ ] Confirmed links and commands are correct
+
+## Useful commands
+
+```bash
+pnpm --filter docs dev
+pnpm --filter docs check:content
+pnpm --filter docs check:drift
+pnpm --filter docs build
+```
+
+## Ownership model
+
+- `platform`: docs structure, automation scripts, CI gates
+- `identity`: auth/user docs and API references
+- `catalog`: product docs and API references
+- `fulfillment`: inventory docs and runbooks

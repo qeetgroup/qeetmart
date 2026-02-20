@@ -1,0 +1,26 @@
+---
+title: GitHub Actions CI/CD
+description: CI governance for polyglot builds, contract checks, platform validation, and docs quality.
+section: DevOps
+lastUpdated: 2026-02-20
+---
+
+## Current pipeline responsibilities
+
+- Path-aware Node build/test for gateway + web/admin + docs
+- Spring Boot test matrix for auth/user/product
+- Go tests for inventory
+- OpenAPI lint and breaking change detection
+- Helm and Kustomize validation
+
+## Docs quality gates
+
+- Frontmatter validation
+- Drift checks (env variables and OpenAPI sync)
+- Search index generation validity
+- Next.js production build of `apps/docs`
+
+## Policy
+
+- PRs that modify services must update corresponding docs when behavior changes.
+- Breaking API changes require version strategy update (`v2` docs path).

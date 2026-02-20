@@ -1,0 +1,67 @@
+[
+  {
+    "id": "api-gateway",
+    "title": "API Gateway",
+    "runtime": "Node.js / Express",
+    "owner": "platform",
+    "port": 4000,
+    "openapi": null,
+    "baseUrls": {
+      "local": "http://localhost:4000",
+      "staging": "https://gateway.staging.qeetmart.internal",
+      "prod": "https://gateway.qeetmart.com"
+    }
+  },
+  {
+    "id": "auth-service",
+    "title": "Auth Service",
+    "runtime": "Spring Boot",
+    "owner": "identity",
+    "port": 8081,
+    "openapi": "auth-service.json",
+    "baseUrls": {
+      "local": "http://localhost:8081",
+      "staging": "https://auth.staging.qeetmart.internal",
+      "prod": "https://auth.qeetmart.com"
+    }
+  },
+  {
+    "id": "user-service",
+    "title": "User Service",
+    "runtime": "Spring Boot",
+    "owner": "identity",
+    "port": 8082,
+    "openapi": "user-service.json",
+    "baseUrls": {
+      "local": "http://localhost:8082",
+      "staging": "https://user.staging.qeetmart.internal",
+      "prod": "https://user.qeetmart.com"
+    }
+  },
+  {
+    "id": "product-service",
+    "title": "Product Service",
+    "runtime": "Spring Boot",
+    "owner": "catalog",
+    "port": 8083,
+    "openapi": "product-service.json",
+    "baseUrls": {
+      "local": "http://localhost:8083",
+      "staging": "https://product.staging.qeetmart.internal",
+      "prod": "https://product.qeetmart.com"
+    }
+  },
+  {
+    "id": "inventory-service",
+    "title": "Inventory Service",
+    "runtime": "Go / Gin",
+    "owner": "fulfillment",
+    "port": 8080,
+    "openapi": "inventory-service.json",
+    "baseUrls": {
+      "local": "http://localhost:8080",
+      "staging": "https://inventory.staging.qeetmart.internal",
+      "prod": "https://inventory.qeetmart.com"
+    }
+  }
+]

@@ -1,0 +1,41 @@
+---
+title: System Overview
+description: Topology of qeetmart clients, gateway, services, and stateful dependencies.
+section: Architecture
+lastUpdated: 2026-02-20
+---
+
+The system is a polyglot microservices platform centered on a Node.js API gateway. Each service owns its data model and exposes HTTP APIs documented in OpenAPI.
+
+<MermaidDiagram
+  title="High-level runtime topology"
+  chart={`
+flowchart LR
+  W[Next.js Web] --> G[API Gateway :4000]
+  A[Admin SPA] --> G
+  M[Expo Mobile] --> G
+  G --> AS[Auth Service :8081]
+  G --> US[User Service :8082]
+  G --> PS[Product Service :8083]
+  G --> IS[Inventory Service :8080]
+  AS --> ADB[(auth_db)]
+  US --> UDB[(user_db)]
+  PS --> PDB[(product_db)]
+  IS --> IDB[(inventory_db)]
+  IS --> R[(Redis)]
+`}
+/>
+
+## Architecture principles
+
+- Gateway is the only public API entrypoint.
+- Services own persistence and business rules.
+- OpenAPI contracts are versioned and CI-governed.
+- Local development mirrors production topology with Docker.
+
+## Key boundaries
+
+- Identity and tokens: auth-service
+- User profile data: user-service
+- Catalog/product metadata: product-service
+- Stock and reservations: inventory-service

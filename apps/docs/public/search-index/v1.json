@@ -1,0 +1,354 @@
+[
+  {
+    "version": "v1",
+    "section": "Architecture",
+    "title": "Service Dependencies",
+    "description": "Dependency direction and runtime coupling across gateway and microservices.",
+    "href": "/docs/v1/architecture/service-dependencies",
+    "body": "Dependency model GW MOB -- GW ADM -- GW subgraph Platform GW[API Gateway] AUTH[Auth Service] USER[User Service] PROD[Product Service] INV[Inventory Service] end GW -- AUTH GW -- USER GW -- PROD GW -- INV USER -. validates token .- AUTH PROD -. validates token .- AUTH } / Coupling constraints - Service-to-service calls are intentionally minimized. - Token verification is shared via JWT issuer and secret agreement. - Contract evolution is managed through contracts/openapi/ checks. Failure behavior - If a downstream service is unavailable, gateway returns 502 . - Health fanout endpoint exposes per-service status. - Rate limiter protects downstream services during incident spikes."
+  },
+  {
+    "version": "v1",
+    "section": "Architecture",
+    "title": "System Overview",
+    "description": "Topology of qeetmart clients, gateway, services, and stateful dependencies.",
+    "href": "/docs/v1/architecture/system-overview",
+    "body": "The system is a polyglot microservices platform centered on a Node.js API gateway. Each service owns its data model and exposes HTTP APIs documented in OpenAPI. G[API Gateway :4000] A[Admin SPA] -- G M[Expo Mobile] -- G G -- AS[Auth Service :8081] G -- US[User Service :8082] G -- PS[Product Service :8083] G -- IS[Inventory Service :8080] AS -- ADB[(auth db)] US -- UDB[(user db)] PS -- PDB[(product db)] IS -- IDB[(inventory db)] IS -- R[(Redis)] } / Architecture principles - Gateway is the only public API entrypoint. - Services own persistence and business rules. - OpenAPI contracts are versioned and CI-governed. - Local development mirrors production topology with Docker. Key boundaries - Identity and tokens: auth-service - User profile data: user-service - Catalog/product metadata: product-service - Stock and reservations: inventory-service"
+  },
+  {
+    "version": "v1",
+    "section": "Contributing",
+    "title": "Contribution Guide",
+    "description": "How qeetmart engineers propose, review, and publish documentation changes safely.",
+    "href": "/docs/v1/contributing/guide",
+    "body": "Contribution standards - Keep docs and code changes in the same PR. - Use concrete commands, not abstract instructions. - Document environment variables and defaults for every new service/config. - Add or update runbooks for operationally meaningful behavior changes. Required PR checklist - [ ] Updated docs pages for behavior changes - [ ] Updated OpenAPI contract if API changed - [ ] Ran docs drift and content validation - [ ] Confirmed links and commands are correct Useful commands Ownership model - platform : docs structure, automation scripts, CI gates - identity : auth/user docs and API references - catalog : product docs and API references - fulfillment : inventory docs and runbooks"
+  },
+  {
+    "version": "v1",
+    "section": "DevOps",
+    "title": "GitHub Actions CI/CD",
+    "description": "CI governance for polyglot builds, contract checks, platform validation, and docs quality.",
+    "href": "/docs/v1/devops/ci-cd",
+    "body": "Current pipeline responsibilities - Path-aware Node build/test for gateway + web/admin + docs - Spring Boot test matrix for auth/user/product - Go tests for inventory - OpenAPI lint and breaking change detection - Helm and Kustomize validation Docs quality gates - Frontmatter validation - Drift checks (env variables and OpenAPI sync) - Search index generation validity - Next.js production build of apps/docs Policy - PRs that modify services must update corresponding docs when behavior changes. - Breaking API changes require version strategy update ( v2 docs path)."
+  },
+  {
+    "version": "v1",
+    "section": "DevOps",
+    "title": "Deployment",
+    "description": "Deployment blueprint for Vercel-hosted docs and Kubernetes-hosted platform services.",
+    "href": "/docs/v1/devops/deployment",
+    "body": "Deployment model - Docs app deploys from apps/docs . - Runtime platform deploys from platform/ and helm/ . - Environments: dev , staging , prod . Vercel docs deployment 1. Connect repo and set root directory to apps/docs . 2. Build command: pnpm --filter docs build . 3. Output: Next.js managed output. 4. Add NEXT PUBLIC DOCS DEFAULT VERSION=v1 . Kubernetes platform deployment - Validate Helm chart before release: - Promote image tags via deployment workflow ( .github/workflows/deploy.yml ). - Rollback path: redeploy prior stable image tag. CDN and cache guidance - Static assets: immutable cache ( max-age=31536000, immutable ). - HTML and docs routes: stale-while-revalidate strategy. - Invalidate docs cache on merge to main and release tags."
+  },
+  {
+    "version": "v1",
+    "section": "DevOps",
+    "title": "Environment Matrix",
+    "description": "Differences in behavior and configuration across local, staging, and production.",
+    "href": "/docs/v1/devops/environment-matrix",
+    "body": "| Dimension | Local | Staging | Production | | --- | --- | --- | --- | | Purpose | Development speed | Pre-release validation | Customer traffic | | Data | Synthetic + disposable | Production-like snapshots | Real customer data | | Auth secrets | Local .env | Managed secrets | Managed secrets + rotation | | Observability | Basic logs | Full metrics/traces | Full metrics/traces + SLO alerts | | Scaling | Single instance | Horizontal baseline | Autoscaled by demand | | Change cadence | Continuous | Daily | Controlled rollout windows | Never assume local defaults are safe for production. Use explicit environment overrides and secret management."
+  },
+  {
+    "version": "v1",
+    "section": "Getting Started",
+    "title": "Local Workflow",
+    "description": "Daily engineering workflow for feature work, integration validation, and contract safety.",
+    "href": "/docs/v1/getting-started/local-workflow",
+    "body": "Standard daily loop 1. Pull latest main and install dependencies. 2. Start local stack ( pnpm docker:up ). 3. Run the service you are editing in dev mode if needed. 4. Validate contracts, unit tests, and affected app builds. 5. Update docs as part of the same PR. Typical command set Service-specific tests Definition of done - Code and docs updated together - OpenAPI changes validated and non-breaking unless version bump is intentional - CI passes for Node/Java/Go + contracts + docs"
+  },
+  {
+    "version": "v1",
+    "section": "Getting Started",
+    "title": "Prerequisites",
+    "description": "Required local toolchain for working across Node.js, Java, Go, and mobile/frontend clients.",
+    "href": "/docs/v1/getting-started/prerequisites",
+    "body": "Baseline toolchain - Node.js 22.x - pnpm 10.x - Java 17 (Temurin) - Go 1.23+ - Docker Desktop (or Docker Engine + Compose v2) Verify before first run Machine profile recommendations - 8 CPU cores - 16 GB RAM minimum - 25 GB free disk (images + caches + DB volumes) Ports used in local development - 4000 : API Gateway - 8081 : Auth Service - 8082 : User Service - 8083 : Product Service - 8080 : Inventory Service - 5432 : PostgreSQL instances - 6379 : Redis (inventory) If local databases are already bound to 5432 , stop them or remap ports in docker-compose.dev.yml ."
+  },
+  {
+    "version": "v1",
+    "section": "Getting Started",
+    "title": "15-Minute Quickstart",
+    "description": "Single-path onboarding flow for new engineers with health validation at the end.",
+    "href": "/docs/v1/getting-started/quickstart",
+    "body": "You are done when pnpm smoke:local returns healthy checks for gateway, auth, user, product, and inventory. First-day checklist - [ ] Gateway reachable at http://localhost:4000 - [ ] Auth service reachable at http://localhost:8081/actuator/health - [ ] User service reachable at http://localhost:8082/actuator/health - [ ] Product service reachable at http://localhost:8083/actuator/health - [ ] Inventory service reachable at http://localhost:8080/health - [ ] OpenAPI contracts lint clean Go to Common Incidents and run the \"Docker service fails healthcheck\" flow."
+  },
+  {
+    "version": "v1",
+    "section": "Home",
+    "title": "qeetmart Documentation",
+    "description": "Production-grade docs for onboarding, architecture, APIs, local development, and deployment.",
+    "href": "/docs/v1",
+    "body": "Start with the 15-minute quickstart . It is optimized for first-day onboarding. What this portal covers - System architecture and service boundaries - Local setup workflows with copy-paste commands - Interactive OpenAPI references - DevOps, CI/CD, deployment, and runbooks - Documentation contribution workflow for 10+ engineers Fast links - - - - -"
+  },
+  {
+    "version": "v1",
+    "section": "Local Development",
+    "title": "Docker Workflow",
+    "description": "Practical Docker commands and service troubleshooting flow for local development.",
+    "href": "/docs/v1/local-development/docker-workflow",
+    "body": "Core commands Service startup order 1. PostgreSQL and Redis dependencies become healthy. 2. Spring Boot and Go services start. 3. Gateway starts and waits on service endpoints. Rebuild a single service image Recommended troubleshooting order 1. Check container state ( docker compose ps ). 2. Check health endpoints directly for failing service. 3. Check service logs. 4. Validate env vars against docs env table."
+  },
+  {
+    "version": "v1",
+    "section": "Local Development",
+    "title": "Run All Services",
+    "description": "Deterministic local stack startup for gateway, microservices, databases, and cache.",
+    "href": "/docs/v1/local-development/run-all-services",
+    "body": "One command startup This launches: - API gateway - auth-service - user-service - product-service - inventory-service - PostgreSQL instances for each service domain - Redis for inventory reservation caching Verify stack health Stop and clean volumes Local PostgreSQL volumes persist between runs. Use pnpm docker:down only when you need a clean environment. Run frontend separately"
+  },
+  {
+    "version": "v1",
+    "section": "Runbooks",
+    "title": "Common Incidents",
+    "description": "First-response playbooks for the most frequent local and staging failures.",
+    "href": "/docs/v1/runbooks/common-incidents",
+    "body": "Gateway returns 502 for all APIs 1. Validate downstream service health directly. 2. Confirm service URLs in micros/api-gateway/.env . 3. Restart gateway container. Inventory reserve endpoint returns 409 unexpectedly 1. Check current stock by product ID. 2. Verify pending reservation TTL is not too long. 3. Inspect Redis connectivity for stale reservation records. Docker service fails healthcheck 1. docker compose -f docker-compose.dev.yml ps 2. docker compose -f docker-compose.dev.yml logs 3. Verify port, DB host, and credentials from .env.example files. OpenAPI check fails in CI 1. Run locally: 2. If change is intentionally breaking, create new docs version path ( /docs/v2 + /reference/v2 )."
+  },
+  {
+    "version": "v1",
+    "section": "Services",
+    "title": "Service Catalog",
+    "description": "Runtime, ownership, and environment configuration for each qeetmart service.",
+    "href": "/docs/v1/services/overview",
+    "body": "API Gateway ( api-gateway ) Auth Service ( auth-service ) User Service ( user-service ) Product Service ( product-service ) Inventory Service ( inventory-service )"
+  },
+  {
+    "version": "v1",
+    "section": "Services",
+    "title": "Api Gateway README (Synced)",
+    "description": "Synced from micros/api-gateway/README.md.",
+    "href": "/docs/v1/services/readmes/api-gateway",
+    "body": "This page is generated by pnpm --filter docs sync:readmes . Qeetmart API Gateway API Gateway for the Qeetmart microservices architecture. This gateway serves as the single entry point for all client requests and routes them to the appropriate microservices. Features - Request Routing : Routes requests to appropriate microservices based on URL patterns - Service Discovery : Configurable service registry with health checks - Authentication : Token forwarding and validation middleware - Rate Limiting : Protects services from overload - Request Logging : Comprehensive logging with correlation IDs - Health Monitoring : Health check endpoints for gateway and services - Error Handling : Centralized error handling and service failure management Tech Stack - Express.js - Web framework - TypeScript - Type safety - http-proxy-middleware - Request proxying - Helmet - Security headers - CORS - Cross-origin resource sharing - express-rate-limit - Rate limiting Architecture Setup 1. Install dependencies: 2. Set up environment variables: 3. Start the gateway: The gateway will be available at http://localhost:4000 Configuration Service URLs By default, services are expected at: - Auth Service: http://localhost:8081 - User Service: http://localhost:8082 - Product Service: http://localhost:8083 - Order Service: http://localhost:8084 - Payment Service: http://localhost:8085 - Inventory Service: http://localhost:8080 Override these in .env : JWT validation settings: Route Configuration Routes are configured in src/config/services.ts . The gateway routes: - /api/v1/auth/ → Auth Service - /api/v1/users/ → User Service - /api/v1/products/ → Product Service - /api/v1/orders/ → Order Service - /api/v1/payments/ → Payment Service - /api/v1/inventory/ → Inventory Service API Endpoints Gateway Endpoints - GET /health - Gateway health check - GET /health/services - Health status of all registered services - GET /info - Gateway information and registered services Proxied Endpoints All requests to /api/v1/ are proxied to the appropriate microservice. Example: Middleware Authentication Middleware The gateway includes authentication middleware that: - Extracts JWT tokens from Authorization headers - Validates JWT signature and claims (issuer/expiration/audience) - Forwards verified tokens to downstream services - Allows public endpoints (health, info, register, login, refresh-token) Logging Middleware All requests are logged with: - Correlation ID (auto-generated or from X-Correlation-ID header) - Request method and path - Response status and duration - Client IP and user agent Rate Limiting Rate limiting is applied to all /api/ routes: - 1000 requests per minute per IP (configurable) - Prevents service overload Health Checks Gateway Health Response: Service Health Response: Error Handling The gateway handles various error scenarios: - Service Unavailable (502) : When a downstream service is unreachable - Timeout : When a service doesn't respond within the configured timeout - Not Found (404) : When a route doesn't match any service - Rate Limit (429) : When rate limit is exceeded Development Project Structure Adding a New Service 1. Add service configuration to src/config/services.ts : 2. Add route configuration: 3. Add environment variable to .env.example : Production Considerations - Service Discovery : Consider using Consul, Eureka, or Kubernetes service discovery - Load Balancing : Add load balancing for multiple service instances - Circuit Breaker : Implement circuit breaker pattern for resilience - Caching : Add response caching for frequently accessed endpoints - Monitoring : Integrate with Prometheus/Grafana for metrics - Tracing : Add distributed tracing (Jaeger, Zipkin) - SSL/TLS : Use HTTPS in production - Authentication : Rotate JWT secrets and enforce issuer/audience claims Troubleshooting Service Not Responding 1. Check if service is running: 2. Check gateway logs for errors 3. Verify service URL in .env matches actual service URL CORS Issues Update CORS ORIGIN in .env to match your frontend URL. Rate Limiting Issues Adjust rate limit configuration in src/index.ts : License MIT"
+  },
+  {
+    "version": "v1",
+    "section": "Services",
+    "title": "Auth Service README (Synced)",
+    "description": "Synced from micros/auth-service/README.md.",
+    "href": "/docs/v1/services/readmes/auth-service",
+    "body": "This page is generated by pnpm --filter docs sync:readmes . No README.md was found for micros/auth-service during docs sync. Add a README and run pnpm --filter docs sync:readmes ."
+  },
+  {
+    "version": "v1",
+    "section": "Services",
+    "title": "Inventory Service README (Synced)",
+    "description": "Synced from micros/inventory-service/README.md.",
+    "href": "/docs/v1/services/readmes/inventory-service",
+    "body": "This page is generated by pnpm --filter docs sync:readmes . inventory-service Golang inventory microservice for eCommerce with: - Gin HTTP APIs - PostgreSQL (pgx) - Redis (go-redis) for reservation caching + TTL - Transaction-safe stock operations with row-level locking - Background expiration release worker Project Structure Environment Variables Use .env.example as reference: - PORT (default 8080 ) - GIN MODE ( debug or release ) - DATABASE URL (required) - REDIS ADDR (default localhost:6379 ) - REDIS PASSWORD (optional) - REDIS DB (default 0 ) - RESERVATION TTL (default 10m ) - EXPIRATION POLL INTERVAL (default 30s ) Run Locally 1. Start PostgreSQL and Redis (for example via Docker): 2. Run service: Service runs on http://localhost:8080 . Run Full Stack via Docker Endpoints Health - GET /health Initialize Inventory - POST /inventory/init - Body: Get Inventory - GET /inventory/:productId Add Stock - POST /inventory/add-stock - Body: Reserve Stock - POST /inventory/reserve - Body: Release Reservation - POST /inventory/release - Body: Deduct Reservation - POST /inventory/deduct - Body: Notes - Reservation creates a PostgreSQL row and caches reservation data in Redis with TTL. - Expired reservations are released by a background worker ( EXPIRATION POLL INTERVAL ). - All stock-changing operations use transactions and SELECT ... FOR UPDATE ."
+  },
+  {
+    "version": "v1",
+    "section": "Services",
+    "title": "Product Service README (Synced)",
+    "description": "Synced from micros/product-service/README.md.",
+    "href": "/docs/v1/services/readmes/product-service",
+    "body": "This page is generated by pnpm --filter docs sync:readmes . No README.md was found for micros/product-service during docs sync. Add a README and run pnpm --filter docs sync:readmes ."
+  },
+  {
+    "version": "v1",
+    "section": "Services",
+    "title": "User Service README (Synced)",
+    "description": "Synced from micros/user-service/README.md.",
+    "href": "/docs/v1/services/readmes/user-service",
+    "body": "This page is generated by pnpm --filter docs sync:readmes . No README.md was found for micros/user-service during docs sync. Add a README and run pnpm --filter docs sync:readmes ."
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "Auth Service API",
+    "description": "OpenAPI reference for auth-service",
+    "href": "/reference/v1/auth-service",
+    "body": ""
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "GET /actuator/health",
+    "description": "Health check",
+    "href": "/reference/v1/auth-service",
+    "body": "authHealth {\"200\":{\"description\":\"Healthy\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "POST /auth/register",
+    "description": "Register a user",
+    "href": "/reference/v1/auth-service",
+    "body": "registerUser {\"201\":{\"description\":\"Registered\"},\"400\":{\"description\":\"Invalid request\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "POST /auth/login",
+    "description": "Login with email/password",
+    "href": "/reference/v1/auth-service",
+    "body": "loginUser {\"200\":{\"description\":\"Authenticated\"},\"401\":{\"description\":\"Unauthorized\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "POST /auth/refresh-token",
+    "description": "Refresh access token",
+    "href": "/reference/v1/auth-service",
+    "body": "refreshToken {\"200\":{\"description\":\"Token refreshed\"},\"401\":{\"description\":\"Unauthorized\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "GET /auth/me",
+    "description": "Get current authenticated user",
+    "href": "/reference/v1/auth-service",
+    "body": "getCurrentUser {\"200\":{\"description\":\"Current user\"},\"401\":{\"description\":\"Unauthorized\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "Inventory Service API",
+    "description": "OpenAPI reference for inventory-service",
+    "href": "/reference/v1/inventory-service",
+    "body": ""
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "GET /health",
+    "description": "Health check",
+    "href": "/reference/v1/inventory-service",
+    "body": "inventoryHealth {\"200\":{\"description\":\"Healthy\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "GET /inventory/{productId}",
+    "description": "Get inventory",
+    "href": "/reference/v1/inventory-service",
+    "body": "getInventory {\"200\":{\"description\":\"Inventory details\"},\"404\":{\"description\":\"Not found\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "POST /inventory/add-stock",
+    "description": "Add stock",
+    "href": "/reference/v1/inventory-service",
+    "body": "addStock {\"200\":{\"description\":\"Stock updated\"},\"400\":{\"description\":\"Invalid request\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "POST /inventory/reserve",
+    "description": "Reserve stock",
+    "href": "/reference/v1/inventory-service",
+    "body": "reserveStock {\"200\":{\"description\":\"Reserved\"},\"409\":{\"description\":\"Insufficient stock\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "Product Service API",
+    "description": "OpenAPI reference for product-service",
+    "href": "/reference/v1/product-service",
+    "body": ""
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "GET /actuator/health",
+    "description": "Health check",
+    "href": "/reference/v1/product-service",
+    "body": "productHealth {\"200\":{\"description\":\"Healthy\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "POST /products",
+    "description": "Create product",
+    "href": "/reference/v1/product-service",
+    "body": "createProduct {\"201\":{\"description\":\"Created\"},\"400\":{\"description\":\"Invalid request\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "GET /products",
+    "description": "List products",
+    "href": "/reference/v1/product-service",
+    "body": "listProducts {\"200\":{\"description\":\"Product list\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "GET /products/{productId}",
+    "description": "Get product",
+    "href": "/reference/v1/product-service",
+    "body": "getProduct {\"200\":{\"description\":\"Product\"},\"404\":{\"description\":\"Not found\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "PUT /products/{productId}",
+    "description": "Update product",
+    "href": "/reference/v1/product-service",
+    "body": "updateProduct {\"200\":{\"description\":\"Updated\"},\"404\":{\"description\":\"Not found\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "DELETE /products/{productId}",
+    "description": "Delete product",
+    "href": "/reference/v1/product-service",
+    "body": "deleteProduct {\"200\":{\"description\":\"Deleted\"},\"404\":{\"description\":\"Not found\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "User Service API",
+    "description": "OpenAPI reference for user-service",
+    "href": "/reference/v1/user-service",
+    "body": ""
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "GET /actuator/health",
+    "description": "Health check",
+    "href": "/reference/v1/user-service",
+    "body": "userHealth {\"200\":{\"description\":\"Healthy\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "POST /users",
+    "description": "Create user profile",
+    "href": "/reference/v1/user-service",
+    "body": "createUserProfile {\"201\":{\"description\":\"Created\"},\"400\":{\"description\":\"Invalid request\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "GET /users",
+    "description": "List users",
+    "href": "/reference/v1/user-service",
+    "body": "listUsers {\"200\":{\"description\":\"User list\"},\"401\":{\"description\":\"Unauthorized\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "GET /users/{userId}",
+    "description": "Get user by id",
+    "href": "/reference/v1/user-service",
+    "body": "getUserById {\"200\":{\"description\":\"User profile\"},\"404\":{\"description\":\"Not found\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "PUT /users/{userId}",
+    "description": "Update user",
+    "href": "/reference/v1/user-service",
+    "body": "updateUserProfile {\"200\":{\"description\":\"Updated\"},\"404\":{\"description\":\"Not found\"}}"
+  },
+  {
+    "version": "v1",
+    "section": "API Reference",
+    "title": "DELETE /users/{userId}",
+    "description": "Delete user",
+    "href": "/reference/v1/user-service",
+    "body": "deleteUserProfile {\"200\":{\"description\":\"Deleted\"},\"404\":{\"description\":\"Not found\"}}"
+  }
+]

@@ -1,0 +1,35 @@
+---
+title: Common Incidents
+description: First-response playbooks for the most frequent local and staging failures.
+section: Runbooks
+lastUpdated: 2026-02-20
+---
+
+## Gateway returns 502 for all APIs
+
+1. Validate downstream service health directly.
+2. Confirm service URLs in `micros/api-gateway/.env`.
+3. Restart gateway container.
+
+## Inventory reserve endpoint returns 409 unexpectedly
+
+1. Check current stock by product ID.
+2. Verify pending reservation TTL is not too long.
+3. Inspect Redis connectivity for stale reservation records.
+
+## Docker service fails healthcheck
+
+1. `docker compose -f docker-compose.dev.yml ps`
+2. `docker compose -f docker-compose.dev.yml logs <service>`
+3. Verify port, DB host, and credentials from `.env.example` files.
+
+## OpenAPI check fails in CI
+
+1. Run locally:
+
+```bash
+pnpm contracts:lint
+pnpm contracts:breaking
+```
+
+2. If change is intentionally breaking, create new docs version path (`/docs/v2` + `/reference/v2`).

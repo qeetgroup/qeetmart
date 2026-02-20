@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  labels:
+    app.kubernetes.io/name: auth-service
+    app.kubernetes.io/part-of: qeetmart
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-service
+        app.kubernetes.io/part-of: qeetmart
+    spec:
+      containers:
+        - name: auth-service
+          image: ghcr.io/qeetgroup/qeetmart/auth-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+              name: http
+          env:
+            - name: SERVER_PORT
+              value: "8081"
+            - name: DB_HOST
+              value: "auth-postgres"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "auth_db"
+            - name: DB_USERNAME
+              value: "postgres"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: qeetmart-shared-secrets
+                  key: AUTH_DB_PASSWORD
+            - name: JPA_DDL_AUTO
+              valueFrom:
+                configMapKeyRef:
+                  name: qeetmart-shared-config
+                  key: JPA_DDL_AUTO
+            - name: JWT_ISSUER_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: qeetmart-shared-config
+                  key: JWT_ISSUER_URI
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: qeetmart-shared-secrets
+                  key: JWT_SECRET
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 150m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  labels:
+    app.kubernetes.io/name: auth-service
+spec:
+  selector:
+    app.kubernetes.io/name: auth-service
+  ports:
+    - name: http
+      port: 8081
+      targetPort: http
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: auth-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: auth-service
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

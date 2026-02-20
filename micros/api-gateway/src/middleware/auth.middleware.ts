@@ -1,14 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
 import { gatewayConfig } from '../config/env.js';
+import { verifyJwtHs256 } from '../utils/jwt.js';
 
-const publicPathPrefixes = ['/health', '/info', '/api/v1/auth/login', '/api/v1/auth/register'];
+const publicPathPrefixes = [
+  '/health',
+  '/info',
+  '/api/v1/auth/register',
+  '/api/v1/auth/login',
+  '/api/v1/auth/refresh-token',
+];
 
 /**
  * Authentication Middleware
  * Validates JWT tokens and forwards them to downstream services
  * 
- * For now, this is a pass-through middleware that extracts the token.
- * In production, you should validate the token here before forwarding.
+ * Validates HS256 JWTs before forwarding to downstream services.
  */
 export const authMiddleware = (
   req: Request,
@@ -26,13 +32,12 @@ export const authMiddleware = (
     }
   }
 
-  // Public endpoints bypass auth checks.
-  if (publicPathPrefixes.some(path => req.path.startsWith(path))) {
+  const isPublicPath = publicPathPrefixes.some(path => req.path.startsWith(path));
+  if (isPublicPath) {
     return next();
   }
 
-  // Auth is optional by default to preserve pass-through behavior.
-  if (!gatewayConfig.requireAuth) {
+  if (!req.token && !gatewayConfig.requireAuth) {
     return next();
   }
 
@@ -42,6 +47,30 @@ export const authMiddleware = (
       error: {
         message: 'Authentication required',
         code: 'UNAUTHORIZED',
+      },
+    });
+  }
+
+  const jwtSecret = gatewayConfig.jwt.secret;
+  if (!jwtSecret) {
+    return res.status(500).json({
+      success: false,
+      error: {
+        message: 'JWT secret is not configured on the gateway',
+        code: 'GATEWAY_MISCONFIGURED',
+      },
+    });
+  }
+
+  try {
+    verifyJwtHs256(req.token, jwtSecret, gatewayConfig.jwt.issuer, gatewayConfig.jwt.audience);
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      error: {
+        message: 'Invalid or expired token',
+        code: 'UNAUTHORIZED',
+        details: error instanceof Error ? error.message : 'Token verification failed',
       },
     });
   }

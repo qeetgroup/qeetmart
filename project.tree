@@ -41,69 +41,6 @@
 │  │  ├── tsconfig.json
 │  │  ├── tsconfig.node.json
 │  │  └── vite.config.ts
-│  ├── api
-│  │  ├── .env
-│  │  ├── .gitignore
-│  │  ├── docs
-│  │  │  ├── API.md
-│  │  │  └── BACKEND_SETUP.md
-│  │  ├── generated
-│  │  │  └── prisma
-│  │  │    ├── browser.ts
-│  │  │    ├── client.ts
-│  │  │    ├── commonInputTypes.ts
-│  │  │    ├── enums.ts
-│  │  │    ├── internal
-│  │  │    │  ├── class.ts
-│  │  │    │  ├── prismaNamespace.ts
-│  │  │    │  └── prismaNamespaceBrowser.ts
-│  │  │    ├── models
-│  │  │    │  ├── Category.ts
-│  │  │    │  ├── Inventory.ts
-│  │  │    │  ├── Order.ts
-│  │  │    │  ├── OrderItem.ts
-│  │  │    │  ├── Payment.ts
-│  │  │    │  ├── Product.ts
-│  │  │    │  └── User.ts
-│  │  │    └── models.ts
-│  │  ├── package.json
-│  │  ├── prisma
-│  │  │  ├── migrations
-│  │  │  │  ├── 20260217031036_init
-│  │  │  │  │  └── migration.sql
-│  │  │  │  └── migration_lock.toml
-│  │  │  └── schema.prisma
-│  │  ├── prisma.config.ts
-│  │  ├── README.md
-│  │  ├── src
-│  │  │  ├── common
-│  │  │  │  ├── error-handler.ts
-│  │  │  │  └── prisma.ts
-│  │  │  ├── index.ts
-│  │  │  ├── modules
-│  │  │  │  ├── inventory
-│  │  │  │  │  ├── inventory.controller.ts
-│  │  │  │  │  ├── inventory.routes.ts
-│  │  │  │  │  └── inventory.service.ts
-│  │  │  │  ├── orders
-│  │  │  │  │  ├── order.controller.ts
-│  │  │  │  │  ├── order.routes.ts
-│  │  │  │  │  └── order.service.ts
-│  │  │  │  ├── payments
-│  │  │  │  │  ├── payment.controller.ts
-│  │  │  │  │  ├── payment.routes.ts
-│  │  │  │  │  └── payment.service.ts
-│  │  │  │  ├── products
-│  │  │  │  │  ├── product.controller.ts
-│  │  │  │  │  ├── product.routes.ts
-│  │  │  │  │  └── product.service.ts
-│  │  │  │  └── users
-│  │  │  │    ├── user.controller.ts
-│  │  │  │    ├── user.routes.ts
-│  │  │  │    └── user.service.ts
-│  │  │  └── routes
-│  │  │    └── v1.routes.ts
-│  │  └── tsconfig.json
 │  ├── mobile
 │  │  ├── .gitignore
 │  │  ├── .vscode
@@ -185,32 +122,6 @@
 │  │  ├── qeetmart-auth-user.postman_collection.json
 │  │  └── qeetmart-local.postman_environment.json
 │  └── PROJECT_ANALYSIS.md
-├── inventory-service
-│  ├── .env.example
-│  ├── cmd
-│  │  └── main.go
-│  ├── docker-compose.yml
-│  ├── Dockerfile
-│  ├── go.mod
-│  ├── go.sum
-│  ├── internal
-│  │  ├── config
-│  │  │  └── config.go
-│  │  ├── handlers
-│  │  │  └── inventory_handler.go
-│  │  ├── middleware
-│  │  │  └── logging.go
-│  │  ├── models
-│  │  │  └── inventory.go
-│  │  ├── repository
-│  │  │  └── inventory_repository.go
-│  │  ├── routes
-│  │  │  └── routes.go
-│  │  └── services
-│  │    └── inventory_service.go
-│  ├── migrations
-│  │  └── 001_init.sql
-│  └── README.md
 ├── LICENSE
 ├── micros
 │  ├── .DS_Store
@@ -325,6 +236,31 @@
 │  │            └── auth
 │  │              └── AuthServiceApplicationTests.java
 │  ├── inventory-service
+│  │  ├── .env.example
+│  │  ├── cmd
+│  │  │  └── main.go
+│  │  ├── docker-compose.yml
+│  │  ├── Dockerfile
+│  │  ├── go.mod
+│  │  ├── go.sum
+│  │  ├── internal
+│  │  │  ├── config
+│  │  │  │  └── config.go
+│  │  │  ├── handlers
+│  │  │  │  └── inventory_handler.go
+│  │  │  ├── middleware
+│  │  │  │  └── logging.go
+│  │  │  ├── models
+│  │  │  │  └── inventory.go
+│  │  │  ├── repository
+│  │  │  │  └── inventory_repository.go
+│  │  │  ├── routes
+│  │  │  │  └── routes.go
+│  │  │  └── services
+│  │  │    └── inventory_service.go
+│  │  ├── migrations
+│  │  │  └── 001_init.sql
+│  │  └── README.md
 │  ├── product-service
 │  │  ├── .gitattributes
 │  │  ├── .github

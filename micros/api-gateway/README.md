@@ -32,7 +32,7 @@ API Gateway (Port 4000)
 │       │          │          │          │          │
 Auth  User    Product   Order   Payment  Inventory
 Service Service  Service  Service  Service  Service
-(4006)  (4001)   (4002)   (4003)   (4004)   (4005)
+(8081)  (8082)   (8083)   (8084)   (8085)   (8080)
 ```
 
 ## Setup
@@ -65,18 +65,25 @@ The gateway will be available at `http://localhost:4000`
 ### Service URLs
 
 By default, services are expected at:
-- Auth Service: `http://localhost:4006`
-- User Service: `http://localhost:4001`
-- Product Service: `http://localhost:4002`
-- Order Service: `http://localhost:4003`
-- Payment Service: `http://localhost:4004`
-- Inventory Service: `http://localhost:4005`
+- Auth Service: `http://localhost:8081`
+- User Service: `http://localhost:8082`
+- Product Service: `http://localhost:8083`
+- Order Service: `http://localhost:8084`
+- Payment Service: `http://localhost:8085`
+- Inventory Service: `http://localhost:8080`
 
 Override these in `.env`:
 ```env
-AUTH_SERVICE_URL=http://localhost:4006
-USER_SERVICE_URL=http://localhost:4001
+AUTH_SERVICE_URL=http://localhost:8081
+USER_SERVICE_URL=http://localhost:8082
 # ... etc
+```
+
+JWT validation settings:
+```env
+REQUIRE_AUTH=true
+JWT_SECRET=CHANGE_ME_TO_A_STRONG_SECRET
+JWT_ISSUER=http://localhost:8081
 ```
 
 ### Route Configuration
@@ -108,7 +115,7 @@ Example:
 GET http://localhost:4000/api/v1/users
 
 # Proxied to
-GET http://localhost:4001/api/v1/users
+GET http://localhost:8082/users
 ```
 
 ## Middleware
@@ -117,10 +124,9 @@ GET http://localhost:4001/api/v1/users
 
 The gateway includes authentication middleware that:
 - Extracts JWT tokens from `Authorization` headers
-- Forwards tokens to downstream services
-- Allows public endpoints (health, info, auth routes)
-
-**TODO**: Add token validation for protected routes.
+- Validates JWT signature and claims (issuer/expiration/audience)
+- Forwards verified tokens to downstream services
+- Allows public endpoints (health, info, register, login, refresh-token)
 
 ### Logging Middleware
 
@@ -244,7 +250,7 @@ NEW_SERVICE_URL=http://localhost:4007
 - **Monitoring**: Integrate with Prometheus/Grafana for metrics
 - **Tracing**: Add distributed tracing (Jaeger, Zipkin)
 - **SSL/TLS**: Use HTTPS in production
-- **Authentication**: Implement proper JWT validation
+- **Authentication**: Rotate JWT secrets and enforce issuer/audience claims
 
 ## Troubleshooting
 
@@ -252,7 +258,7 @@ NEW_SERVICE_URL=http://localhost:4007
 
 1. Check if service is running:
 ```bash
-curl http://localhost:4001/health
+curl http://localhost:8082/actuator/health
 ```
 
 2. Check gateway logs for errors

@@ -8,7 +8,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${JPA_DDL_AUTO:validate}
     show-sql: false
     open-in-view: false
     properties:
@@ -18,13 +18,13 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8081}
+          issuer-uri: ${JWT_ISSUER_URI}
 
 app:
   security:
     jwt:
-      secret: ${JWT_SECRET:QXV0aFNlcnZpY2VTaWduaW5nS2V5Rm9ySldUMzJCeXRlcys=}
-      issuer: ${JWT_ISSUER_URI:http://localhost:8081}
+      secret: ${JWT_SECRET}
+      issuer: ${JWT_ISSUER_URI}
 
 springdoc:
   api-docs:
@@ -34,3 +34,13 @@ springdoc:
 
 server:
   port: ${SERVER_PORT:8083}
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus

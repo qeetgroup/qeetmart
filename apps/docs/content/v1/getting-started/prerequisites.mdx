@@ -1,0 +1,45 @@
+---
+title: Prerequisites
+description: Required local toolchain for working across Node.js, Java, Go, and mobile/frontend clients.
+section: Getting Started
+lastUpdated: 2026-02-20
+---
+
+## Baseline toolchain
+
+- Node.js `22.x`
+- pnpm `10.x`
+- Java `17` (Temurin)
+- Go `1.23+`
+- Docker Desktop (or Docker Engine + Compose v2)
+
+## Verify before first run
+
+```bash
+node -v
+pnpm -v
+java -version
+go version
+docker version
+docker compose version
+```
+
+## Machine profile recommendations
+
+- 8 CPU cores
+- 16 GB RAM minimum
+- 25 GB free disk (images + caches + DB volumes)
+
+## Ports used in local development
+
+- `4000`: API Gateway
+- `8081`: Auth Service
+- `8082`: User Service
+- `8083`: Product Service
+- `8080`: Inventory Service
+- `5432`: PostgreSQL instances
+- `6379`: Redis (inventory)
+
+<Callout title="Port collisions" tone="warning">
+  If local databases are already bound to `5432`, stop them or remap ports in `docker-compose.dev.yml`.
+</Callout>

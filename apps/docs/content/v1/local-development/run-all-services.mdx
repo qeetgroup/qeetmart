@@ -1,0 +1,46 @@
+---
+title: Run All Services
+description: Deterministic local stack startup for gateway, microservices, databases, and cache.
+section: Local Development
+lastUpdated: 2026-02-20
+---
+
+## One command startup
+
+```bash
+pnpm docker:up
+```
+
+This launches:
+
+- API gateway
+- auth-service
+- user-service
+- product-service
+- inventory-service
+- PostgreSQL instances for each service domain
+- Redis for inventory reservation caching
+
+## Verify stack health
+
+```bash
+curl http://localhost:4000/health
+curl http://localhost:4000/health/services
+```
+
+## Stop and clean volumes
+
+```bash
+pnpm docker:down
+```
+
+<Callout title="Persistent data" tone="info">
+  Local PostgreSQL volumes persist between runs. Use `pnpm docker:down` only when you need a clean environment.
+</Callout>
+
+## Run frontend separately
+
+```bash
+pnpm dev:web
+pnpm dev:admin
+```

@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  labels:
+    app.kubernetes.io/name: api-gateway
+    app.kubernetes.io/part-of: qeetmart
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api-gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: api-gateway
+        app.kubernetes.io/part-of: qeetmart
+    spec:
+      containers:
+        - name: api-gateway
+          image: ghcr.io/qeetgroup/qeetmart/api-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4000
+              name: http
+          env:
+            - name: PORT
+              value: "4000"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: TRUST_PROXY
+              value: "true"
+            - name: REQUIRE_AUTH
+              value: "true"
+            - name: JWT_ISSUER
+              valueFrom:
+                configMapKeyRef:
+                  name: qeetmart-shared-config
+                  key: JWT_ISSUER_URI
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: qeetmart-shared-secrets
+                  key: JWT_SECRET
+            - name: AUTH_SERVICE_URL
+              value: "http://auth-service:8081"
+            - name: USER_SERVICE_URL
+              value: "http://user-service:8082"
+            - name: PRODUCT_SERVICE_URL
+              value: "http://product-service:8083"
+            - name: INVENTORY_SERVICE_URL
+              value: "http://inventory-service:8080"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  labels:
+    app.kubernetes.io/name: api-gateway
+spec:
+  selector:
+    app.kubernetes.io/name: api-gateway
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-gateway
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-gateway
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

@@ -1,0 +1,37 @@
+---
+title: Deployment
+description: Deployment blueprint for Vercel-hosted docs and Kubernetes-hosted platform services.
+section: DevOps
+lastUpdated: 2026-02-20
+---
+
+## Deployment model
+
+- Docs app deploys from `apps/docs`.
+- Runtime platform deploys from `platform/` and `helm/`.
+- Environments: `dev`, `staging`, `prod`.
+
+## Vercel docs deployment
+
+1. Connect repo and set root directory to `apps/docs`.
+2. Build command: `pnpm --filter docs build`.
+3. Output: Next.js managed output.
+4. Add `NEXT_PUBLIC_DOCS_DEFAULT_VERSION=v1`.
+
+## Kubernetes platform deployment
+
+- Validate Helm chart before release:
+
+```bash
+helm lint helm/qeetmart
+kustomize build platform/k8s/overlays/staging > /tmp/staging.yaml
+```
+
+- Promote image tags via deployment workflow (`.github/workflows/deploy.yml`).
+- Rollback path: redeploy prior stable image tag.
+
+## CDN and cache guidance
+
+- Static assets: immutable cache (`max-age=31536000, immutable`).
+- HTML and docs routes: `stale-while-revalidate` strategy.
+- Invalidate docs cache on merge to `main` and release tags.

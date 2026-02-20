@@ -1,0 +1,425 @@
+{
+  "api-gateway": [
+    {
+      "name": "PORT",
+      "required": false,
+      "default": "4000",
+      "description": "HTTP port for the gateway listener.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "HOST",
+      "required": false,
+      "default": "0.0.0.0",
+      "description": "Network interface binding for the gateway process.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "TRUST_PROXY",
+      "required": false,
+      "default": "false",
+      "description": "Enable if requests come through an L7 proxy or ingress.",
+      "environments": ["staging", "prod"]
+    },
+    {
+      "name": "CORS_ORIGINS",
+      "required": true,
+      "default": "http://localhost:3000,http://localhost:3001",
+      "description": "Comma-separated allowlist for browser origins.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "CORS_ORIGIN",
+      "required": false,
+      "default": "http://localhost:3000",
+      "description": "Legacy single-origin CORS fallback.",
+      "environments": ["local"]
+    },
+    {
+      "name": "CORS_CREDENTIALS",
+      "required": false,
+      "default": "true",
+      "description": "Set true if cookies or auth headers are sent cross-origin.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JSON_BODY_LIMIT",
+      "required": false,
+      "default": "1mb",
+      "description": "Request payload size guard for JSON content.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "URLENCODED_EXTENDED",
+      "required": false,
+      "default": "true",
+      "description": "Express urlencoded parser mode.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "REQUIRE_AUTH",
+      "required": false,
+      "default": "true",
+      "description": "Force JWT validation for protected endpoints.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "GATEWAY_PROXY_TIMEOUT_MS",
+      "required": false,
+      "default": "5000",
+      "description": "Timeout for downstream service proxy requests.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JWT_SECRET",
+      "required": true,
+      "default": "",
+      "description": "Signing key used to verify gateway-authenticated JWTs.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JWT_ISSUER",
+      "required": true,
+      "default": "http://localhost:8081",
+      "description": "Expected JWT issuer claim.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JWT_AUDIENCE",
+      "required": false,
+      "default": "",
+      "description": "Optional audience claim constraint.",
+      "environments": ["staging", "prod"]
+    },
+    {
+      "name": "RATE_LIMIT_WINDOW_MS",
+      "required": false,
+      "default": "60000",
+      "description": "Rate-limit evaluation window.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "RATE_LIMIT_MAX",
+      "required": false,
+      "default": "1000",
+      "description": "Max requests allowed per IP in one window.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "RATE_LIMIT_MESSAGE",
+      "required": false,
+      "default": "Too many requests from this IP, please try again later.",
+      "description": "Gateway response message for throttled requests.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "AUTH_SERVICE_URL",
+      "required": true,
+      "default": "http://localhost:8081",
+      "description": "Base URL for auth service proxy target.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "USER_SERVICE_URL",
+      "required": true,
+      "default": "http://localhost:8082",
+      "description": "Base URL for user service proxy target.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "PRODUCT_SERVICE_URL",
+      "required": true,
+      "default": "http://localhost:8083",
+      "description": "Base URL for product service proxy target.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "ORDER_SERVICE_URL",
+      "required": false,
+      "default": "http://localhost:8084",
+      "description": "Reserved for future order-service integration.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "PAYMENT_SERVICE_URL",
+      "required": false,
+      "default": "http://localhost:8085",
+      "description": "Reserved for future payment-service integration.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "INVENTORY_SERVICE_URL",
+      "required": true,
+      "default": "http://localhost:8080",
+      "description": "Base URL for inventory service proxy target.",
+      "environments": ["local", "staging", "prod"]
+    }
+  ],
+  "auth-service": [
+    {
+      "name": "SERVER_PORT",
+      "required": false,
+      "default": "8081",
+      "description": "HTTP server port for auth service.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_HOST",
+      "required": true,
+      "default": "localhost",
+      "description": "PostgreSQL host for auth database.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_PORT",
+      "required": true,
+      "default": "5432",
+      "description": "PostgreSQL port for auth database.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_NAME",
+      "required": true,
+      "default": "auth_db",
+      "description": "Auth database name.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_USERNAME",
+      "required": true,
+      "default": "postgres",
+      "description": "Database username.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_PASSWORD",
+      "required": true,
+      "default": "",
+      "description": "Database password.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JPA_DDL_AUTO",
+      "required": false,
+      "default": "update",
+      "description": "Schema management mode; use validate in staging/prod.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JWT_SECRET",
+      "required": true,
+      "default": "",
+      "description": "Signing key for access and refresh token minting.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JWT_ISSUER_URI",
+      "required": true,
+      "default": "http://localhost:8081",
+      "description": "Issuer identifier embedded in generated JWTs.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JWT_ACCESS_EXPIRATION_MS",
+      "required": false,
+      "default": "900000",
+      "description": "Access token TTL in milliseconds.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JWT_REFRESH_EXPIRATION_MS",
+      "required": false,
+      "default": "604800000",
+      "description": "Refresh token TTL in milliseconds.",
+      "environments": ["local", "staging", "prod"]
+    }
+  ],
+  "user-service": [
+    {
+      "name": "SERVER_PORT",
+      "required": false,
+      "default": "8082",
+      "description": "HTTP server port for user service.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_HOST",
+      "required": true,
+      "default": "localhost",
+      "description": "PostgreSQL host for user database.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_PORT",
+      "required": true,
+      "default": "5432",
+      "description": "PostgreSQL port for user database.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_NAME",
+      "required": true,
+      "default": "user_db",
+      "description": "User database name.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_USERNAME",
+      "required": true,
+      "default": "postgres",
+      "description": "Database username.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_PASSWORD",
+      "required": true,
+      "default": "",
+      "description": "Database password.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JPA_DDL_AUTO",
+      "required": false,
+      "default": "update",
+      "description": "Schema management mode; use validate in staging/prod.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JWT_SECRET",
+      "required": true,
+      "default": "",
+      "description": "JWT validation secret for gateway-issued tokens.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JWT_ISSUER_URI",
+      "required": true,
+      "default": "http://localhost:8081",
+      "description": "Expected issuer for inbound JWTs.",
+      "environments": ["local", "staging", "prod"]
+    }
+  ],
+  "product-service": [
+    {
+      "name": "SERVER_PORT",
+      "required": false,
+      "default": "8083",
+      "description": "HTTP server port for product service.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_HOST",
+      "required": true,
+      "default": "localhost",
+      "description": "PostgreSQL host for product database.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_PORT",
+      "required": true,
+      "default": "5432",
+      "description": "PostgreSQL port for product database.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_NAME",
+      "required": true,
+      "default": "product_db",
+      "description": "Product database name.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_USERNAME",
+      "required": true,
+      "default": "postgres",
+      "description": "Database username.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DB_PASSWORD",
+      "required": true,
+      "default": "",
+      "description": "Database password.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JPA_DDL_AUTO",
+      "required": false,
+      "default": "update",
+      "description": "Schema management mode; use validate in staging/prod.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JWT_SECRET",
+      "required": true,
+      "default": "",
+      "description": "JWT validation secret for gateway-issued tokens.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "JWT_ISSUER_URI",
+      "required": true,
+      "default": "http://localhost:8081",
+      "description": "Expected issuer for inbound JWTs.",
+      "environments": ["local", "staging", "prod"]
+    }
+  ],
+  "inventory-service": [
+    {
+      "name": "PORT",
+      "required": false,
+      "default": "8080",
+      "description": "HTTP server port for inventory service.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "GIN_MODE",
+      "required": false,
+      "default": "release",
+      "description": "Gin runtime mode.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "DATABASE_URL",
+      "required": true,
+      "default": "",
+      "description": "PostgreSQL connection URL.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "REDIS_ADDR",
+      "required": true,
+      "default": "localhost:6379",
+      "description": "Redis host and port for reservation cache.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "REDIS_PASSWORD",
+      "required": false,
+      "default": "",
+      "description": "Redis password if ACL/auth is enabled.",
+      "environments": ["staging", "prod"]
+    },
+    {
+      "name": "REDIS_DB",
+      "required": false,
+      "default": "0",
+      "description": "Redis logical database index.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "RESERVATION_TTL",
+      "required": false,
+      "default": "10m",
+      "description": "Reservation expiration duration.",
+      "environments": ["local", "staging", "prod"]
+    },
+    {
+      "name": "EXPIRATION_POLL_INTERVAL",
+      "required": false,
+      "default": "30s",
+      "description": "Worker interval for releasing expired reservations.",
+      "environments": ["local", "staging", "prod"]
+    }
+  ]
+}

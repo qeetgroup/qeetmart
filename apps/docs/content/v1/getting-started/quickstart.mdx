@@ -1,0 +1,69 @@
+---
+title: 15-Minute Quickstart
+description: Single-path onboarding flow for new engineers with health validation at the end.
+section: Getting Started
+lastUpdated: 2026-02-20
+---
+
+<Callout title="Success criteria" tone="success">
+  You are done when `pnpm smoke:local` returns healthy checks for gateway, auth, user, product, and inventory.
+</Callout>
+
+<Steps>
+  <Step title="1. Install dependencies">
+
+```bash
+pnpm install --frozen-lockfile
+```
+
+  </Step>
+  <Step title="2. Create environment files">
+
+```bash
+cp micros/api-gateway/.env.example micros/api-gateway/.env
+cp micros/auth-service/.env.example micros/auth-service/.env
+cp micros/user-service/.env.example micros/user-service/.env
+cp micros/product-service/.env.example micros/product-service/.env
+cp micros/inventory-service/.env.example micros/inventory-service/.env
+```
+
+  </Step>
+  <Step title="3. Start infrastructure and services via Docker">
+
+```bash
+pnpm docker:up
+```
+
+  </Step>
+  <Step title="4. Validate API contracts and smoke endpoints">
+
+```bash
+pnpm contracts:lint
+pnpm contracts:breaking
+curl http://localhost:4000/health
+curl http://localhost:4000/health/services
+```
+
+  </Step>
+  <Step title="5. Start frontend apps (optional during first run)">
+
+```bash
+pnpm dev:web
+pnpm dev:admin
+```
+
+  </Step>
+</Steps>
+
+## First-day checklist
+
+- [ ] Gateway reachable at `http://localhost:4000`
+- [ ] Auth service reachable at `http://localhost:8081/actuator/health`
+- [ ] User service reachable at `http://localhost:8082/actuator/health`
+- [ ] Product service reachable at `http://localhost:8083/actuator/health`
+- [ ] Inventory service reachable at `http://localhost:8080/health`
+- [ ] OpenAPI contracts lint clean
+
+<Callout title="If startup exceeds 15 minutes" tone="warning">
+  Go to <a href="/docs/v1/runbooks/common-incidents">Common Incidents</a> and run the "Docker service fails healthcheck" flow.
+</Callout>
