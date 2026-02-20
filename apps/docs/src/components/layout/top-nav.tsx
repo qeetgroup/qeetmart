@@ -30,11 +30,11 @@ export function TopNav({ version }: TopNavProps) {
       initial={{ opacity: 0, y: reduceMotion ? 0 : -6 }}
       transition={transition}
     >
-      <div className="mx-auto w-full max-w-400 px-4 sm:px-6 lg:px-8">
-        <div className="flex min-h-16 flex-col gap-2 py-2 md:flex-row md:flex-wrap md:items-center md:justify-between lg:flex-nowrap lg:gap-4 lg:py-3">
-          <div className="flex min-w-0 items-center gap-2.5">
+      <div className="mx-auto w-full max-w-[1600px] px-3 sm:px-6 lg:px-8">
+        <div className="flex min-h-16 flex-col gap-2 py-2 sm:gap-2.5 md:flex-row md:flex-wrap md:items-center md:justify-between lg:flex-nowrap lg:gap-4 lg:py-3">
+          <div className="flex min-w-0 items-center gap-2">
             <Link
-              className="truncate text-base font-semibold tracking-tight text-foreground transition-colors duration-150 hover:text-primary"
+              className="truncate text-sm font-semibold tracking-tight text-foreground transition-colors duration-150 hover:text-primary sm:text-base"
               href="/"
             >
               Qeetmart
@@ -43,12 +43,12 @@ export function TopNav({ version }: TopNavProps) {
               Enterprise Docs
             </Badge>
           </div>
-          <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:w-auto lg:items-center lg:justify-end">
+          <div className="grid w-full grid-cols-1 gap-2 min-[520px]:grid-cols-2 lg:flex lg:w-auto lg:items-center lg:justify-end">
             <VersionSwitcher currentVersion={version} />
             <EnvironmentSwitcher currentEnvironment={currentEnvironment} />
-            <ThemeSwitcher />
+            <ThemeSwitcher className="min-[520px]:col-span-2 lg:col-auto" />
             <SearchCommand
-              className="w-full min-w-0 sm:col-span-2 lg:min-w-52"
+              className="w-full min-w-0 min-[520px]:col-span-2 lg:min-w-56"
               version={version}
             />
           </div>

@@ -50,21 +50,21 @@ export default function HomePage() {
         <Badge className="mb-3" variant="muted">
           qeetmart Platform Docs
         </Badge>
-        <h1 className="max-w-4xl text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.7rem]">
+        <h1 className="max-w-4xl text-balance text-2xl font-semibold tracking-tight text-foreground min-[420px]:text-3xl sm:text-4xl lg:text-[2.7rem]">
           Structured documentation for operating a multi-service commerce platform.
         </h1>
         <p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground">
           Reference architecture, service contracts, operational workflows, and onboarding guides in one consistent
           documentation system.
         </p>
-        <div className="mt-6 flex flex-wrap gap-2.5">
-          <Button asChild size="lg">
+        <div className="mt-6 grid gap-2.5 sm:flex sm:flex-wrap">
+          <Button asChild className="w-full sm:w-auto" size="lg">
             <Link href="/docs/v1/getting-started/quickstart">Start in 15 Minutes</Link>
           </Button>
-          <Button asChild size="lg" variant="outline">
+          <Button asChild className="w-full sm:w-auto" size="lg" variant="outline">
             <Link href="/docs/v1/architecture/system-overview">Explore Architecture</Link>
           </Button>
-          <Button asChild size="lg" variant="secondary">
+          <Button asChild className="w-full sm:w-auto" size="lg" variant="secondary">
             <Link href="/reference/v1">Open API Reference</Link>
           </Button>
         </div>

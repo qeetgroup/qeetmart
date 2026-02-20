@@ -15,9 +15,9 @@ export function Steps({ children }: StepsProps) {
 
 export function Step({ title, children }: StepProps) {
   return (
-    <li className="rounded-lg border border-border bg-card p-4">
+    <li className="min-w-0 overflow-hidden rounded-lg border border-border bg-card p-4">
       <p className="text-sm font-semibold text-foreground">{title}</p>
-      <div className="mt-2 text-sm leading-7 text-muted-foreground">{children}</div>
+      <div className="mt-2 min-w-0 text-sm leading-7 text-muted-foreground">{children}</div>
     </li>
   );
 }

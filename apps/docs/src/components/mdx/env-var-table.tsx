@@ -27,7 +27,7 @@ export function EnvVarTable({ service }: EnvVarTableProps) {
 
   return (
     <div className="my-4 overflow-x-auto rounded-lg border border-border">
-      <table className="min-w-[760px] w-full border-collapse text-sm">
+      <table className="w-full min-w-[640px] border-collapse text-sm">
         <thead className="bg-muted text-xs uppercase tracking-wide text-muted-foreground">
           <tr>
             <th className="px-3 py-2 text-left font-semibold">Name</th>

@@ -20,15 +20,15 @@ export function NativeSelect({ label, options, value, onValueChange, className }
   return (
     <label
       className={cn(
-        "inline-flex h-9 w-full min-w-32 items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1.5 min-[640px]:w-auto",
+        "inline-flex h-9 w-full min-w-0 items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1.5 min-[640px]:w-auto",
         className,
       )}
       htmlFor={selectId}
     >
-      <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{label}</span>
-      <div className="relative min-w-20 flex-1">
+      <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:text-[11px]">{label}</span>
+      <div className="relative min-w-0 flex-1">
         <select
-          className="h-7 w-full appearance-none rounded-sm bg-transparent pr-5 text-sm text-foreground outline-none"
+          className="h-7 w-full appearance-none rounded-sm bg-transparent pr-5 text-xs text-foreground outline-none sm:text-sm"
           id={selectId}
           onChange={(event) => onValueChange(event.target.value)}
           value={value}

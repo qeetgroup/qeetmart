@@ -30,8 +30,8 @@ export function ServiceCard({ service, version }: ServiceCardProps) {
       <Link className="block rounded-xl focus-visible:ring-2 focus-visible:ring-primary/55" href={href}>
         <Card className="h-full transition-colors duration-150 hover:bg-accent/30">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between gap-2">
-              <CardTitle className="text-base">{service.title}</CardTitle>
+            <div className="flex flex-col items-start justify-between gap-2 min-[480px]:flex-row min-[480px]:items-center">
+              <CardTitle className="text-base leading-snug">{service.title}</CardTitle>
               <Badge variant={service.openapi ? "success" : "warning"}>
                 {service.openapi ? "OpenAPI Ready" : "OpenAPI Pending"}
               </Badge>

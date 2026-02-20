@@ -11,18 +11,18 @@ The system is a polyglot microservices platform centered on a Node.js API gatewa
   title="High-level runtime topology"
 >
 flowchart LR
-  W[Next.js Web] --> G[API Gateway :4000]
-  A[Admin SPA] --> G
-  M[Expo Mobile] --> G
-  G --> AS[Auth Service :8081]
-  G --> US[User Service :8082]
-  G --> PS[Product Service :8083]
-  G --> IS[Inventory Service :8080]
-  AS --> ADB[(auth_db)]
-  US --> UDB[(user_db)]
-  PS --> PDB[(product_db)]
-  IS --> IDB[(inventory_db)]
-  IS --> R[(Redis)]
+  W[Next.js Web] --> G[API Gateway :4000];
+  A[Admin SPA] --> G;
+  M[Expo Mobile] --> G;
+  G --> AS[Auth Service :8081];
+  G --> US[User Service :8082];
+  G --> PS[Product Service :8083];
+  G --> IS[Inventory Service :8080];
+  AS --> ADB[(auth_db)];
+  US --> UDB[(user_db)];
+  PS --> PDB[(product_db)];
+  IS --> IDB[(inventory_db)];
+  IS --> R[(Redis)];
 </MermaidDiagram>
 
 ## Architecture principles

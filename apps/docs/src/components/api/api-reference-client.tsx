@@ -16,7 +16,7 @@ export function ApiReferenceClient({ spec }: ApiReferenceClientProps) {
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl border border-border bg-card p-3"
+      className="max-w-full overflow-x-auto rounded-xl border border-border bg-card p-2 sm:p-3"
       initial={{ opacity: 0, y: reduceMotion ? 0 : 6 }}
       transition={getReducedTransition(reduceMotion, {
         duration: MOTION.duration.component,

@@ -25,11 +25,21 @@ export function DocsChrome({ version, children }: DocsChromeProps) {
       >
         <TopNav version={version} />
       </Suspense>
-      <div className="mx-auto grid w-full max-w-[1600px] lg:grid-cols-[18rem_minmax(0,1fr)]">
-        <aside className="border-b border-border/80 bg-sidebar/70 px-3 py-4 lg:sticky lg:top-16 lg:h-[calc(100dvh-4rem)] lg:overflow-y-auto lg:border-r lg:border-b-0 lg:px-4 lg:py-6">
-          <SidebarNav sections={sections} />
+      <div className="mx-auto grid w-full max-w-[1600px] lg:grid-cols-[19rem_minmax(0,1fr)]">
+        <aside className="hidden border-r border-border/80 bg-sidebar/70 lg:sticky lg:top-16 lg:block lg:h-[calc(100dvh-4rem)] lg:overflow-y-auto lg:px-4 lg:py-6">
+          <SidebarNav idPrefix="desktop-sidebar-section" sections={sections} />
         </aside>
-        <main className="px-4 py-6 sm:px-6 lg:px-10 lg:py-8">{children}</main>
+        <main className="px-3 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8">
+          <details className="mb-4 rounded-lg border border-border bg-card lg:hidden">
+            <summary className="cursor-pointer select-none px-3 py-2 text-sm font-semibold text-foreground">
+              Browse documentation
+            </summary>
+            <div className="border-t border-border px-3 py-3">
+              <SidebarNav idPrefix="mobile-sidebar-section" sections={sections} />
+            </div>
+          </details>
+          {children}
+        </main>
       </div>
     </div>
   );
