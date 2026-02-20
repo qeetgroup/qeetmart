@@ -1,10 +1,9 @@
+├── .dockerignore
 ├── .DS_Store
 ├── .github
-│  └── java-upgrade
-│    ├── .gitignore
-│    └── 20260219144011
-│      └── logs
-│        └── 0.log
+│  └── workflows
+│    ├── ci.yml
+│    └── deploy.yml
 ├── .gitignore
 ├── .idea
 │  ├── .gitignore
@@ -24,24 +23,233 @@
 ├── apps
 │  ├── admin
 │  │  ├── .gitignore
+│  │  ├── bundle-regression-baseline.json
 │  │  ├── eslint.config.js
 │  │  ├── index.html
 │  │  ├── package.json
 │  │  ├── public
 │  │  │  └── vite.svg
 │  │  ├── README.md
+│  │  ├── scripts
+│  │  │  └── check-bundle-regression.mjs
 │  │  ├── src
-│  │  │  ├── App.css
-│  │  │  ├── App.tsx
+│  │  │  ├── app
+│  │  │  │  ├── app-router.tsx
+│  │  │  │  ├── lazy-routes.ts
+│  │  │  │  └── navigation.ts
 │  │  │  ├── assets
-│  │  │  │  └── react.svg
+│  │  │  ├── components
+│  │  │  │  ├── charts
+│  │  │  │  │  ├── inventory-stock-chart.tsx
+│  │  │  │  │  ├── orders-trend-chart.tsx
+│  │  │  │  │  └── sales-trend-chart.tsx
+│  │  │  │  ├── feedback
+│  │  │  │  │  ├── dashboard-skeleton.tsx
+│  │  │  │  │  ├── empty-state.tsx
+│  │  │  │  │  ├── error-state.tsx
+│  │  │  │  │  ├── route-fallback.tsx
+│  │  │  │  │  └── table-skeleton.tsx
+│  │  │  │  ├── forms
+│  │  │  │  │  ├── login-form.tsx
+│  │  │  │  │  ├── order-details-dialog.tsx
+│  │  │  │  │  └── product-form-dialog.tsx
+│  │  │  │  ├── layout
+│  │  │  │  │  ├── app-header.tsx
+│  │  │  │  │  ├── app-sidebar.tsx
+│  │  │  │  │  ├── dashboard-layout.tsx
+│  │  │  │  │  ├── data-pagination.tsx
+│  │  │  │  │  └── page-header.tsx
+│  │  │  │  └── ui
+│  │  │  │    ├── avatar.tsx
+│  │  │  │    ├── badge.tsx
+│  │  │  │    ├── button.tsx
+│  │  │  │    ├── card.tsx
+│  │  │  │    ├── dialog.tsx
+│  │  │  │    ├── dropdown-menu.tsx
+│  │  │  │    ├── input.tsx
+│  │  │  │    ├── label.tsx
+│  │  │  │    ├── select.tsx
+│  │  │  │    ├── separator.tsx
+│  │  │  │    ├── sheet.tsx
+│  │  │  │    ├── skeleton.tsx
+│  │  │  │    ├── switch.tsx
+│  │  │  │    ├── table.tsx
+│  │  │  │    ├── textarea.tsx
+│  │  │  │    └── tooltip.tsx
+│  │  │  ├── guards
+│  │  │  │  ├── permission-gate.tsx
+│  │  │  │  └── protected-route.tsx
 │  │  │  ├── index.css
-│  │  │  └── main.tsx
+│  │  │  ├── lib
+│  │  │  │  ├── query-client.ts
+│  │  │  │  └── utils.ts
+│  │  │  ├── main.tsx
+│  │  │  ├── pages
+│  │  │  │  ├── admins-page.tsx
+│  │  │  │  ├── auth
+│  │  │  │  │  ├── forbidden-page.tsx
+│  │  │  │  │  └── login-page.tsx
+│  │  │  │  ├── customers-page.tsx
+│  │  │  │  ├── dashboard-page.tsx
+│  │  │  │  ├── inventory-page.tsx
+│  │  │  │  ├── not-found-page.tsx
+│  │  │  │  ├── orders-page.tsx
+│  │  │  │  ├── products-page.tsx
+│  │  │  │  └── settings-page.tsx
+│  │  │  ├── providers
+│  │  │  │  ├── query-provider.tsx
+│  │  │  │  └── theme-provider.tsx
+│  │  │  ├── services
+│  │  │  │  ├── admins-service.ts
+│  │  │  │  ├── auth-service.ts
+│  │  │  │  ├── customers-service.ts
+│  │  │  │  ├── dashboard-service.ts
+│  │  │  │  ├── index.ts
+│  │  │  │  ├── inventory-service.ts
+│  │  │  │  ├── mock-data.ts
+│  │  │  │  ├── mock-db.ts
+│  │  │  │  ├── orders-service.ts
+│  │  │  │  ├── products-service.ts
+│  │  │  │  └── types.ts
+│  │  │  └── stores
+│  │  │    ├── auth-store.ts
+│  │  │    └── ui-store.ts
+│  │  ├── tailwind.config.js
 │  │  ├── tsconfig.app.json
 │  │  ├── tsconfig.json
 │  │  ├── tsconfig.node.json
 │  │  └── vite.config.ts
+│  ├── docs
+│  │  ├── .gitignore
+│  │  ├── content
+│  │  │  └── v1
+│  │  │    ├── architecture
+│  │  │    │  ├── service-dependencies.mdx
+│  │  │    │  └── system-overview.mdx
+│  │  │    ├── contributing
+│  │  │    │  └── guide.mdx
+│  │  │    ├── devops
+│  │  │    │  ├── ci-cd.mdx
+│  │  │    │  ├── deployment.mdx
+│  │  │    │  └── environment-matrix.mdx
+│  │  │    ├── getting-started
+│  │  │    │  ├── local-workflow.mdx
+│  │  │    │  ├── prerequisites.mdx
+│  │  │    │  └── quickstart.mdx
+│  │  │    ├── index.mdx
+│  │  │    ├── local-development
+│  │  │    │  ├── docker-workflow.mdx
+│  │  │    │  └── run-all-services.mdx
+│  │  │    ├── runbooks
+│  │  │    │  └── common-incidents.mdx
+│  │  │    └── services
+│  │  │      ├── overview.mdx
+│  │  │      └── readmes
+│  │  │        ├── api-gateway.mdx
+│  │  │        ├── auth-service.mdx
+│  │  │        ├── inventory-service.mdx
+│  │  │        ├── product-service.mdx
+│  │  │        └── user-service.mdx
+│  │  ├── eslint.config.mjs
+│  │  ├── next-env.d.ts
+│  │  ├── next.config.ts
+│  │  ├── openapi
+│  │  │  └── v1
+│  │  │    ├── auth-service.json
+│  │  │    ├── inventory-service.json
+│  │  │    ├── product-service.json
+│  │  │    └── user-service.json
+│  │  ├── package.json
+│  │  ├── playwright.config.ts
+│  │  ├── postcss.config.mjs
+│  │  ├── public
+│  │  │  └── search-index
+│  │  │    └── v1.json
+│  │  ├── README.md
+│  │  ├── scripts
+│  │  │  ├── build-search-index.mjs
+│  │  │  ├── docs-drift-check.mjs
+│  │  │  ├── generate-clients.mjs
+│  │  │  ├── sync-openapi.mjs
+│  │  │  ├── sync-readmes.mjs
+│  │  │  └── validate-content.mjs
+│  │  ├── src
+│  │  │  ├── app
+│  │  │  │  ├── docs
+│  │  │  │  │  └── [version]
+│  │  │  │  │    ├── [[...slug]]
+│  │  │  │  │    │  └── page.tsx
+│  │  │  │  │    └── layout.tsx
+│  │  │  │  ├── globals.css
+│  │  │  │  ├── layout.tsx
+│  │  │  │  ├── page.tsx
+│  │  │  │  └── reference
+│  │  │  │    └── [version]
+│  │  │  │      ├── [service]
+│  │  │  │      │  └── page.tsx
+│  │  │  │      ├── layout.tsx
+│  │  │  │      └── page.tsx
+│  │  │  ├── components
+│  │  │  │  ├── api
+│  │  │  │  │  ├── api-reference-client.tsx
+│  │  │  │  │  └── service-card.tsx
+│  │  │  │  ├── layout
+│  │  │  │  │  ├── docs-article.tsx
+│  │  │  │  │  ├── docs-chrome.tsx
+│  │  │  │  │  ├── environment-switcher.tsx
+│  │  │  │  │  ├── search-command.tsx
+│  │  │  │  │  ├── sidebar-nav.tsx
+│  │  │  │  │  ├── theme-switcher.tsx
+│  │  │  │  │  ├── top-nav.tsx
+│  │  │  │  │  └── version-switcher.tsx
+│  │  │  │  ├── mdx
+│  │  │  │  │  ├── callout.tsx
+│  │  │  │  │  ├── code-block.tsx
+│  │  │  │  │  ├── env-var-table.tsx
+│  │  │  │  │  ├── mdx-components.tsx
+│  │  │  │  │  ├── mermaid-diagram.tsx
+│  │  │  │  │  └── steps.tsx
+│  │  │  │  └── ui
+│  │  │  │    ├── badge.tsx
+│  │  │  │    ├── button.tsx
+│  │  │  │    ├── card.tsx
+│  │  │  │    ├── input.tsx
+│  │  │  │    ├── select.tsx
+│  │  │  │    └── separator.tsx
+│  │  │  ├── data
+│  │  │  │  ├── env-vars.v1.json
+│  │  │  │  └── service-catalog.v1.json
+│  │  │  └── lib
+│  │  │    ├── docs
+│  │  │    │  ├── config.ts
+│  │  │    │  ├── content.ts
+│  │  │    │  ├── frontmatter.ts
+│  │  │    │  └── search.ts
+│  │  │    ├── motion.ts
+│  │  │    ├── openapi
+│  │  │    │  └── specs.ts
+│  │  │    ├── theme.ts
+│  │  │    └── utils.ts
+│  │  ├── test-results
+│  │  │  ├── .last-run.json
+│  │  │  ├── docs-visual-api-reference-surfaces-visual-baseline
+│  │  │  │  └── trace.zip
+│  │  │  ├── docs-visual-architecture-page-renders-mermaid-diagram
+│  │  │  │  └── trace.zip
+│  │  │  ├── docs-visual-landing-page-visual-baseline
+│  │  │  │  └── trace.zip
+│  │  │  └── docs-visual-quickstart-docs-visual-baseline
+│  │  │    └── trace.zip
+│  │  ├── tests
+│  │  │  └── visual
+│  │  │    └── docs-visual.spec.ts
+│  │  ├── tsconfig.json
+│  │  └── tsconfig.tsbuildinfo
 │  ├── mobile
+│  │  ├── .expo
+│  │  │  └── cache
+│  │  │    └── eslint
+│  │  │      └── .cache_1m2u5md
 │  │  ├── .gitignore
 │  │  ├── .vscode
 │  │  │  ├── extensions.json
@@ -89,10 +297,10 @@
 │  │  ├── scripts
 │  │  │  └── reset-project.js
 │  │  └── tsconfig.json
+│  ├── README.md
 │  └── web
 │    ├── .gitignore
 │    ├── eslint.config.mjs
-│    ├── next-env.d.ts
 │    ├── next.config.ts
 │    ├── package.json
 │    ├── postcss.config.mjs
@@ -110,6 +318,14 @@
 │    │    ├── layout.tsx
 │    │    └── page.tsx
 │    └── tsconfig.json
+├── contracts
+│  ├── openapi
+│  │  ├── auth-service.openapi.json
+│  │  ├── inventory-service.openapi.json
+│  │  ├── product-service.openapi.json
+│  │  └── user-service.openapi.json
+│  └── README.md
+├── docker-compose.dev.yml
 ├── docs
 │  ├── API_CONTRACTS.md
 │  ├── ARCHITECTURE_GUIDE.md
@@ -121,20 +337,34 @@
 │  ├── postman
 │  │  ├── qeetmart-auth-user.postman_collection.json
 │  │  └── qeetmart-local.postman_environment.json
-│  └── PROJECT_ANALYSIS.md
+│  ├── PROJECT_ANALYSIS.md
+│  └── README_TEMPLATE.md
+├── helm
+│  └── qeetmart
+│    ├── Chart.yaml
+│    ├── templates
+│    │  ├── _helpers.tpl
+│    │  ├── config-secret.yaml
+│    │  ├── deployment.yaml
+│    │  ├── hpa.yaml
+│    │  ├── ingress.yaml
+│    │  └── service.yaml
+│    └── values.yaml
 ├── LICENSE
 ├── micros
 │  ├── .DS_Store
 │  ├── .gitkeep
 │  ├── api-gateway
-│  │  ├── .env
+│  │  ├── .dockerignore
 │  │  ├── .env.example
 │  │  ├── .gitignore
+│  │  ├── Dockerfile
 │  │  ├── package.json
 │  │  ├── README.md
 │  │  ├── src
 │  │  │  ├── config
 │  │  │  │  ├── env.ts
+│  │  │  │  ├── services.test.ts
 │  │  │  │  └── services.ts
 │  │  │  ├── index.ts
 │  │  │  ├── middleware
@@ -146,36 +376,23 @@
 │  │  │  ├── types
 │  │  │  │  └── express.d.ts
 │  │  │  └── utils
-│  │  │    └── health-check.ts
+│  │  │    ├── health-check.ts
+│  │  │    ├── jwt.test.ts
+│  │  │    └── jwt.ts
 │  │  └── tsconfig.json
 │  ├── auth-service
+│  │  ├── .dockerignore
+│  │  ├── .env.example
 │  │  ├── .gitattributes
-│  │  ├── .github
-│  │  │  └── java-upgrade
-│  │  │    ├── .gitignore
-│  │  │    ├── 20260219144016
-│  │  │    │  ├── logs
-│  │  │    │  │  ├── 0.log
-│  │  │    │  │  └── 1.generatePlan.log
-│  │  │    │  └── progress.md
-│  │  │    └── 20260219144118
-│  │  │      └── logs
-│  │  │        └── 0.log
 │  │  ├── .gitignore
 │  │  ├── .idea
-│  │  │  ├── .gitignore
 │  │  │  ├── compiler.xml
-│  │  │  ├── encodings.xml
-│  │  │  ├── jarRepositories.xml
-│  │  │  ├── misc.xml
-│  │  │  ├── vcs.xml
 │  │  │  └── workspace.xml
 │  │  ├── .mvn
 │  │  │  └── wrapper
 │  │  │    └── maven-wrapper.properties
 │  │  ├── compose.yaml
 │  │  ├── Dockerfile
-│  │  ├── HELP.md
 │  │  ├── mvnw
 │  │  ├── mvnw.cmd
 │  │  ├── pom.xml
@@ -224,18 +441,19 @@
 │  │    │  │          ├── AuthService.java
 │  │    │  │          └── RefreshTokenService.java
 │  │    │  └── resources
-│  │    │    ├── application.yml
-│  │    │    ├── db
-│  │    │    │  └── migration
-│  │    │    ├── static
-│  │    │    └── templates
+│  │    │    └── application.yml
 │  │    └── test
-│  │      └── java
-│  │        └── com
-│  │          └── qeetmart
-│  │            └── auth
-│  │              └── AuthServiceApplicationTests.java
+│  │      ├── java
+│  │      │  └── com
+│  │      │    └── qeetmart
+│  │      │      └── auth
+│  │      │        ├── AuthServiceApplicationTests.java
+│  │      │        └── service
+│  │      │          └── AuthServiceTest.java
+│  │      └── resources
+│  │        └── application.yml
 │  ├── inventory-service
+│  │  ├── .dockerignore
 │  │  ├── .env.example
 │  │  ├── cmd
 │  │  │  └── main.go
@@ -262,20 +480,15 @@
 │  │  │  └── 001_init.sql
 │  │  └── README.md
 │  ├── product-service
+│  │  ├── .dockerignore
+│  │  ├── .env.example
 │  │  ├── .gitattributes
-│  │  ├── .github
-│  │  │  └── java-upgrade
-│  │  │    ├── .gitignore
-│  │  │    └── 20260219144131
-│  │  │      └── logs
-│  │  │        └── 0.log
 │  │  ├── .gitignore
 │  │  ├── .mvn
 │  │  │  └── wrapper
 │  │  │    └── maven-wrapper.properties
 │  │  ├── compose.yaml
 │  │  ├── Dockerfile
-│  │  ├── HELP.md
 │  │  ├── mvnw
 │  │  ├── mvnw.cmd
 │  │  ├── pom.xml
@@ -338,37 +551,26 @@
 │  │    │  │        └── specification
 │  │    │  │          └── ProductSpecification.java
 │  │    │  └── resources
-│  │    │    ├── application.yml
-│  │    │    ├── db
-│  │    │    │  └── migration
-│  │    │    ├── static
-│  │    │    └── templates
+│  │    │    └── application.yml
 │  │    └── test
-│  │      └── java
-│  │        └── com
-│  │          └── qeetmart
-│  │            └── product
-│  │              └── ProductServiceApplicationTests.java
+│  │      ├── java
+│  │      │  └── com
+│  │      │    └── qeetmart
+│  │      │      └── product
+│  │      │        └── ProductServiceApplicationTests.java
+│  │      └── resources
+│  │        └── application.yml
+│  ├── README.md
 │  └── user-service
+│    ├── .dockerignore
+│    ├── .env.example
 │    ├── .gitattributes
-│    ├── .github
-│    │  └── java-upgrade
-│    │    ├── .gitignore
-│    │    └── 20260219144138
-│    │      └── logs
-│    │        └── 0.log
 │    ├── .gitignore
-│    ├── .idea
-│    │  ├── .gitignore
-│    │  ├── misc.xml
-│    │  ├── vcs.xml
-│    │  └── workspace.xml
 │    ├── .mvn
 │    │  └── wrapper
 │    │    └── maven-wrapper.properties
 │    ├── compose.yaml
 │    ├── Dockerfile
-│    ├── HELP.md
 │    ├── mvnw
 │    ├── mvnw.cmd
 │    ├── pom.xml
@@ -421,20 +623,27 @@
 │      │  │        │  └── UserProfileService.java
 │      │  │        └── UserServiceApplication.java
 │      │  └── resources
-│      │    ├── application.yml
-│      │    ├── db
-│      │    │  └── migration
-│      │    ├── static
-│      │    └── templates
+│      │    └── application.yml
 │      └── test
-│        └── java
-│          └── com
-│            └── qeetmart
-│              └── user
-│                └── UserServiceApplicationTests.java
+│        ├── java
+│        │  └── com
+│        │    └── qeetmart
+│        │      └── user
+│        │        └── UserServiceApplicationTests.java
+│        └── resources
+│          └── application.yml
 ├── package.json
 ├── packages
-│  ├── lib
+│  ├── openapi-clients
+│  │  ├── package.json
+│  │  ├── src
+│  │  │  ├── index.ts
+│  │  │  └── v1
+│  │  │    ├── auth-service.ts
+│  │  │    ├── inventory-service.ts
+│  │  │    ├── product-service.ts
+│  │  │    └── user-service.ts
+│  │  └── tsconfig.json
 │  └── shared
 │    ├── package.json
 │    ├── src
@@ -445,9 +654,37 @@
 │    │    └── index.ts
 │    ├── tsconfig.json
 │    └── tsconfig.tsbuildinfo
+├── platform
+│  ├── k8s
+│  │  ├── base
+│  │  │  ├── api-gateway.yaml
+│  │  │  ├── auth-service.yaml
+│  │  │  ├── ingress.yaml
+│  │  │  ├── inventory-service.yaml
+│  │  │  ├── kustomization.yaml
+│  │  │  ├── namespace.yaml
+│  │  │  ├── product-service.yaml
+│  │  │  ├── shared-config.yaml
+│  │  │  └── user-service.yaml
+│  │  └── overlays
+│  │    ├── dev
+│  │    │  ├── config-patch.yaml
+│  │    │  ├── kustomization.yaml
+│  │    │  └── replicas-patch.yaml
+│  │    ├── prod
+│  │    │  ├── kustomization.yaml
+│  │    │  └── replicas-patch.yaml
+│  │    └── staging
+│  │      ├── kustomization.yaml
+│  │      └── replicas-patch.yaml
+│  └── README.md
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
 ├── project.tree
 ├── README.md
+├── tools
+│  └── ci
+│    ├── openapi-breaking.mjs
+│    └── openapi-lint.mjs
 ├── tsconfig.base.json
 └── tsconfig.json

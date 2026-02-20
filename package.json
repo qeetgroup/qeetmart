@@ -15,7 +15,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "generate:tree": "struct -i .next -i target -i dist -i .pnpm-store -o project.tree",
+    "generate:tree": "struct -i .next -i target -i dist -i .pnpm-store -i .cache -o project.tree",
     "dev:gateway": "pnpm --filter @qeetmart/api-gateway dev",
     "dev:web": "pnpm --filter web dev",
     "dev:admin": "pnpm --filter admin dev",
