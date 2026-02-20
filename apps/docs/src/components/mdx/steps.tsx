@@ -10,14 +10,14 @@ type StepProps = {
 };
 
 export function Steps({ children }: StepsProps) {
-  return <ol className="steps">{children}</ol>;
+  return <ol className="my-4 space-y-3">{children}</ol>;
 }
 
 export function Step({ title, children }: StepProps) {
   return (
-    <li className="step-item">
-      <p className="step-title">{title}</p>
-      <div>{children}</div>
+    <li className="rounded-lg border border-border bg-card p-4">
+      <p className="text-sm font-semibold text-foreground">{title}</p>
+      <div className="mt-2 text-sm leading-7 text-muted-foreground">{children}</div>
     </li>
   );
 }

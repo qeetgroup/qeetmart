@@ -42,10 +42,12 @@ export function MermaidDiagram({ chart, title }: MermaidDiagramProps) {
   }, [chart, renderId]);
 
   return (
-    <figure className="diagram-shell">
-      {title ? <figcaption>{title}</figcaption> : null}
+    <figure className="my-4 overflow-x-auto rounded-xl border border-border bg-card p-4 shadow-sm">
+      {title ? <figcaption className="mb-3 text-sm font-semibold text-foreground">{title}</figcaption> : null}
       {error ? (
-        <p>Unable to render Mermaid diagram.</p>
+        <p className="rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
+          Unable to render Mermaid diagram.
+        </p>
       ) : (
         // The SVG comes from mermaid's renderer output.
         <div dangerouslySetInnerHTML={{ __html: svg }} />

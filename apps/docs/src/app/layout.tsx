@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
+import { JetBrains_Mono, Public_Sans } from "next/font/google";
 import "swagger-ui-react/swagger-ui.css";
 import "./globals.css";
 
-const sans = Space_Grotesk({
+const sans = Public_Sans({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-doc-sans",
 });
 
-const mono = IBM_Plex_Mono({
+const mono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-mono",
+  weight: ["400", "500", "600"],
+  variable: "--font-doc-mono",
 });
 
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${sans.variable} ${mono.variable}`}>{children}</body>
+      <body className={`${sans.variable} ${mono.variable} bg-background text-foreground`}>{children}</body>
     </html>
   );
 }

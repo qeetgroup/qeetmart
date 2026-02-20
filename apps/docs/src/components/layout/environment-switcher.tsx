@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { NativeSelect } from "@/components/ui/select";
 import { DOC_ENVIRONMENTS } from "@/lib/docs/config";
 
 type EnvironmentSwitcherProps = {
@@ -19,15 +20,11 @@ export function EnvironmentSwitcher({ currentEnvironment }: EnvironmentSwitcherP
   };
 
   return (
-    <label className="select-shell">
-      <span>Environment</span>
-      <select onChange={(event) => onChange(event.target.value)} value={currentEnvironment}>
-        {DOC_ENVIRONMENTS.map((env) => (
-          <option key={env} value={env}>
-            {env}
-          </option>
-        ))}
-      </select>
-    </label>
+    <NativeSelect
+      label="Environment"
+      onValueChange={onChange}
+      options={DOC_ENVIRONMENTS.map((env) => ({ label: env, value: env }))}
+      value={currentEnvironment}
+    />
   );
 }
