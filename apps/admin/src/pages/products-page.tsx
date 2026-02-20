@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Plus } from 'lucide-react'
+import { ArrowDownUp, PackageSearch, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { EmptyState } from '@/components/feedback/empty-state'
+import { ErrorState } from '@/components/feedback/error-state'
+import { TableSkeleton } from '@/components/feedback/table-skeleton'
 import { ProductFormDialog } from '@/components/forms/product-form-dialog'
 import { DataPagination } from '@/components/layout/data-pagination'
 import { PageHeader } from '@/components/layout/page-header'
@@ -20,15 +24,46 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { productCategories, productsService } from '@/services'
-import type { Product, ProductCategory, ProductPayload } from '@/services'
+import type { Product, ProductCategory, ProductPayload, ProductSort } from '@/services'
+
+const productSortOptions: Array<{ value: ProductSort; label: string }> = [
+  { value: 'updated_desc', label: 'Recently updated' },
+  { value: 'updated_asc', label: 'Oldest updated' },
+  { value: 'name_asc', label: 'Name A-Z' },
+  { value: 'name_desc', label: 'Name Z-A' },
+  { value: 'price_desc', label: 'Price high to low' },
+  { value: 'price_asc', label: 'Price low to high' },
+]
+
+const defaultProductSort: ProductSort = 'updated_desc'
 
 export function ProductsPage() {
   const queryClient = useQueryClient()
+  const [searchParams, setSearchParams] = useSearchParams()
+
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<ProductCategory | 'all'>('all')
   const [isDialogOpen, setDialogOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+
+  const activeSort = useMemo<ProductSort>(() => {
+    const sort = searchParams.get('sort')
+    if (productSortOptions.some((option) => option.value === sort)) {
+      return sort as ProductSort
+    }
+    return defaultProductSort
+  }, [searchParams])
+
+  function updateSort(nextSort: ProductSort) {
+    const nextParams = new URLSearchParams(searchParams)
+    if (nextSort === defaultProductSort) {
+      nextParams.delete('sort')
+    } else {
+      nextParams.set('sort', nextSort)
+    }
+    setSearchParams(nextParams, { replace: true })
+  }
 
   const filters = useMemo(
     () => ({
@@ -36,8 +71,9 @@ export function ProductsPage() {
       pageSize: 8,
       search,
       category,
+      sort: activeSort,
     }),
-    [category, page, search],
+    [activeSort, category, page, search],
   )
 
   const productsQuery = useQuery({
@@ -101,7 +137,7 @@ export function ProductsPage() {
 
       <Card>
         <CardContent className="space-y-4 p-4">
-          <div className="grid gap-3 sm:grid-cols-[1fr_200px]">
+          <div className="grid gap-3 sm:grid-cols-[1fr_200px] xl:grid-cols-[1fr_200px_220px]">
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground">Search</p>
               <Input
@@ -134,69 +170,120 @@ export function ProductsPage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Sort</p>
+              <Select
+                value={activeSort}
+                onValueChange={(value) => {
+                  updateSort(value as ProductSort)
+                  setPage(1)
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sort products" />
+                </SelectTrigger>
+                <SelectContent>
+                  {productSortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <span className="inline-flex items-center gap-2">
+                        <ArrowDownUp className="size-3.5" aria-hidden="true" />
+                        {option.label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Updated</TableHead>
-                <TableHead className="text-right">Price</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="size-10 rounded-md border border-border/70 object-cover"
-                        loading="lazy"
-                      />
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">{product.sku}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>
-                    <Badge variant={product.stock <= 8 ? 'destructive' : 'secondary'}>
-                      {product.stock <= 0 ? 'Out of stock' : `${product.stock} units`}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{formatDate(product.updatedAt)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(product.price)}</TableCell>
-                  <TableCell className="text-right">
-                    <PermissionGate permission="products.write" fallback={<span className="text-xs text-muted-foreground">Read only</span>}>
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(product)}>
-                        Edit
-                      </Button>
-                    </PermissionGate>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {!productsQuery.isLoading && items.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                    No products found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          {productsQuery.isError ? (
+            <ErrorState
+              title="Unable to load products"
+              description={
+                productsQuery.error instanceof Error ? productsQuery.error.message : 'Products request failed.'
+              }
+              onRetry={() => {
+                void productsQuery.refetch()
+              }}
+            />
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Stock</TableHead>
+                    <TableHead>Updated</TableHead>
+                    <TableHead className="text-right">Price</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {productsQuery.isLoading ? (
+                    <TableSkeleton columns={6} rows={8} />
+                  ) : items.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-4">
+                        <EmptyState
+                          title="No products found"
+                          description="Try adjusting search keywords or category filters."
+                          icon={<PackageSearch className="size-4" aria-hidden="true" />}
+                          className="min-h-36"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    items.map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={product.imageUrl}
+                              alt={product.name}
+                              className="size-10 rounded-md border border-border/70 object-cover"
+                              loading="lazy"
+                            />
+                            <div>
+                              <p className="font-medium">{product.name}</p>
+                              <p className="text-xs text-muted-foreground">{product.sku}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{product.category}</TableCell>
+                        <TableCell>
+                          <Badge variant={product.stock <= 8 ? 'destructive' : 'secondary'}>
+                            {product.stock <= 0 ? 'Out of stock' : `${product.stock} units`}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{formatDate(product.updatedAt)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(product.price)}</TableCell>
+                        <TableCell className="text-right">
+                          <PermissionGate
+                            permission="products.write"
+                            fallback={<span className="text-xs text-muted-foreground">Read only</span>}
+                          >
+                            <Button variant="outline" size="sm" onClick={() => handleEdit(product)}>
+                              Edit
+                            </Button>
+                          </PermissionGate>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
 
-          <DataPagination
-            page={page}
-            pageSize={8}
-            total={productsQuery.data?.total ?? 0}
-            onPageChange={setPage}
-          />
+              {!productsQuery.isLoading && items.length > 0 ? (
+                <DataPagination
+                  page={page}
+                  pageSize={8}
+                  total={productsQuery.data?.total ?? 0}
+                  onPageChange={setPage}
+                />
+              ) : null}
+            </>
+          )}
         </CardContent>
       </Card>
 

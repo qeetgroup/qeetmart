@@ -1,6 +1,6 @@
 import { isAfter, isBefore, parseISO } from 'date-fns'
 import { mockDb, withLatency } from './mock-db'
-import type { Order, OrderFilters, OrderStatus, PaginatedResult } from './types'
+import type { Order, OrderFilters, OrderSort, OrderStatus, PaginatedResult } from './types'
 
 function inDateRange(order: Order, from?: string, to?: string) {
   const date = parseISO(order.createdAt)
@@ -19,16 +19,39 @@ function inDateRange(order: Order, from?: string, to?: string) {
   return true
 }
 
+function sortOrders(orders: Order[], sort: OrderSort) {
+  return [...orders].sort((a, b) => {
+    switch (sort) {
+      case 'date_asc':
+        return a.createdAt > b.createdAt ? 1 : -1
+      case 'amount_desc':
+        return b.total - a.total
+      case 'amount_asc':
+        return a.total - b.total
+      case 'customer_asc':
+        return a.customerName.localeCompare(b.customerName)
+      case 'customer_desc':
+        return b.customerName.localeCompare(a.customerName)
+      case 'date_desc':
+      default:
+        return a.createdAt < b.createdAt ? 1 : -1
+    }
+  })
+}
+
 export const ordersService = {
   async getOrders(filters: OrderFilters = {}): Promise<PaginatedResult<Order>> {
     return withLatency(() => {
       const page = filters.page ?? 1
       const pageSize = filters.pageSize ?? 8
+      const sort = filters.sort ?? 'date_desc'
 
-      const filtered = mockDb.orders
-        .filter((order) => (filters.status && filters.status !== 'all' ? order.status === filters.status : true))
-        .filter((order) => inDateRange(order, filters.from, filters.to))
-        .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      const filtered = sortOrders(
+        mockDb.orders
+          .filter((order) => (filters.status && filters.status !== 'all' ? order.status === filters.status : true))
+          .filter((order) => inDateRange(order, filters.from, filters.to)),
+        sort,
+      )
 
       const start = (page - 1) * pageSize
       const items = filtered.slice(start, start + pageSize)

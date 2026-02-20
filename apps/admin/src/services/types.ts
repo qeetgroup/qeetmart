@@ -72,7 +72,16 @@ export interface OrderFilters {
   to?: string
   page?: number
   pageSize?: number
+  sort?: OrderSort
 }
+
+export type OrderSort =
+  | 'date_desc'
+  | 'date_asc'
+  | 'amount_desc'
+  | 'amount_asc'
+  | 'customer_asc'
+  | 'customer_desc'
 
 export type ProductCategory =
   | 'Apparel'
@@ -106,7 +115,16 @@ export interface ProductFilters {
   category?: ProductCategory | 'all'
   page?: number
   pageSize?: number
+  sort?: ProductSort
 }
+
+export type ProductSort =
+  | 'updated_desc'
+  | 'updated_asc'
+  | 'name_asc'
+  | 'name_desc'
+  | 'price_desc'
+  | 'price_asc'
 
 export interface CustomerActivity {
   id: string
@@ -126,6 +144,14 @@ export interface Customer {
   lastOrderAt: string
   activity: CustomerActivity[]
 }
+
+export type CustomerSort =
+  | 'last_order_desc'
+  | 'last_order_asc'
+  | 'name_asc'
+  | 'name_desc'
+  | 'spent_desc'
+  | 'spent_asc'
 
 export interface InventoryItem {
   productId: string

@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ArrowDownUp, ClipboardList } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { EmptyState } from '@/components/feedback/empty-state'
+import { ErrorState } from '@/components/feedback/error-state'
+import { TableSkeleton } from '@/components/feedback/table-skeleton'
 import { OrderDetailsDialog } from '@/components/forms/order-details-dialog'
 import { DataPagination } from '@/components/layout/data-pagination'
 import { PageHeader } from '@/components/layout/page-header'
@@ -19,7 +24,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { ordersService } from '@/services'
-import type { Order, OrderStatus } from '@/services'
+import type { Order, OrderSort, OrderStatus } from '@/services'
 
 const statusOptions: Array<OrderStatus | 'all'> = [
   'all',
@@ -30,6 +35,17 @@ const statusOptions: Array<OrderStatus | 'all'> = [
   'cancelled',
   'refunded',
 ]
+
+const orderSortOptions: Array<{ value: OrderSort; label: string }> = [
+  { value: 'date_desc', label: 'Newest first' },
+  { value: 'date_asc', label: 'Oldest first' },
+  { value: 'amount_desc', label: 'Amount high to low' },
+  { value: 'amount_asc', label: 'Amount low to high' },
+  { value: 'customer_asc', label: 'Customer A-Z' },
+  { value: 'customer_desc', label: 'Customer Z-A' },
+]
+
+const defaultOrderSort: OrderSort = 'date_desc'
 
 const statusVariantMap: Record<OrderStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   delivered: 'default',
@@ -42,6 +58,7 @@ const statusVariantMap: Record<OrderStatus, 'default' | 'secondary' | 'destructi
 
 export function OrdersPage() {
   const queryClient = useQueryClient()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [status, setStatus] = useState<OrderStatus | 'all'>('all')
   const [fromDate, setFromDate] = useState('')
@@ -50,6 +67,24 @@ export function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [isDialogOpen, setDialogOpen] = useState(false)
 
+  const activeSort = useMemo<OrderSort>(() => {
+    const sort = searchParams.get('sort')
+    if (orderSortOptions.some((option) => option.value === sort)) {
+      return sort as OrderSort
+    }
+    return defaultOrderSort
+  }, [searchParams])
+
+  function updateSort(nextSort: OrderSort) {
+    const nextParams = new URLSearchParams(searchParams)
+    if (nextSort === defaultOrderSort) {
+      nextParams.delete('sort')
+    } else {
+      nextParams.set('sort', nextSort)
+    }
+    setSearchParams(nextParams, { replace: true })
+  }
+
   const filters = useMemo(
     () => ({
       status,
@@ -57,8 +92,9 @@ export function OrdersPage() {
       to: toDate || undefined,
       page,
       pageSize: 8,
+      sort: activeSort,
     }),
-    [fromDate, page, status, toDate],
+    [activeSort, fromDate, page, status, toDate],
   )
 
   const ordersQuery = useQuery({
@@ -104,7 +140,7 @@ export function OrdersPage() {
 
       <Card>
         <CardContent className="space-y-4 p-4">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground">Status</p>
               <Select
@@ -150,59 +186,108 @@ export function OrdersPage() {
                 }}
               />
             </div>
+
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Sort</p>
+              <Select
+                value={activeSort}
+                onValueChange={(value) => {
+                  updateSort(value as OrderSort)
+                  setPage(1)
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sort orders" />
+                </SelectTrigger>
+                <SelectContent>
+                  {orderSortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <span className="inline-flex items-center gap-2">
+                        <ArrowDownUp className="size-3.5" aria-hidden="true" />
+                        {option.label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(ordersQuery.data?.items ?? []).map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.id}</TableCell>
-                  <TableCell>
-                    <p>{order.customerName}</p>
-                    <p className="text-xs text-muted-foreground">{order.email}</p>
-                  </TableCell>
-                  <TableCell>{formatDate(order.createdAt)}</TableCell>
-                  <TableCell>
-                    <Badge variant={statusVariantMap[order.status]} className="capitalize">
-                      {order.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">{formatCurrency(order.total)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedOrder(order)
-                        setDialogOpen(true)
-                      }}
-                    >
-                      View details
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {!ordersQuery.isLoading && (ordersQuery.data?.items.length ?? 0) === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                    No orders found for current filters.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          {ordersQuery.isError ? (
+            <ErrorState
+              title="Unable to load orders"
+              description={
+                ordersQuery.error instanceof Error ? ordersQuery.error.message : 'Orders request failed.'
+              }
+              onRetry={() => {
+                void ordersQuery.refetch()
+              }}
+            />
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Order</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {ordersQuery.isLoading ? (
+                    <TableSkeleton columns={6} rows={8} />
+                  ) : (ordersQuery.data?.items.length ?? 0) === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-4">
+                        <EmptyState
+                          title="No orders found"
+                          description="Try adjusting filters or date range to find matching orders."
+                          icon={<ClipboardList className="size-4" aria-hidden="true" />}
+                          className="min-h-36"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    (ordersQuery.data?.items ?? []).map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">{order.id}</TableCell>
+                        <TableCell>
+                          <p>{order.customerName}</p>
+                          <p className="text-xs text-muted-foreground">{order.email}</p>
+                        </TableCell>
+                        <TableCell>{formatDate(order.createdAt)}</TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariantMap[order.status]} className="capitalize">
+                            {order.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">{formatCurrency(order.total)}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedOrder(order)
+                              setDialogOpen(true)
+                            }}
+                          >
+                            View details
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
 
-          <DataPagination page={page} pageSize={8} total={total} onPageChange={setPage} />
+              {!ordersQuery.isLoading && (ordersQuery.data?.items.length ?? 0) > 0 ? (
+                <DataPagination page={page} pageSize={8} total={total} onPageChange={setPage} />
+              ) : null}
+            </>
+          )}
         </CardContent>
       </Card>
 
