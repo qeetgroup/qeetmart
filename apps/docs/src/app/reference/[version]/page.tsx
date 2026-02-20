@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ServiceCard } from "@/components/api/service-card";
+import { DocsArticle } from "@/components/layout/docs-article";
 import { DOC_VERSIONS, getServicesForVersion, isValidVersion } from "@/lib/docs/config";
 
 type PageProps = {
@@ -22,16 +23,17 @@ export default async function ApiReferenceIndexPage({ params }: PageProps) {
   const services = getServicesForVersion(version);
 
   return (
-    <article className="doc-article">
-      <header>
-        <h1>API Reference</h1>
-        <p>Interactive API contracts by service and version.</p>
-      </header>
-      <section className="service-grid">
+    <DocsArticle
+      contentClassName="space-y-4"
+      description="Interactive API contracts by service and version."
+      prose={false}
+      title="API Reference"
+    >
+      <section className="grid gap-3 sm:grid-cols-2">
         {services.map((service) => (
           <ServiceCard key={service.id} service={service} version={version} />
         ))}
       </section>
-    </article>
+    </DocsArticle>
   );
 }

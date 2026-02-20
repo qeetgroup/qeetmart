@@ -9,7 +9,7 @@ lastUpdated: 2026-02-20
 
 <MermaidDiagram
   title="Service dependency graph"
-  chart={`
+>
 flowchart TB
   subgraph Clients
     WEB[Next.js Web]
@@ -34,8 +34,7 @@ flowchart TB
   GW --> INV
   USER -. validates token .-> AUTH
   PROD -. validates token .-> AUTH
-`}
-/>
+</MermaidDiagram>
 
 ## Coupling constraints
 

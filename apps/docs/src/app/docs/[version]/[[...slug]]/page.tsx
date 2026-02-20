@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
+import { DocsArticle } from "@/components/layout/docs-article";
 import { mdxComponents } from "@/components/mdx/mdx-components";
 import { getDocSource, getAllDocSlugs } from "@/lib/docs/content";
 import { DOC_VERSIONS, isValidVersion } from "@/lib/docs/config";
@@ -65,13 +66,12 @@ export default async function DocsPage({ params }: PageProps) {
   });
 
   return (
-    <article className="doc-article">
-      <header>
-        <h1>{doc.frontmatter.title}</h1>
-        <p>{doc.frontmatter.description}</p>
-        {doc.frontmatter.lastUpdated ? <small>Last updated: {doc.frontmatter.lastUpdated}</small> : null}
-      </header>
-      <section>{content}</section>
-    </article>
+    <DocsArticle
+      description={doc.frontmatter.description}
+      lastUpdated={doc.frontmatter.lastUpdated}
+      title={doc.frontmatter.title}
+    >
+      {content}
+    </DocsArticle>
   );
 }

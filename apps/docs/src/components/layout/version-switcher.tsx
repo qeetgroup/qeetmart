@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { NativeSelect } from "@/components/ui/select";
 import { DOC_VERSIONS } from "@/lib/docs/config";
 
 type VersionSwitcherProps = {
@@ -28,15 +29,11 @@ export function VersionSwitcher({ currentVersion }: VersionSwitcherProps) {
   };
 
   return (
-    <label className="select-shell">
-      <span>Version</span>
-      <select onChange={(event) => onChange(event.target.value)} value={currentVersion}>
-        {DOC_VERSIONS.map((version) => (
-          <option key={version} value={version}>
-            {version}
-          </option>
-        ))}
-      </select>
-    </label>
+    <NativeSelect
+      label="Version"
+      onValueChange={onChange}
+      options={DOC_VERSIONS.map((version) => ({ label: version.toUpperCase(), value: version }))}
+      value={currentVersion}
+    />
   );
 }

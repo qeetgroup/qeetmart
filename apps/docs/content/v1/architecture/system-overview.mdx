@@ -9,7 +9,7 @@ The system is a polyglot microservices platform centered on a Node.js API gatewa
 
 <MermaidDiagram
   title="High-level runtime topology"
-  chart={`
+>
 flowchart LR
   W[Next.js Web] --> G[API Gateway :4000]
   A[Admin SPA] --> G
@@ -23,8 +23,7 @@ flowchart LR
   PS --> PDB[(product_db)]
   IS --> IDB[(inventory_db)]
   IS --> R[(Redis)]
-`}
-/>
+</MermaidDiagram>
 
 ## Architecture principles
 

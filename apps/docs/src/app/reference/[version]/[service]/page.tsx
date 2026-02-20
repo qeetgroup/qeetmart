@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ApiReferenceClient } from "@/components/api/api-reference-client";
+import { DocsArticle } from "@/components/layout/docs-article";
 import {
   DOC_VERSIONS,
   DOC_ENVIRONMENTS,
@@ -60,14 +61,19 @@ export default async function ApiReferenceServicePage({ params, searchParams }: 
   };
 
   return (
-    <article className="doc-article">
-      <header>
-        <h1>{metadata.title}</h1>
-        <p>
-          Runtime: {metadata.runtime}. Owner: {metadata.owner}. Base URL ({env}): <code>{selectedBaseUrl}</code>
-        </p>
-      </header>
+    <DocsArticle
+      contentClassName="space-y-4"
+      description={`Runtime: ${metadata.runtime}. Owner: ${metadata.owner}. Base URL (${env}): ${selectedBaseUrl}`}
+      prose={false}
+      title={metadata.title}
+    >
+      <p className="mb-4 rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
+        Runtime: <strong className="text-foreground">{metadata.runtime}</strong> · Owner:{" "}
+        <strong className="text-foreground">{metadata.owner}</strong> · Environment:{" "}
+        <strong className="text-foreground">{env}</strong> · Base URL:{" "}
+        <code className="rounded bg-card px-1.5 py-0.5 text-xs text-foreground">{selectedBaseUrl}</code>
+      </p>
       <ApiReferenceClient spec={enrichedSpec} />
-    </article>
+    </DocsArticle>
   );
 }
