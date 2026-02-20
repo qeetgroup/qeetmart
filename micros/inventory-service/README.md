@@ -1,0 +1,130 @@
+# inventory-service
+
+Golang inventory microservice for eCommerce with:
+- Gin HTTP APIs
+- PostgreSQL (pgx)
+- Redis (go-redis) for reservation caching + TTL
+- Transaction-safe stock operations with row-level locking
+- Background expiration release worker
+
+## Project Structure
+
+```text
+inventory-service/
+  cmd/main.go
+  internal/config/
+  internal/handlers/
+  internal/services/
+  internal/repository/
+  internal/models/
+  internal/middleware/
+  internal/routes/
+  migrations/
+  Dockerfile
+  docker-compose.yml
+  go.mod
+  README.md
+```
+
+## Environment Variables
+
+Use `.env.example` as reference:
+
+- `PORT` (default `8080`)
+- `GIN_MODE` (`debug` or `release`)
+- `DATABASE_URL` (required)
+- `REDIS_ADDR` (default `localhost:6379`)
+- `REDIS_PASSWORD` (optional)
+- `REDIS_DB` (default `0`)
+- `RESERVATION_TTL` (default `10m`)
+- `EXPIRATION_POLL_INTERVAL` (default `30s`)
+
+## Run Locally
+
+1. Start PostgreSQL and Redis (for example via Docker):
+
+```bash
+docker-compose up -d postgres redis
+```
+
+2. Run service:
+
+```bash
+go run cmd/main.go
+```
+
+Service runs on `http://localhost:8080`.
+
+## Run Full Stack via Docker
+
+```bash
+docker-compose up -d
+```
+
+## Endpoints
+
+### Health
+- `GET /health`
+
+### Initialize Inventory
+- `POST /inventory/init`
+- Body:
+
+```json
+{
+  "productId": "P1001",
+  "quantity": 0
+}
+```
+
+### Get Inventory
+- `GET /inventory/:productId`
+
+### Add Stock
+- `POST /inventory/add-stock`
+- Body:
+
+```json
+{
+  "productId": "P1001",
+  "quantity": 10
+}
+```
+
+### Reserve Stock
+- `POST /inventory/reserve`
+- Body:
+
+```json
+{
+  "productId": "P1001",
+  "orderId": "O5001",
+  "quantity": 2
+}
+```
+
+### Release Reservation
+- `POST /inventory/release`
+- Body:
+
+```json
+{
+  "reservationId": "<uuid>"
+}
+```
+
+### Deduct Reservation
+- `POST /inventory/deduct`
+- Body:
+
+```json
+{
+  "reservationId": "<uuid>"
+}
+```
+
+## Notes
+
+- Reservation creates a PostgreSQL row and caches reservation data in Redis with TTL.
+- Expired reservations are released by a background worker (`EXPIRATION_POLL_INTERVAL`).
+- All stock-changing operations use transactions and `SELECT ... FOR UPDATE`.
