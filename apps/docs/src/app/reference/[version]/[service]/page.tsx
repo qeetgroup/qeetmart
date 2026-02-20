@@ -67,11 +67,11 @@ export default async function ApiReferenceServicePage({ params, searchParams }: 
       prose={false}
       title={metadata.title}
     >
-      <p className="mb-4 rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
+      <p className="mb-4 rounded-md border border-border bg-muted px-3 py-2 text-sm leading-6 text-muted-foreground">
         Runtime: <strong className="text-foreground">{metadata.runtime}</strong> · Owner:{" "}
         <strong className="text-foreground">{metadata.owner}</strong> · Environment:{" "}
         <strong className="text-foreground">{env}</strong> · Base URL:{" "}
-        <code className="rounded bg-card px-1.5 py-0.5 text-xs text-foreground">{selectedBaseUrl}</code>
+        <code className="break-all rounded bg-card px-1.5 py-0.5 text-xs text-foreground">{selectedBaseUrl}</code>
       </p>
       <ApiReferenceClient spec={enrichedSpec} />
     </DocsArticle>

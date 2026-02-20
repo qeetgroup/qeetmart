@@ -92,6 +92,7 @@
   body {
     min-height: 100dvh;
     margin: 0;
+    overflow-x: clip;
     background-color: var(--background);
     background-image: radial-gradient(1100px 500px at 100% -10%, rgba(32, 74, 125, 0.1), transparent 60%);
     color: var(--foreground);
@@ -212,6 +213,7 @@
 
 .swagger-ui .wrapper {
   padding: 0;
+  max-width: 100%;
 }
 
 .swagger-ui .info {
@@ -220,4 +222,40 @@
 
 .swagger-ui section.models {
   border-color: var(--border);
+}
+
+.swagger-ui .opblock,
+.swagger-ui .model-box {
+  overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+  body {
+    background-image: radial-gradient(700px 340px at 100% -10%, rgba(32, 74, 125, 0.1), transparent 65%);
+  }
+
+  .doc-prose {
+    line-height: 1.66;
+  }
+
+  .doc-prose h2 {
+    font-size: 1.28rem;
+  }
+
+  .doc-prose h3 {
+    font-size: 1.12rem;
+  }
+
+  .swagger-ui {
+    font-size: 13px;
+  }
+
+  .swagger-ui .opblock-summary {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .swagger-ui .opblock-summary-path {
+    word-break: break-all;
+  }
 }

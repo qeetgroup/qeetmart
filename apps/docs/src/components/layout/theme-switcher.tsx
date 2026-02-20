@@ -9,6 +9,7 @@ import {
   resolveDocsTheme,
   type DocsThemeMode,
 } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 const applyThemeMode = (mode: DocsThemeMode) => {
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -21,7 +22,11 @@ const persistThemeMode = (theme: DocsThemeMode) => {
   window.localStorage.setItem(DOCS_THEME_STORAGE_KEY, theme);
 };
 
-export function ThemeSwitcher() {
+type ThemeSwitcherProps = {
+  className?: string;
+};
+
+export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
   const [theme, setTheme] = useState<DocsThemeMode>(DEFAULT_DOCS_THEME);
 
   useEffect(() => {
@@ -71,7 +76,7 @@ export function ThemeSwitcher() {
 
   return (
     <NativeSelect
-      className="min-w-32"
+      className={cn("min-w-32", className)}
       label="Theme"
       onValueChange={(value) => {
         if (!isDocsThemeMode(value)) {

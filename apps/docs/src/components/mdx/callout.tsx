@@ -17,7 +17,7 @@ export function Callout({ title, tone = "info", children }: CalloutProps) {
   return (
     <aside className={cn("my-4 rounded-lg border px-4 py-3", toneClasses[tone])}>
       {title ? <p className="mb-1 text-sm font-semibold text-foreground">{title}</p> : null}
-      <div className="text-sm leading-7 text-muted-foreground">{children}</div>
+      <div className="break-words text-sm leading-7 text-muted-foreground">{children}</div>
     </aside>
   );
 }

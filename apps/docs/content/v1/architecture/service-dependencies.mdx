@@ -16,9 +16,9 @@ flowchart TB
     MOB[Expo Mobile]
     ADM[Admin UI]
   end
-  WEB --> GW
-  MOB --> GW
-  ADM --> GW
+  WEB --> GW;
+  MOB --> GW;
+  ADM --> GW;
 
   subgraph Platform
     GW[API Gateway]
@@ -28,12 +28,12 @@ flowchart TB
     INV[Inventory Service]
   end
 
-  GW --> AUTH
-  GW --> USER
-  GW --> PROD
-  GW --> INV
-  USER -. validates token .-> AUTH
-  PROD -. validates token .-> AUTH
+  GW --> AUTH;
+  GW --> USER;
+  GW --> PROD;
+  GW --> INV;
+  USER -. validates token .-> AUTH;
+  PROD -. validates token .-> AUTH;
 </MermaidDiagram>
 
 ## Coupling constraints

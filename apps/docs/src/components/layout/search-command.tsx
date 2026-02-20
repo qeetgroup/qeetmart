@@ -102,7 +102,7 @@ export function SearchCommand({ version, className }: SearchCommandProps) {
       <Button
         aria-expanded={open}
         aria-haspopup="dialog"
-        className={cn("h-9 w-full justify-between gap-2 min-[640px]:w-auto min-[640px]:min-w-52", className)}
+        className={cn("h-9 w-full justify-between gap-2 sm:w-auto sm:min-w-52", className)}
         onClick={() => {
           setActiveIndex(0);
           setOpen(true);
@@ -116,7 +116,7 @@ export function SearchCommand({ version, className }: SearchCommandProps) {
         {open ? (
           <motion.div
             animate={{ opacity: 1 }}
-            className="fixed inset-0 z-50 grid place-items-center bg-foreground/40 p-4"
+            className="fixed inset-0 z-50 grid place-items-center bg-foreground/40 p-3 sm:p-4"
             exit={{ opacity: 0 }}
             initial={{ opacity: 0 }}
             onClick={() => setOpen(false)}
@@ -129,7 +129,7 @@ export function SearchCommand({ version, className }: SearchCommandProps) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               aria-labelledby="docs-search-title"
               aria-modal="true"
-              className="surface-elevated w-full max-w-2xl rounded-xl p-4"
+              className="surface-elevated w-full max-w-2xl max-h-[min(88dvh,38rem)] overflow-hidden rounded-xl p-3 sm:p-4"
               exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.985, y: reduceMotion ? 0 : 4 }}
               initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.985, y: reduceMotion ? 0 : 6 }}
               onClick={(event) => event.stopPropagation()}
@@ -139,14 +139,14 @@ export function SearchCommand({ version, className }: SearchCommandProps) {
                 ease: MOTION.ease.out,
               })}
             >
-              <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                 <div>
                   <h2 className="text-sm font-semibold text-foreground" id="docs-search-title">
                     Search Documentation
                   </h2>
                   <p className="text-xs text-muted-foreground">Find docs, runbooks, and API references quickly.</p>
                 </div>
-                <Button onClick={() => setOpen(false)} size="sm" variant="ghost">
+                <Button className="self-start sm:self-auto" onClick={() => setOpen(false)} size="sm" variant="ghost">
                   Close
                 </Button>
               </div>
@@ -164,7 +164,7 @@ export function SearchCommand({ version, className }: SearchCommandProps) {
                 value={query}
               />
               <ul
-                className="mt-3 max-h-96 space-y-1 overflow-y-auto pr-1"
+                className="mt-3 max-h-[min(62dvh,24rem)] space-y-1 overflow-y-auto pr-1"
                 id={resultsListId}
                 role="listbox"
               >
@@ -177,7 +177,7 @@ export function SearchCommand({ version, className }: SearchCommandProps) {
                   <motion.li
                     animate={{ opacity: 1, y: 0 }}
                     initial={{ opacity: 0, y: reduceMotion ? 0 : 4 }}
-                    key={result.href}
+                    key={`${result.href}-${result.title}-${index}`}
                     role="option"
                     aria-selected={index === currentActiveIndex}
                     transition={getReducedTransition(reduceMotion, {
