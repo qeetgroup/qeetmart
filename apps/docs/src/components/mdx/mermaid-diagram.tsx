@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { isValidElement, type ReactNode, useEffect, useMemo, useState } from "react";
 
 type MermaidDiagramProps = {
-  chart: string;
+  chart?: unknown;
   title?: string;
+  children?: ReactNode;
 };
 
 let mermaidInitialized = false;
@@ -16,9 +17,49 @@ const getRenderId = () => {
   return `mermaid-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
 };
 
-export function MermaidDiagram({ chart, title }: MermaidDiagramProps) {
+const extractText = (value: unknown): string => {
+  if (value === null || value === undefined || typeof value === "boolean") {
+    return "";
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(extractText).join("");
+  }
+
+  if (isValidElement(value)) {
+    return extractText((value.props as { children?: unknown }).children);
+  }
+
+  if (typeof value === "object") {
+    const objectValue = value as Record<string, unknown>;
+    if ("children" in objectValue) {
+      return extractText(objectValue.children);
+    }
+    if ("value" in objectValue) {
+      return extractText(objectValue.value);
+    }
+  }
+
+  return "";
+};
+
+const normalizeChartSource = (input: MermaidDiagramProps["chart"], children: ReactNode): string => {
+  const fromProp = extractText(input).trim();
+  if (fromProp) {
+    return fromProp;
+  }
+
+  return extractText(children).trim();
+};
+
+export function MermaidDiagram({ chart, title, children }: MermaidDiagramProps) {
   const [svg, setSvg] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const chartSource = useMemo(() => normalizeChartSource(chart, children), [chart, children]);
 
   useEffect(() => {
     let isActive = true;
@@ -29,7 +70,10 @@ export function MermaidDiagram({ chart, title }: MermaidDiagramProps) {
 
       try {
         const renderId = getRenderId();
-        const normalizedChart = chart.trim();
+        const normalizedChart = chartSource.trim();
+        if (!normalizedChart) {
+          throw new Error("Missing Mermaid chart definition. Pass non-empty chart content.");
+        }
 
         const mermaid = (await import("mermaid")).default;
         if (!mermaidInitialized) {
@@ -60,7 +104,7 @@ export function MermaidDiagram({ chart, title }: MermaidDiagramProps) {
     return () => {
       isActive = false;
     };
-  }, [chart]);
+  }, [chartSource]);
 
   return (
     <figure className="my-4 overflow-x-auto rounded-xl border border-border bg-card p-4 shadow-sm">
@@ -70,7 +114,7 @@ export function MermaidDiagram({ chart, title }: MermaidDiagramProps) {
           <p className="font-medium text-foreground">Unable to render Mermaid diagram.</p>
           <p className="mt-1 text-xs">{errorMessage}</p>
           <pre className="mt-2 overflow-x-auto rounded bg-muted p-2 text-xs text-foreground">
-            <code>{chart}</code>
+            <code>{chartSource || "(empty chart source)"}</code>
           </pre>
         </div>
       ) : (

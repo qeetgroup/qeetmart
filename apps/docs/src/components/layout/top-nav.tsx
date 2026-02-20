@@ -30,7 +30,7 @@ export function TopNav({ version }: TopNavProps) {
       initial={{ opacity: 0, y: reduceMotion ? 0 : -6 }}
       transition={transition}
     >
-      <div className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-400 px-4 sm:px-6 lg:px-8">
         <div className="flex min-h-16 flex-col gap-2 py-2 md:flex-row md:flex-wrap md:items-center md:justify-between lg:flex-nowrap lg:gap-4 lg:py-3">
           <div className="flex min-w-0 items-center gap-2.5">
             <Link
@@ -47,7 +47,10 @@ export function TopNav({ version }: TopNavProps) {
             <VersionSwitcher currentVersion={version} />
             <EnvironmentSwitcher currentEnvironment={currentEnvironment} />
             <ThemeSwitcher />
-            <SearchCommand className="w-full min-w-0 sm:col-span-2 lg:min-w-52" version={version} />
+            <SearchCommand
+              className="w-full min-w-0 sm:col-span-2 lg:min-w-52"
+              version={version}
+            />
           </div>
         </div>
       </div>

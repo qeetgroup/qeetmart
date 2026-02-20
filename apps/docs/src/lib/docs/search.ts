@@ -7,6 +7,13 @@ export type SearchEntry = {
   section: string;
 };
 
+const normalizeHref = (href: string): string => {
+  if (href.length > 1 && href.endsWith("/")) {
+    return href.slice(0, -1);
+  }
+  return href;
+};
+
 const scoreEntry = (entry: SearchEntry, query: string): number => {
   const term = query.toLowerCase();
   const title = entry.title.toLowerCase();
@@ -35,10 +42,27 @@ export const rankEntries = (entries: SearchEntry[], query: string, limit = 10): 
     return [];
   }
 
-  return entries
+  const ranked = entries
     .map((entry) => ({ entry, score: scoreEntry(entry, query) }))
     .filter((item) => item.score > 0)
-    .sort((a, b) => b.score - a.score || a.entry.title.localeCompare(b.entry.title))
-    .slice(0, limit)
-    .map((item) => item.entry);
+    .sort((a, b) => b.score - a.score || a.entry.title.localeCompare(b.entry.title));
+
+  const uniqueResults: SearchEntry[] = [];
+  const seenHrefs = new Set<string>();
+
+  for (const item of ranked) {
+    const href = normalizeHref(item.entry.href);
+    if (seenHrefs.has(href)) {
+      continue;
+    }
+
+    seenHrefs.add(href);
+    uniqueResults.push(item.entry);
+
+    if (uniqueResults.length >= limit) {
+      break;
+    }
+  }
+
+  return uniqueResults;
 };
