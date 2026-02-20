@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { getDocsNavigation, type DocVersion } from "@/lib/docs/config";
 import { SidebarNav } from "./sidebar-nav";
 import { TopNav } from "./top-nav";
@@ -13,7 +13,18 @@ export function DocsChrome({ version, children }: DocsChromeProps) {
 
   return (
     <div className="docs-shell">
-      <TopNav version={version} />
+      <Suspense
+        fallback={
+          <header className="top-nav">
+            <div className="top-nav-brand">
+              <span>qeetmart</span>
+              <span>Documentation</span>
+            </div>
+          </header>
+        }
+      >
+        <TopNav version={version} />
+      </Suspense>
       <div className="docs-body">
         <aside className="docs-sidebar">
           <SidebarNav sections={sections} />
