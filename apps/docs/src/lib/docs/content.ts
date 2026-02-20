@@ -45,7 +45,13 @@ const toSlugParts = (absolutePath: string, version: string): string[] => {
   if (withoutExtension === "index") {
     return [];
   }
-  return withoutExtension.split(path.sep);
+
+  const parts = withoutExtension.split(path.sep);
+  if (parts[parts.length - 1] === "index") {
+    return parts.slice(0, -1);
+  }
+
+  return parts;
 };
 
 const toAbsoluteDocPath = (version: string, slug: string[]): string | null => {

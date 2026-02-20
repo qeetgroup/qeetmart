@@ -69,6 +69,13 @@ const stripMdx = (source) => {
     .trim();
 };
 
+const toDocHref = (version, filePath) => {
+  const relative = path.relative(path.join(contentRoot, version), filePath).replace(/\.mdx$/, "");
+  const normalized = relative.split(path.sep).join("/");
+  const slug = normalized === "index" ? "" : normalized.replace(/\/index$/, "");
+  return slug ? `/docs/${version}/${slug}` : `/docs/${version}`;
+};
+
 mkdirSync(outputRoot, { recursive: true });
 
 const versions = readdirSync(contentRoot).filter((entry) => statSync(path.join(contentRoot, entry)).isDirectory());
@@ -80,10 +87,7 @@ for (const version of versions) {
   for (const filePath of docsFiles) {
     const raw = readFileSync(filePath, "utf8");
     const parsed = parseFrontmatter(raw);
-
-    const rel = path.relative(path.join(contentRoot, version), filePath).replace(/\.mdx$/, "");
-    const slug = rel === "index" ? "" : rel;
-    const href = slug ? `/docs/${version}/${slug}` : `/docs/${version}`;
+    const href = toDocHref(version, filePath);
 
     entries.push({
       version,
@@ -132,7 +136,9 @@ for (const version of versions) {
             section: "API Reference",
             title: `${method.toUpperCase()} ${pathName}`,
             description: String(operation.summary ?? `Endpoint in ${service}`),
-            href: `/reference/${version}/${service}`,
+            href: `/reference/${version}/${service}?operation=${encodeURIComponent(
+              String(operation.operationId ?? `${method}-${pathName}`),
+            )}`,
             body: `${operation.operationId ?? ""} ${JSON.stringify(operation.responses ?? {})}`,
           });
         }

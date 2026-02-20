@@ -14,6 +14,20 @@ lastUpdated: 2026-02-20
 | Scaling | Single instance | Horizontal baseline | Autoscaled by demand |
 | Change cadence | Continuous | Daily | Controlled rollout windows |
 
+## Environment guardrails
+
+<Callout title="Local (speed first)" tone="info">
+  Optimize for fast iteration. Synthetic data and relaxed constraints are acceptable.
+</Callout>
+
+<Callout title="Staging (confidence first)" tone="warning">
+  Match production topology as closely as possible. Use production-like data snapshots and full observability.
+</Callout>
+
+<Callout title="Production (reliability first)" tone="critical">
+  Every change must have rollback path, alert coverage, and explicit blast-radius awareness.
+</Callout>
+
 <Callout title="Rule" tone="warning">
   Never assume local defaults are safe for production. Use explicit environment overrides and secret management.
 </Callout>

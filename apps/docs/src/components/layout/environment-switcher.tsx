@@ -20,7 +20,7 @@ export function EnvironmentSwitcher({ currentEnvironment }: EnvironmentSwitcherP
 
   return (
     <label className="select-shell">
-      <span>Environment</span>
+      <span>API Env</span>
       <select onChange={(event) => onChange(event.target.value)} value={currentEnvironment}>
         {DOC_ENVIRONMENTS.map((env) => (
           <option key={env} value={env}>

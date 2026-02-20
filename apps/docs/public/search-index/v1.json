@@ -5,7 +5,7 @@
     "title": "Service Dependencies",
     "description": "Dependency direction and runtime coupling across gateway and microservices.",
     "href": "/docs/v1/architecture/service-dependencies",
-    "body": "Dependency model ApiGateway ExpoMobile -- ApiGateway AdminUi -- ApiGateway ApiGateway -- AuthService ApiGateway -- UserService ApiGateway -- ProductService ApiGateway -- InventoryService UserService -- AuthService ProductService -- AuthService } / Coupling constraints - Service-to-service calls are intentionally minimized. - Token verification is shared via JWT issuer and secret agreement. - Contract evolution is managed through contracts/openapi/ checks. Failure behavior - If a downstream service is unavailable, gateway returns 502 . - Health fanout endpoint exposes per-service status. - Rate limiter protects downstream services during incident spikes."
+    "body": "Dependency model ApiGateway ExpoMobile -- ApiGateway AdminUi -- ApiGateway ApiGateway -- AuthService ApiGateway -- UserService ApiGateway -- ProductService ApiGateway -- InventoryService UserService -- AuthService ProductService -- AuthService } / Arrows indicate runtime dependency direction. Failures usually propagate along arrow direction. Coupling constraints - Service-to-service calls are intentionally minimized. - Token verification is shared via JWT issuer and secret agreement. - Contract evolution is managed through contracts/openapi/ checks. Failure behavior - If a downstream service is unavailable, gateway returns 502 . - Health fanout endpoint exposes per-service status. - Rate limiter protects downstream services during incident spikes. Practical debugging sequence 1. Start at the failing client flow and identify the gateway route. 2. Follow one edge at a time to the next dependency. 3. Verify health and logs for each dependency before jumping services."
   },
   {
     "version": "v1",
@@ -13,7 +13,7 @@
     "title": "System Overview",
     "description": "Topology of qeetmart clients, gateway, services, and stateful dependencies.",
     "href": "/docs/v1/architecture/system-overview",
-    "body": "The system is a polyglot microservices platform centered on a Node.js API gateway. Each service owns its data model and exposes HTTP APIs documented in OpenAPI. ApiGateway4000 AdminUi -- ApiGateway4000 ExpoMobile -- ApiGateway4000 ApiGateway4000 -- AuthService8081 ApiGateway4000 -- UserService8082 ApiGateway4000 -- ProductService8083 ApiGateway4000 -- InventoryService8080 AuthService8081 -- AuthDb UserService8082 -- UserDb ProductService8083 -- ProductDb InventoryService8080 -- InventoryDb InventoryService8080 -- Redis } / Architecture principles - Gateway is the only public API entrypoint. - Services own persistence and business rules. - OpenAPI contracts are versioned and CI-governed. - Local development mirrors production topology with Docker. Key boundaries - Identity and tokens: auth-service - User profile data: user-service - Catalog/product metadata: product-service - Stock and reservations: inventory-service"
+    "body": "The system is a polyglot microservices platform centered on a Node.js API gateway. Each service owns its data model and exposes HTTP APIs documented in OpenAPI. Layer 1: System topology ApiGateway4000 AdminUi -- ApiGateway4000 ExpoMobile -- ApiGateway4000 ApiGateway4000 -- AuthService8081 ApiGateway4000 -- UserService8082 ApiGateway4000 -- ProductService8083 ApiGateway4000 -- InventoryService8080 AuthService8081 -- AuthDb UserService8082 -- UserDb ProductService8083 -- ProductDb InventoryService8080 -- InventoryDb InventoryService8080 -- Redis } / Layer 2: Why this shape - Gateway is the only public API entrypoint. - Services own persistence and business rules. - OpenAPI contracts are versioned and CI-governed. - Local development mirrors production topology with Docker. Key boundaries - Identity and tokens: auth-service - User profile data: user-service - Catalog/product metadata: product-service - Stock and reservations: inventory-service Layer 3: Read this when debugging incidents - If gateway health is green but APIs fail, inspect downstream service health first. - If one service is degraded, treat its database and cache dependencies as the next fault domain. - Use dependency graph + runbooks together: topology tells you where to look, runbooks tell you what to run."
   },
   {
     "version": "v1",
@@ -21,7 +21,7 @@
     "title": "Contribution Guide",
     "description": "How qeetmart engineers propose, review, and publish documentation changes safely.",
     "href": "/docs/v1/contributing/guide",
-    "body": "Contribution standards - Keep docs and code changes in the same PR. - Use concrete commands, not abstract instructions. - Document environment variables and defaults for every new service/config. - Add or update runbooks for operationally meaningful behavior changes. Required PR checklist - [ ] Updated docs pages for behavior changes - [ ] Updated OpenAPI contract if API changed - [ ] Ran docs drift and content validation - [ ] Confirmed links and commands are correct Useful commands Ownership model - platform : docs structure, automation scripts, CI gates - identity : auth/user docs and API references - catalog : product docs and API references - fulfillment : inventory docs and runbooks"
+    "body": "Contribution standards - Keep docs and code changes in the same PR. - Use concrete commands, not abstract instructions. - Document environment variables and defaults for every new service/config. - Add or update runbooks for operationally meaningful behavior changes. First PR in 20 minutes Touch only impacted pages and keep commands copy-paste ready. Assign platform , identity , catalog , or fulfillment as reviewer domain. Required PR checklist - [ ] Updated docs pages for behavior changes - [ ] Updated OpenAPI contract if API changed - [ ] Ran docs drift and content validation - [ ] Confirmed links and commands are correct Useful commands Ownership model - platform : docs structure, automation scripts, CI gates - identity : auth/user docs and API references - catalog : product docs and API references - fulfillment : inventory docs and runbooks PlatformTeam AuthDocs -- IdentityTeam UserDocs -- IdentityTeam ProductDocs -- CatalogTeam InventoryDocs -- FulfillmentTeam } /"
   },
   {
     "version": "v1",
@@ -29,7 +29,7 @@
     "title": "GitHub Actions CI/CD",
     "description": "CI governance for polyglot builds, contract checks, platform validation, and docs quality.",
     "href": "/docs/v1/devops/ci-cd",
-    "body": "Current pipeline responsibilities - Path-aware Node build/test for gateway + web/admin + docs - Spring Boot test matrix for auth/user/product - Go tests for inventory - OpenAPI lint and breaking change detection - Helm and Kustomize validation Docs quality gates - Frontmatter validation - Drift checks (env variables and OpenAPI sync) - Search index generation validity - Next.js production build of apps/docs Policy - PRs that modify services must update corresponding docs when behavior changes. - Breaking API changes require version strategy update ( v2 docs path)."
+    "body": "Current pipeline responsibilities - Path-aware Node build/test for gateway + web/admin + docs - Spring Boot test matrix for auth/user/product - Go tests for inventory - OpenAPI lint and breaking change detection - Helm and Kustomize validation Pipeline flow QualityGates QualityGates -- Contracts Contracts -- DocsBuild DocsBuild -- StagingDeploy StagingDeploy -- ProdApproval ProdApproval -- ProdDeploy } / Docs quality gates - Frontmatter validation - Drift checks (env variables and OpenAPI sync) - Search index generation validity - Next.js production build of apps/docs Policy - PRs that modify services must update corresponding docs when behavior changes. - Breaking API changes require version strategy update ( v2 docs path)."
   },
   {
     "version": "v1",
@@ -37,7 +37,7 @@
     "title": "Deployment",
     "description": "Deployment blueprint for Vercel-hosted docs and Kubernetes-hosted platform services.",
     "href": "/docs/v1/devops/deployment",
-    "body": "Deployment model - Docs app deploys from apps/docs . - Runtime platform deploys from platform/ and helm/ . - Environments: dev , staging , prod . Vercel docs deployment 1. Connect repo and set root directory to apps/docs . 2. Build command: pnpm --filter docs build . 3. Output: Next.js managed output. 4. Add NEXT PUBLIC DOCS DEFAULT VERSION=v1 . Kubernetes platform deployment - Validate Helm chart before release: - Promote image tags via deployment workflow ( .github/workflows/deploy.yml ). - Rollback path: redeploy prior stable image tag. CDN and cache guidance - Static assets: immutable cache ( max-age=31536000, immutable ). - HTML and docs routes: stale-while-revalidate strategy. - Invalidate docs cache on merge to main and release tags."
+    "body": "Deployment model - Docs app deploys from apps/docs . - Runtime platform deploys from platform/ and helm/ . - Environments: dev , staging , prod . Promotion must be sequential: dev - staging - prod . Skip-level promotion is not allowed. Vercel docs deployment 1. Connect repo and set root directory to apps/docs . 2. Build command: pnpm --filter docs build . 3. Output: Next.js managed output. 4. Add NEXT PUBLIC DOCS DEFAULT VERSION=v1 . Kubernetes platform deployment - Validate Helm chart before release: - Promote image tags via deployment workflow ( .github/workflows/deploy.yml ). - Rollback path: redeploy prior stable image tag. Rollout workflow Deploy via .github/workflows/deploy.yml with approved tag. Redeploy previous stable image tag and capture incident notes. CDN and cache guidance - Static assets: immutable cache ( max-age=31536000, immutable ). - HTML and docs routes: stale-while-revalidate strategy. - Invalidate docs cache on merge to main and release tags."
   },
   {
     "version": "v1",
@@ -45,7 +45,7 @@
     "title": "Environment Matrix",
     "description": "Differences in behavior and configuration across local, staging, and production.",
     "href": "/docs/v1/devops/environment-matrix",
-    "body": "| Dimension | Local | Staging | Production | | --- | --- | --- | --- | | Purpose | Development speed | Pre-release validation | Customer traffic | | Data | Synthetic + disposable | Production-like snapshots | Real customer data | | Auth secrets | Local .env | Managed secrets | Managed secrets + rotation | | Observability | Basic logs | Full metrics/traces | Full metrics/traces + SLO alerts | | Scaling | Single instance | Horizontal baseline | Autoscaled by demand | | Change cadence | Continuous | Daily | Controlled rollout windows | Never assume local defaults are safe for production. Use explicit environment overrides and secret management."
+    "body": "| Dimension | Local | Staging | Production | | --- | --- | --- | --- | | Purpose | Development speed | Pre-release validation | Customer traffic | | Data | Synthetic + disposable | Production-like snapshots | Real customer data | | Auth secrets | Local .env | Managed secrets | Managed secrets + rotation | | Observability | Basic logs | Full metrics/traces | Full metrics/traces + SLO alerts | | Scaling | Single instance | Horizontal baseline | Autoscaled by demand | | Change cadence | Continuous | Daily | Controlled rollout windows | Environment guardrails Optimize for fast iteration. Synthetic data and relaxed constraints are acceptable. Match production topology as closely as possible. Use production-like data snapshots and full observability. Every change must have rollback path, alert coverage, and explicit blast-radius awareness. Never assume local defaults are safe for production. Use explicit environment overrides and secret management."
   },
   {
     "version": "v1",
@@ -53,7 +53,7 @@
     "title": "Local Workflow",
     "description": "Daily engineering workflow for feature work, integration validation, and contract safety.",
     "href": "/docs/v1/getting-started/local-workflow",
-    "body": "Standard daily loop 1. Pull latest main and install dependencies. 2. Start local stack ( pnpm docker:up ). 3. Run the service you are editing in dev mode if needed. 4. Validate contracts, unit tests, and affected app builds. 5. Update docs as part of the same PR. Typical command set Service-specific tests Definition of done - Code and docs updated together - OpenAPI changes validated and non-breaking unless version bump is intentional - CI passes for Node/Java/Go + contracts + docs"
+    "body": "Standard daily loop 1. Pull latest main and install dependencies. 2. Start local stack ( pnpm docker:up ). 3. Run the service you are editing in dev mode if needed. 4. Validate contracts, unit tests, and affected app builds. 5. Update docs as part of the same PR. Run only service-local tests first. Run full build before opening PR. Typical command set Service-specific tests Definition of done - Code and docs updated together - OpenAPI changes validated and non-breaking unless version bump is intentional - CI passes for Node/Java/Go + contracts + docs Escalation path If local validation differs from CI, run before requesting review."
   },
   {
     "version": "v1",
@@ -61,7 +61,7 @@
     "title": "Prerequisites",
     "description": "Required local toolchain for working across Node.js, Java, Go, and mobile/frontend clients.",
     "href": "/docs/v1/getting-started/prerequisites",
-    "body": "Baseline toolchain - Node.js 22.x - pnpm 10.x - Java 17 (Temurin) - Go 1.23+ - Docker Desktop (or Docker Engine + Compose v2) Verify before first run Machine profile recommendations - 8 CPU cores - 16 GB RAM minimum - 25 GB free disk (images + caches + DB volumes) Ports used in local development - 4000 : API Gateway - 8081 : Auth Service - 8082 : User Service - 8083 : Product Service - 8080 : Inventory Service - 5432 : PostgreSQL instances - 6379 : Redis (inventory) If local databases are already bound to 5432 , stop them or remap ports in docker-compose.dev.yml ."
+    "body": "Baseline toolchain - Node.js 22.x - pnpm 10.x - Java 17 (Temurin) - Go 1.23+ - Docker Desktop (or Docker Engine + Compose v2) Install Node + pnpm first, then Java + Go, then Docker. Re-open your terminal before version checks. Verify before first run Machine profile recommendations - 8 CPU cores - 16 GB RAM minimum - 25 GB free disk (images + caches + DB volumes) Fast failure checks - If docker compose version fails, Docker CLI plugins are missing. - If pnpm -v fails, run corepack enable then reopen terminal. - If Java or Go versions mismatch, pin versions before running quickstart. Ports used in local development - 4000 : API Gateway - 8081 : Auth Service - 8082 : User Service - 8083 : Product Service - 8080 : Inventory Service - 5432 : PostgreSQL instances - 6379 : Redis (inventory) If local databases are already bound to 5432 , stop them or remap ports in docker-compose.dev.yml ."
   },
   {
     "version": "v1",
@@ -69,7 +69,7 @@
     "title": "15-Minute Quickstart",
     "description": "Single-path onboarding flow for new engineers with health validation at the end.",
     "href": "/docs/v1/getting-started/quickstart",
-    "body": "You are done when pnpm smoke:local returns healthy checks for gateway, auth, user, product, and inventory. First-day checklist - [ ] Gateway reachable at http://localhost:4000 - [ ] Auth service reachable at http://localhost:8081/actuator/health - [ ] User service reachable at http://localhost:8082/actuator/health - [ ] Product service reachable at http://localhost:8083/actuator/health - [ ] Inventory service reachable at http://localhost:8080/health - [ ] OpenAPI contracts lint clean Go to Common Incidents and run the \"Docker service fails healthcheck\" flow."
+    "body": "You are done when pnpm smoke:local returns healthy checks for gateway, auth, user, product, and inventory. Before you run commands - Use a clean branch with no uncommitted infra changes. - Keep Docker Desktop running before step 3. - Stay in repo root ( qeetmart/ ) for all commands. Expected outcome: workspace dependencies resolve without lockfile changes. Expected outcome: each service now has a local .env file. Expected outcome: all containers show healthy in compose status. Expected outcome: contract checks pass and health endpoints return 200 . Expected outcome: web/admin apps boot without gateway CORS or auth handshake errors. First-day checklist - [ ] Gateway reachable at http://localhost:4000 - [ ] Auth service reachable at http://localhost:8081/actuator/health - [ ] User service reachable at http://localhost:8082/actuator/health - [ ] Product service reachable at http://localhost:8083/actuator/health - [ ] Inventory service reachable at http://localhost:8080/health - [ ] OpenAPI contracts lint clean If startup fails Go to Common Incidents and run the \"Docker service fails healthcheck\" flow. Validate AUTH SERVICE URL , USER SERVICE URL , PRODUCT SERVICE URL , and INVENTORY SERVICE URL in micros/api-gateway/.env ."
   },
   {
     "version": "v1",
@@ -77,7 +77,7 @@
     "title": "qeetmart Documentation",
     "description": "Production-grade docs for onboarding, architecture, APIs, local development, and deployment.",
     "href": "/docs/v1",
-    "body": "Start with the 15-minute quickstart . It is optimized for first-day onboarding. What this portal covers - System architecture and service boundaries - Local setup workflows with copy-paste commands - Interactive OpenAPI references - DevOps, CI/CD, deployment, and runbooks - Documentation contribution workflow for 10+ engineers Fast links - - - - -"
+    "body": "Start with the 15-minute quickstart . It is optimized for first-day onboarding. Portal map - Start : prerequisites, quickstart, local stack runbook - Build : architecture, service boundaries, service-level docs - Operate : deployment, CI/CD, environment policy, incidents - Reference : interactive OpenAPI by service and environment Fast links - - - - -"
   },
   {
     "version": "v1",
@@ -130,6 +130,14 @@
   {
     "version": "v1",
     "section": "Services",
+    "title": "Service READMEs",
+    "description": "Synced implementation-level READMEs for each qeetmart microservice.",
+    "href": "/docs/v1/services/readmes",
+    "body": "These pages sync from service repositories via pnpm --filter docs sync:readmes . Service implementation docs - - - - - When to use these pages - Use this section for service-internal details and implementation notes. - Use for environment variables and ownership. - Use for contract-level endpoint usage."
+  },
+  {
+    "version": "v1",
+    "section": "Services",
     "title": "Inventory Service README (Synced)",
     "description": "Synced from micros/inventory-service/README.md.",
     "href": "/docs/v1/services/readmes/inventory-service",
@@ -164,7 +172,7 @@
     "section": "API Reference",
     "title": "GET /actuator/health",
     "description": "Health check",
-    "href": "/reference/v1/auth-service",
+    "href": "/reference/v1/auth-service?operation=authHealth",
     "body": "authHealth {\"200\":{\"description\":\"Healthy\"}}"
   },
   {
@@ -172,7 +180,7 @@
     "section": "API Reference",
     "title": "POST /auth/register",
     "description": "Register a user",
-    "href": "/reference/v1/auth-service",
+    "href": "/reference/v1/auth-service?operation=registerUser",
     "body": "registerUser {\"201\":{\"description\":\"Registered\"},\"400\":{\"description\":\"Invalid request\"}}"
   },
   {
@@ -180,7 +188,7 @@
     "section": "API Reference",
     "title": "POST /auth/login",
     "description": "Login with email/password",
-    "href": "/reference/v1/auth-service",
+    "href": "/reference/v1/auth-service?operation=loginUser",
     "body": "loginUser {\"200\":{\"description\":\"Authenticated\"},\"401\":{\"description\":\"Unauthorized\"}}"
   },
   {
@@ -188,7 +196,7 @@
     "section": "API Reference",
     "title": "POST /auth/refresh-token",
     "description": "Refresh access token",
-    "href": "/reference/v1/auth-service",
+    "href": "/reference/v1/auth-service?operation=refreshToken",
     "body": "refreshToken {\"200\":{\"description\":\"Token refreshed\"},\"401\":{\"description\":\"Unauthorized\"}}"
   },
   {
@@ -196,7 +204,7 @@
     "section": "API Reference",
     "title": "GET /auth/me",
     "description": "Get current authenticated user",
-    "href": "/reference/v1/auth-service",
+    "href": "/reference/v1/auth-service?operation=getCurrentUser",
     "body": "getCurrentUser {\"200\":{\"description\":\"Current user\"},\"401\":{\"description\":\"Unauthorized\"}}"
   },
   {
@@ -212,7 +220,7 @@
     "section": "API Reference",
     "title": "GET /health",
     "description": "Health check",
-    "href": "/reference/v1/inventory-service",
+    "href": "/reference/v1/inventory-service?operation=inventoryHealth",
     "body": "inventoryHealth {\"200\":{\"description\":\"Healthy\"}}"
   },
   {
@@ -220,7 +228,7 @@
     "section": "API Reference",
     "title": "GET /inventory/{productId}",
     "description": "Get inventory",
-    "href": "/reference/v1/inventory-service",
+    "href": "/reference/v1/inventory-service?operation=getInventory",
     "body": "getInventory {\"200\":{\"description\":\"Inventory details\"},\"404\":{\"description\":\"Not found\"}}"
   },
   {
@@ -228,7 +236,7 @@
     "section": "API Reference",
     "title": "POST /inventory/add-stock",
     "description": "Add stock",
-    "href": "/reference/v1/inventory-service",
+    "href": "/reference/v1/inventory-service?operation=addStock",
     "body": "addStock {\"200\":{\"description\":\"Stock updated\"},\"400\":{\"description\":\"Invalid request\"}}"
   },
   {
@@ -236,7 +244,7 @@
     "section": "API Reference",
     "title": "POST /inventory/reserve",
     "description": "Reserve stock",
-    "href": "/reference/v1/inventory-service",
+    "href": "/reference/v1/inventory-service?operation=reserveStock",
     "body": "reserveStock {\"200\":{\"description\":\"Reserved\"},\"409\":{\"description\":\"Insufficient stock\"}}"
   },
   {
@@ -252,7 +260,7 @@
     "section": "API Reference",
     "title": "GET /actuator/health",
     "description": "Health check",
-    "href": "/reference/v1/product-service",
+    "href": "/reference/v1/product-service?operation=productHealth",
     "body": "productHealth {\"200\":{\"description\":\"Healthy\"}}"
   },
   {
@@ -260,7 +268,7 @@
     "section": "API Reference",
     "title": "POST /products",
     "description": "Create product",
-    "href": "/reference/v1/product-service",
+    "href": "/reference/v1/product-service?operation=createProduct",
     "body": "createProduct {\"201\":{\"description\":\"Created\"},\"400\":{\"description\":\"Invalid request\"}}"
   },
   {
@@ -268,7 +276,7 @@
     "section": "API Reference",
     "title": "GET /products",
     "description": "List products",
-    "href": "/reference/v1/product-service",
+    "href": "/reference/v1/product-service?operation=listProducts",
     "body": "listProducts {\"200\":{\"description\":\"Product list\"}}"
   },
   {
@@ -276,7 +284,7 @@
     "section": "API Reference",
     "title": "GET /products/{productId}",
     "description": "Get product",
-    "href": "/reference/v1/product-service",
+    "href": "/reference/v1/product-service?operation=getProduct",
     "body": "getProduct {\"200\":{\"description\":\"Product\"},\"404\":{\"description\":\"Not found\"}}"
   },
   {
@@ -284,7 +292,7 @@
     "section": "API Reference",
     "title": "PUT /products/{productId}",
     "description": "Update product",
-    "href": "/reference/v1/product-service",
+    "href": "/reference/v1/product-service?operation=updateProduct",
     "body": "updateProduct {\"200\":{\"description\":\"Updated\"},\"404\":{\"description\":\"Not found\"}}"
   },
   {
@@ -292,7 +300,7 @@
     "section": "API Reference",
     "title": "DELETE /products/{productId}",
     "description": "Delete product",
-    "href": "/reference/v1/product-service",
+    "href": "/reference/v1/product-service?operation=deleteProduct",
     "body": "deleteProduct {\"200\":{\"description\":\"Deleted\"},\"404\":{\"description\":\"Not found\"}}"
   },
   {
@@ -308,7 +316,7 @@
     "section": "API Reference",
     "title": "GET /actuator/health",
     "description": "Health check",
-    "href": "/reference/v1/user-service",
+    "href": "/reference/v1/user-service?operation=userHealth",
     "body": "userHealth {\"200\":{\"description\":\"Healthy\"}}"
   },
   {
@@ -316,7 +324,7 @@
     "section": "API Reference",
     "title": "POST /users",
     "description": "Create user profile",
-    "href": "/reference/v1/user-service",
+    "href": "/reference/v1/user-service?operation=createUserProfile",
     "body": "createUserProfile {\"201\":{\"description\":\"Created\"},\"400\":{\"description\":\"Invalid request\"}}"
   },
   {
@@ -324,7 +332,7 @@
     "section": "API Reference",
     "title": "GET /users",
     "description": "List users",
-    "href": "/reference/v1/user-service",
+    "href": "/reference/v1/user-service?operation=listUsers",
     "body": "listUsers {\"200\":{\"description\":\"User list\"},\"401\":{\"description\":\"Unauthorized\"}}"
   },
   {
@@ -332,7 +340,7 @@
     "section": "API Reference",
     "title": "GET /users/{userId}",
     "description": "Get user by id",
-    "href": "/reference/v1/user-service",
+    "href": "/reference/v1/user-service?operation=getUserById",
     "body": "getUserById {\"200\":{\"description\":\"User profile\"},\"404\":{\"description\":\"Not found\"}}"
   },
   {
@@ -340,7 +348,7 @@
     "section": "API Reference",
     "title": "PUT /users/{userId}",
     "description": "Update user",
-    "href": "/reference/v1/user-service",
+    "href": "/reference/v1/user-service?operation=updateUserProfile",
     "body": "updateUserProfile {\"200\":{\"description\":\"Updated\"},\"404\":{\"description\":\"Not found\"}}"
   },
   {
@@ -348,7 +356,7 @@
     "section": "API Reference",
     "title": "DELETE /users/{userId}",
     "description": "Delete user",
-    "href": "/reference/v1/user-service",
+    "href": "/reference/v1/user-service?operation=deleteUserProfile",
     "body": "deleteUserProfile {\"200\":{\"description\":\"Deleted\"},\"404\":{\"description\":\"Not found\"}}"
   }
 ]

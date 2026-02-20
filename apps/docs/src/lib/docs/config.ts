@@ -54,7 +54,7 @@ export const getOpenApiServicesForVersion = (version: DocVersion): ServiceMetada
 export const getDocsNavigation = (version: DocVersion): NavSection[] => {
   return [
     {
-      title: "Getting Started",
+      title: "Start",
       items: [
         {
           title: "15-Minute Quickstart",
@@ -66,70 +66,6 @@ export const getDocsNavigation = (version: DocVersion): NavSection[] => {
           href: `/docs/${version}/getting-started/prerequisites`,
         },
         {
-          title: "Local Workflow",
-          href: `/docs/${version}/getting-started/local-workflow`,
-        },
-      ],
-    },
-    {
-      title: "Architecture",
-      items: [
-        {
-          title: "System Overview",
-          href: `/docs/${version}/architecture/system-overview`,
-        },
-        {
-          title: "Service Dependencies",
-          href: `/docs/${version}/architecture/service-dependencies`,
-        },
-      ],
-    },
-    {
-      title: "Services",
-      items: [
-        {
-          title: "Service Catalog",
-          href: `/docs/${version}/services/overview`,
-        },
-        {
-          title: "API Gateway README",
-          href: `/docs/${version}/services/readmes/api-gateway`,
-        },
-        {
-          title: "Auth Service README",
-          href: `/docs/${version}/services/readmes/auth-service`,
-        },
-        {
-          title: "User Service README",
-          href: `/docs/${version}/services/readmes/user-service`,
-        },
-        {
-          title: "Product Service README",
-          href: `/docs/${version}/services/readmes/product-service`,
-        },
-        {
-          title: "Inventory Service README",
-          href: `/docs/${version}/services/readmes/inventory-service`,
-        },
-      ],
-    },
-    {
-      title: "API Reference",
-      items: [
-        {
-          title: "API Home",
-          href: `/reference/${version}`,
-        },
-        ...getOpenApiServicesForVersion(version).map((service) => ({
-          title: service.title,
-          href: `/reference/${version}/${service.id}`,
-        })),
-      ],
-    },
-    {
-      title: "Local Development",
-      items: [
-        {
           title: "Run All Services",
           href: `/docs/${version}/local-development/run-all-services`,
         },
@@ -140,7 +76,32 @@ export const getDocsNavigation = (version: DocVersion): NavSection[] => {
       ],
     },
     {
-      title: "DevOps",
+      title: "Build",
+      items: [
+        {
+          title: "Local Workflow",
+          href: `/docs/${version}/getting-started/local-workflow`,
+        },
+        {
+          title: "System Overview",
+          href: `/docs/${version}/architecture/system-overview`,
+        },
+        {
+          title: "Service Dependencies",
+          href: `/docs/${version}/architecture/service-dependencies`,
+        },
+        {
+          title: "Service Catalog",
+          href: `/docs/${version}/services/overview`,
+        },
+        {
+          title: "Service READMEs",
+          href: `/docs/${version}/services/readmes`,
+        },
+      ],
+    },
+    {
+      title: "Operate",
       items: [
         {
           title: "Deployment",
@@ -154,24 +115,27 @@ export const getDocsNavigation = (version: DocVersion): NavSection[] => {
           title: "Environment Matrix",
           href: `/docs/${version}/devops/environment-matrix`,
         },
-      ],
-    },
-    {
-      title: "Runbooks",
-      items: [
         {
           title: "Common Incidents",
           href: `/docs/${version}/runbooks/common-incidents`,
         },
-      ],
-    },
-    {
-      title: "Contributing",
-      items: [
         {
           title: "Contribution Guide",
           href: `/docs/${version}/contributing/guide`,
         },
+      ],
+    },
+    {
+      title: "Reference",
+      items: [
+        {
+          title: "API Home",
+          href: `/reference/${version}`,
+        },
+        ...getOpenApiServicesForVersion(version).map((service) => ({
+          title: service.title,
+          href: `/reference/${version}/${service.id}`,
+        })),
       ],
     },
   ];

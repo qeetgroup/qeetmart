@@ -12,10 +12,12 @@ export function ServiceCard({ service, version }: ServiceCardProps) {
   return (
     <Link className="service-card" href={href}>
       <span className="service-title">{service.title}</span>
-      <span>{service.runtime}</span>
-      <span>Owner: {service.owner}</span>
-      <span>Port: {service.port}</span>
-      <span>{service.openapi ? "OpenAPI Available" : "OpenAPI Pending"}</span>
+      <span className="service-meta">{service.runtime}</span>
+      <div className="service-chip-row">
+        <span className="service-chip">Owner: {service.owner}</span>
+        <span className="service-chip">Port: {service.port}</span>
+        <span className="service-chip">{service.openapi ? "OpenAPI Ready" : "OpenAPI Pending"}</span>
+      </div>
     </Link>
   );
 }

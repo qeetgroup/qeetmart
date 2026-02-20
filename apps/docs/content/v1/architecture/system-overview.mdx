@@ -7,6 +7,8 @@ lastUpdated: 2026-02-20
 
 The system is a polyglot microservices platform centered on a Node.js API gateway. Each service owns its data model and exposes HTTP APIs documented in OpenAPI.
 
+## Layer 1: System topology
+
 <MermaidDiagram
   title="High-level runtime topology"
   chart={`
@@ -26,7 +28,7 @@ flowchart LR
 `}
 />
 
-## Architecture principles
+## Layer 2: Why this shape
 
 - Gateway is the only public API entrypoint.
 - Services own persistence and business rules.
@@ -39,3 +41,9 @@ flowchart LR
 - User profile data: user-service
 - Catalog/product metadata: product-service
 - Stock and reservations: inventory-service
+
+## Layer 3: Read this when debugging incidents
+
+- If gateway health is green but APIs fail, inspect downstream service health first.
+- If one service is degraded, treat its database and cache dependencies as the next fault domain.
+- Use dependency graph + runbooks together: topology tells you where to look, runbooks tell you what to run.

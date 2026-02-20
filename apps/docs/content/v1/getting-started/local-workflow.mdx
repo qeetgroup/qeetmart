@@ -13,6 +13,10 @@ lastUpdated: 2026-02-20
 4. Validate contracts, unit tests, and affected app builds.
 5. Update docs as part of the same PR.
 
+<Callout title="Progressive scope" tone="info">
+  Run only service-local tests first. Run full build before opening PR.
+</Callout>
+
 ## Typical command set
 
 ```bash
@@ -37,3 +41,7 @@ pnpm test:inventory-service
 - Code and docs updated together
 - OpenAPI changes validated and non-breaking unless version bump is intentional
 - CI passes for Node/Java/Go + contracts + docs
+
+## Escalation path
+
+If local validation differs from CI, run [Common Incidents](/docs/v1/runbooks/common-incidents) before requesting review.

@@ -13,6 +13,10 @@ lastUpdated: 2026-02-20
 - Go `1.23+`
 - Docker Desktop (or Docker Engine + Compose v2)
 
+<Callout title="Recommended install order" tone="info">
+  Install Node + pnpm first, then Java + Go, then Docker. Re-open your terminal before version checks.
+</Callout>
+
 ## Verify before first run
 
 ```bash
@@ -29,6 +33,12 @@ docker compose version
 - 8 CPU cores
 - 16 GB RAM minimum
 - 25 GB free disk (images + caches + DB volumes)
+
+## Fast failure checks
+
+- If `docker compose version` fails, Docker CLI plugins are missing.
+- If `pnpm -v` fails, run `corepack enable` then reopen terminal.
+- If Java or Go versions mismatch, pin versions before running quickstart.
 
 ## Ports used in local development
 

@@ -11,6 +11,10 @@ lastUpdated: 2026-02-20
 - Runtime platform deploys from `platform/` and `helm/`.
 - Environments: `dev`, `staging`, `prod`.
 
+<Callout title="Promotion policy" tone="warning">
+  Promotion must be sequential: `dev` -> `staging` -> `prod`. Skip-level promotion is not allowed.
+</Callout>
+
 ## Vercel docs deployment
 
 1. Connect repo and set root directory to `apps/docs`.
@@ -29,6 +33,43 @@ kustomize build platform/k8s/overlays/staging > /tmp/staging.yaml
 
 - Promote image tags via deployment workflow (`.github/workflows/deploy.yml`).
 - Rollback path: redeploy prior stable image tag.
+
+## Rollout workflow
+
+<Steps>
+  <Step title="1. Preflight checks">
+
+```bash
+helm lint helm/qeetmart
+kustomize build platform/k8s/overlays/dev > /tmp/dev.yaml
+```
+
+  </Step>
+  <Step title="2. Deploy to staging">
+
+```bash
+kustomize build platform/k8s/overlays/staging > /tmp/staging.yaml
+```
+
+  </Step>
+  <Step title="3. Verify health + smoke">
+
+```bash
+curl https://gateway.staging.qeetmart.internal/health
+```
+
+  </Step>
+  <Step title="4. Promote to production">
+
+Deploy via `.github/workflows/deploy.yml` with approved tag.
+
+  </Step>
+  <Step title="5. Rollback if SLO degrades">
+
+Redeploy previous stable image tag and capture incident notes.
+
+  </Step>
+</Steps>
 
 ## CDN and cache guidance
 

@@ -59,6 +59,13 @@ const walk = (directory) => {
   return files;
 };
 
+const toDocHref = (version, versionDir, file) => {
+  const relative = path.relative(versionDir, file).replace(/\.mdx$/, "");
+  const normalized = relative.split(path.sep).join("/");
+  const slug = normalized === "index" ? "" : normalized.replace(/\/index$/, "");
+  return slug ? `/docs/${version}/${slug}` : `/docs/${version}`;
+};
+
 const errors = [];
 
 for (const version of readdirSync(contentRoot)) {
@@ -71,8 +78,7 @@ for (const version of readdirSync(contentRoot)) {
   const files = walk(versionDir);
 
   for (const file of files) {
-    const relative = path.relative(versionDir, file).replace(/\.mdx$/, "");
-    const href = relative === "index" ? `/docs/${version}` : `/docs/${version}/${relative}`;
+    const href = toDocHref(version, versionDir, file);
     validDocPaths.add(href);
   }
 

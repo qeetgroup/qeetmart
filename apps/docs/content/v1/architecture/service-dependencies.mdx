@@ -23,6 +23,10 @@ flowchart TB
 `}
 />
 
+<Callout title="How to read this graph" tone="info">
+  Arrows indicate runtime dependency direction. Failures usually propagate along arrow direction.
+</Callout>
+
 ## Coupling constraints
 
 - Service-to-service calls are intentionally minimized.
@@ -34,3 +38,9 @@ flowchart TB
 - If a downstream service is unavailable, gateway returns `502`.
 - Health fanout endpoint exposes per-service status.
 - Rate limiter protects downstream services during incident spikes.
+
+## Practical debugging sequence
+
+1. Start at the failing client flow and identify the gateway route.
+2. Follow one edge at a time to the next dependency.
+3. Verify health and logs for each dependency before jumping services.

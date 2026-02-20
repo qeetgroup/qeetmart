@@ -9,7 +9,10 @@ type MermaidDiagramProps = {
   children?: ReactNode;
 };
 
-const toChartText = (chart: string | undefined, children: ReactNode): string => {
+const toChartText = (
+  chart: string | undefined,
+  children: ReactNode,
+): string => {
   if (typeof chart === "string") {
     return chart.trim();
   }
@@ -28,9 +31,14 @@ const toChartText = (chart: string | undefined, children: ReactNode): string => 
   return "";
 };
 
-export function MermaidDiagram({ chart, title, children }: MermaidDiagramProps) {
+export function MermaidDiagram({
+  chart,
+  title,
+  children,
+}: MermaidDiagramProps) {
   const [svg, setSvg] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
   const chartText = toChartText(chart, children);
 
   const renderId = useMemo(() => {
@@ -48,7 +56,11 @@ export function MermaidDiagram({ chart, title, children }: MermaidDiagramProps) 
           throw new Error("Mermaid chart content is empty.");
         }
         const mermaid = (await import("mermaid")).default;
-        mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default" });
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: "strict",
+          theme: "default",
+        });
         const result = await mermaid.render(renderId, chartText);
         if (isActive) {
           setSvg(result.svg);
@@ -56,7 +68,8 @@ export function MermaidDiagram({ chart, title, children }: MermaidDiagramProps) 
       } catch (cause) {
         if (isActive) {
           setSvg("");
-          const message = cause instanceof Error ? cause.message : String(cause);
+          const message =
+            cause instanceof Error ? cause.message : String(cause);
           setError(message);
         }
       }
@@ -71,15 +84,30 @@ export function MermaidDiagram({ chart, title, children }: MermaidDiagramProps) 
 
   return (
     <figure className="diagram-shell">
-      {title ? <figcaption>{title}</figcaption> : null}
+      <div className="diagram-head">
+        {title ? <figcaption>{title}</figcaption> : <span>Architecture diagram</span>}
+        <div className="diagram-controls">
+          <button onClick={() => setZoom((value) => Math.max(0.7, Number((value - 0.1).toFixed(2))))} type="button">
+            - Zoom
+          </button>
+          <button onClick={() => setZoom((value) => Math.min(1.8, Number((value + 0.1).toFixed(2))))} type="button">
+            + Zoom
+          </button>
+          <button onClick={() => setZoom(1)} type="button">
+            Reset
+          </button>
+        </div>
+      </div>
       {error ? (
         <div>
           <p>Unable to render Mermaid diagram.</p>
           {process.env.NODE_ENV !== "production" ? <pre>{error}</pre> : null}
         </div>
       ) : (
-        // The SVG comes from mermaid's renderer output.
-        <div dangerouslySetInnerHTML={{ __html: svg }} />
+        <div className="diagram-canvas">
+          {/* The SVG comes from mermaid's renderer output. */}
+          <div className="diagram-content" dangerouslySetInnerHTML={{ __html: svg }} style={{ transform: `scale(${zoom})` }} />
+        </div>
       )}
     </figure>
   );

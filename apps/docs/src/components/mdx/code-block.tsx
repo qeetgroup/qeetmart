@@ -23,29 +23,46 @@ const getCodeContent = (children: ReactNode): { code: string; language: string }
 
 export function CodeBlock({ children }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const { code, language } = useMemo(() => getCodeContent(children), [children]);
+  const lineCount = code ? code.split("\n").length : 0;
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(code);
       setCopied(true);
+      setCopyError(false);
       setTimeout(() => setCopied(false), 1200);
     } catch {
-      setCopied(false);
+      setCopyError(true);
     }
   };
 
   return (
     <div className="code-shell">
       <div className="code-shell-head">
-        <span>{language}</span>
-        <button className="copy-btn" onClick={handleCopy} type="button">
+        <span className="code-shell-meta">
+          <strong>{language}</strong>
+          <span>{lineCount} lines</span>
+        </span>
+        <button
+          aria-live="polite"
+          className="copy-btn"
+          data-copied={copied ? "true" : "false"}
+          onClick={handleCopy}
+          type="button"
+        >
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
       <pre>
         <code>{code}</code>
       </pre>
+      {copyError ? (
+        <p aria-live="polite" style={{ margin: "0", padding: "0.2rem 0.85rem 0.65rem", color: "#fca5a5", fontSize: "0.75rem" }}>
+          Copy failed. Select text manually.
+        </p>
+      ) : null}
     </div>
   );
 }

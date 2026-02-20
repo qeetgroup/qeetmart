@@ -12,6 +12,36 @@ lastUpdated: 2026-02-20
 - Document environment variables and defaults for every new service/config.
 - Add or update runbooks for operationally meaningful behavior changes.
 
+## First PR in 20 minutes
+
+<Steps>
+  <Step title="1. Run docs app locally">
+
+```bash
+pnpm --filter docs dev
+```
+
+  </Step>
+  <Step title="2. Edit docs in the same branch as code change">
+
+Touch only impacted pages and keep commands copy-paste ready.
+
+  </Step>
+  <Step title="3. Run quality checks">
+
+```bash
+pnpm --filter docs check:content
+pnpm --filter docs check:drift
+```
+
+  </Step>
+  <Step title="4. Open PR with ownership tag">
+
+Assign `platform`, `identity`, `catalog`, or `fulfillment` as reviewer domain.
+
+  </Step>
+</Steps>
+
 ## Required PR checklist
 
 - [ ] Updated docs pages for behavior changes
@@ -34,3 +64,15 @@ pnpm --filter docs build
 - `identity`: auth/user docs and API references
 - `catalog`: product docs and API references
 - `fulfillment`: inventory docs and runbooks
+
+<MermaidDiagram
+  title="Docs ownership and review routing"
+  chart={`
+flowchart LR
+  PlatformDocs --> PlatformTeam
+  AuthDocs --> IdentityTeam
+  UserDocs --> IdentityTeam
+  ProductDocs --> CatalogTeam
+  InventoryDocs --> FulfillmentTeam
+`}
+/>

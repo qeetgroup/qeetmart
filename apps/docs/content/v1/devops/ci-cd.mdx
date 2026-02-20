@@ -13,6 +13,21 @@ lastUpdated: 2026-02-20
 - OpenAPI lint and breaking change detection
 - Helm and Kustomize validation
 
+## Pipeline flow
+
+<MermaidDiagram
+  title="PR to deploy promotion path"
+  chart={`
+flowchart LR
+  PR --> QualityGates
+  QualityGates --> Contracts
+  Contracts --> DocsBuild
+  DocsBuild --> StagingDeploy
+  StagingDeploy --> ProdApproval
+  ProdApproval --> ProdDeploy
+`}
+/>
+
 ## Docs quality gates
 
 - Frontmatter validation
