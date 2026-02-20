@@ -20,7 +20,7 @@ export function NativeSelect({ label, options, value, onValueChange, className }
   return (
     <label
       className={cn(
-        "inline-flex min-w-36 items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1.5",
+        "inline-flex h-9 w-full min-w-32 items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1.5 min-[640px]:w-auto",
         className,
       )}
       htmlFor={selectId}

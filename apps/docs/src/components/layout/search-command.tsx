@@ -2,21 +2,26 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MOTION, getReducedTransition, getStaggerDelay } from "@/lib/motion";
 import { rankEntries, type SearchEntry } from "@/lib/docs/search";
+import { cn } from "@/lib/utils";
 
 type SearchCommandProps = {
   version: string;
+  className?: string;
 };
 
-export function SearchCommand({ version }: SearchCommandProps) {
+export function SearchCommand({ version, className }: SearchCommandProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [entries, setEntries] = useState<SearchEntry[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const reduceMotion = useReducedMotion();
+  const resultRefs = useRef<Array<HTMLAnchorElement | null>>([]);
+  const resultsListId = "docs-search-results";
 
   useEffect(() => {
     const load = async () => {
@@ -40,6 +45,7 @@ export function SearchCommand({ version }: SearchCommandProps) {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
+        setActiveIndex(0);
         setOpen((state) => !state);
       }
       if (event.key === "Escape") {
@@ -64,14 +70,43 @@ export function SearchCommand({ version }: SearchCommandProps) {
   }, [open]);
 
   const results = useMemo(() => rankEntries(entries, query, 12), [entries, query]);
+  const currentActiveIndex = results.length === 0 ? -1 : Math.min(activeIndex, results.length - 1);
+
+  const onInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (results.length === 0) {
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveIndex((current) => (current + 1) % results.length);
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveIndex((current) => (current - 1 + results.length) % results.length);
+      return;
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+      if (currentActiveIndex >= 0) {
+        resultRefs.current[currentActiveIndex]?.click();
+      }
+    }
+  };
 
   return (
     <>
       <Button
         aria-expanded={open}
         aria-haspopup="dialog"
-        className="h-9 w-full justify-between gap-2 sm:w-auto sm:min-w-52"
-        onClick={() => setOpen(true)}
+        className={cn("h-9 w-full justify-between gap-2 min-[640px]:w-auto min-[640px]:min-w-52", className)}
+        onClick={() => {
+          setActiveIndex(0);
+          setOpen(true);
+        }}
         variant="outline"
       >
         <span className="truncate text-sm">Search docs</span>
@@ -117,11 +152,22 @@ export function SearchCommand({ version }: SearchCommandProps) {
               </div>
               <Input
                 autoFocus
-                onChange={(event) => setQuery(event.target.value)}
+                aria-controls={resultsListId}
+                aria-expanded={open}
+                aria-label="Search documentation"
+                onKeyDown={onInputKeyDown}
+                onChange={(event) => {
+                  setActiveIndex(0);
+                  setQuery(event.target.value);
+                }}
                 placeholder="Try: deployment, healthcheck, OpenAPI"
                 value={query}
               />
-              <ul className="mt-3 max-h-96 space-y-1 overflow-y-auto pr-1">
+              <ul
+                className="mt-3 max-h-96 space-y-1 overflow-y-auto pr-1"
+                id={resultsListId}
+                role="listbox"
+              >
                 {results.length === 0 ? (
                   <li className="rounded-md border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">
                     No results found.
@@ -132,6 +178,8 @@ export function SearchCommand({ version }: SearchCommandProps) {
                     animate={{ opacity: 1, y: 0 }}
                     initial={{ opacity: 0, y: reduceMotion ? 0 : 4 }}
                     key={result.href}
+                    role="option"
+                    aria-selected={index === currentActiveIndex}
                     transition={getReducedTransition(reduceMotion, {
                       duration: MOTION.duration.micro,
                       ease: MOTION.ease.out,
@@ -139,9 +187,17 @@ export function SearchCommand({ version }: SearchCommandProps) {
                     })}
                   >
                     <Link
-                      className="block rounded-md border border-border px-3 py-2 transition-colors duration-150 hover:bg-muted"
+                      className={cn(
+                        "block rounded-md border border-border px-3 py-2 transition-colors duration-150 hover:bg-muted",
+                        index === currentActiveIndex ? "border-primary/35 bg-muted" : "",
+                      )}
                       href={result.href}
+                      onFocus={() => setActiveIndex(index)}
+                      onMouseEnter={() => setActiveIndex(index)}
                       onClick={() => setOpen(false)}
+                      ref={(node) => {
+                        resultRefs.current[index] = node;
+                      }}
                     >
                       <span className="block text-sm font-medium text-foreground">{result.title}</span>
                       <small className="mt-0.5 block text-xs text-muted-foreground">{result.section}</small>

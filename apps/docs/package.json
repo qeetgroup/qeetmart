@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots",
     "typecheck": "tsc --noEmit",
     "sync:openapi": "node scripts/sync-openapi.mjs",
     "sync:readmes": "node scripts/sync-readmes.mjs",
@@ -35,6 +37,7 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^20",
     "@types/react": "^19",

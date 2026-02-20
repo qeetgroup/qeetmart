@@ -74,7 +74,7 @@
   {
     "version": "v1",
     "section": "Home",
-    "title": "qeetmart Documentation",
+    "title": "Qeetmart Documentation",
     "description": "Production-grade docs for onboarding, architecture, APIs, local development, and deployment.",
     "href": "/docs/v1",
     "body": "Start with the 15-minute quickstart . It is optimized for first-day onboarding. What this portal covers - System architecture and service boundaries - Local setup workflows with copy-paste commands - Interactive OpenAPI references - DevOps, CI/CD, deployment, and runbooks - Documentation contribution workflow for 10+ engineers Fast links - - - - -"
