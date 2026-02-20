@@ -32,12 +32,10 @@ spec:
                   name: qeetmart-shared-config
                   key: GIN_MODE
             - name: DATABASE_URL
-              value: "postgres://postgres:$(DB_PASSWORD)@inventory-postgres:5432/inventory?sslmode=disable"
-            - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: qeetmart-shared-secrets
-                  key: INVENTORY_DB_PASSWORD
+                  key: INVENTORY_DATABASE_URL
             - name: REDIS_ADDR
               value: "inventory-redis:6379"
             - name: REDIS_PASSWORD

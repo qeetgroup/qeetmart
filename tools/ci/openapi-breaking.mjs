@@ -24,7 +24,12 @@ const getBaseRef = () => {
 };
 
 const getChangedOpenApiFiles = (baseRef) => {
-  const output = run(`git diff --name-only ${baseRef}...HEAD -- contracts/openapi`);
+  const range =
+    process.env.GITHUB_ACTIONS === 'true'
+      ? `${baseRef}...HEAD`
+      : 'HEAD';
+
+  const output = run(`git diff --name-only ${range} -- contracts/openapi`);
   if (!output) {
     return [];
   }

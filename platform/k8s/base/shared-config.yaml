@@ -17,4 +17,4 @@ stringData:
   AUTH_DB_PASSWORD: "CHANGE_ME"
   USER_DB_PASSWORD: "CHANGE_ME"
   PRODUCT_DB_PASSWORD: "CHANGE_ME"
-  INVENTORY_DB_PASSWORD: "CHANGE_ME"
+  INVENTORY_DATABASE_URL: "postgres://postgres:CHANGE_ME@inventory-postgres:5432/inventory?sslmode=disable"
