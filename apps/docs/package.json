@@ -1,0 +1,42 @@
+{
+  "name": "docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "sync:openapi": "node scripts/sync-openapi.mjs",
+    "sync:readmes": "node scripts/sync-readmes.mjs",
+    "generate:clients": "node scripts/generate-clients.mjs",
+    "search:index": "node scripts/build-search-index.mjs",
+    "check:content": "node scripts/validate-content.mjs",
+    "check:drift": "node scripts/docs-drift-check.mjs",
+    "predev": "pnpm sync:openapi && pnpm sync:readmes && pnpm search:index",
+    "prebuild": "pnpm sync:openapi && pnpm sync:readmes && pnpm search:index && pnpm check:content"
+  },
+  "dependencies": {
+    "gray-matter": "^4",
+    "mermaid": "^11",
+    "next": "16.1.6",
+    "next-mdx-remote": "^5",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "rehype-autolink-headings": "^7",
+    "rehype-slug": "^6",
+    "remark-gfm": "^4",
+    "swagger-ui-react": "^5"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/swagger-ui-react": "^5",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "typescript": "^5"
+  }
+}

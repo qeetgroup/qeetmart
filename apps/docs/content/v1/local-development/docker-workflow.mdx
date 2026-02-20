@@ -1,0 +1,35 @@
+---
+title: Docker Workflow
+description: Practical Docker commands and service troubleshooting flow for local development.
+section: Local Development
+lastUpdated: 2026-02-20
+---
+
+## Core commands
+
+```bash
+docker compose -f docker-compose.dev.yml up --build
+docker compose -f docker-compose.dev.yml ps
+docker compose -f docker-compose.dev.yml logs -f gateway
+docker compose -f docker-compose.dev.yml down -v
+```
+
+## Service startup order
+
+1. PostgreSQL and Redis dependencies become healthy.
+2. Spring Boot and Go services start.
+3. Gateway starts and waits on service endpoints.
+
+## Rebuild a single service image
+
+```bash
+docker compose -f docker-compose.dev.yml build inventory-service
+docker compose -f docker-compose.dev.yml up -d inventory-service
+```
+
+## Recommended troubleshooting order
+
+1. Check container state (`docker compose ps`).
+2. Check health endpoints directly for failing service.
+3. Check service logs.
+4. Validate env vars against docs env table.

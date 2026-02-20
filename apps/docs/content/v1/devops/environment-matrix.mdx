@@ -1,0 +1,19 @@
+---
+title: Environment Matrix
+description: Differences in behavior and configuration across local, staging, and production.
+section: DevOps
+lastUpdated: 2026-02-20
+---
+
+| Dimension | Local | Staging | Production |
+| --- | --- | --- | --- |
+| Purpose | Development speed | Pre-release validation | Customer traffic |
+| Data | Synthetic + disposable | Production-like snapshots | Real customer data |
+| Auth secrets | Local `.env` | Managed secrets | Managed secrets + rotation |
+| Observability | Basic logs | Full metrics/traces | Full metrics/traces + SLO alerts |
+| Scaling | Single instance | Horizontal baseline | Autoscaled by demand |
+| Change cadence | Continuous | Daily | Controlled rollout windows |
+
+<Callout title="Rule" tone="warning">
+  Never assume local defaults are safe for production. Use explicit environment overrides and secret management.
+</Callout>

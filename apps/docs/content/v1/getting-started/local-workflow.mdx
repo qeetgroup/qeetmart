@@ -1,0 +1,39 @@
+---
+title: Local Workflow
+description: Daily engineering workflow for feature work, integration validation, and contract safety.
+section: Getting Started
+lastUpdated: 2026-02-20
+---
+
+## Standard daily loop
+
+1. Pull latest `main` and install dependencies.
+2. Start local stack (`pnpm docker:up`).
+3. Run the service you are editing in dev mode if needed.
+4. Validate contracts, unit tests, and affected app builds.
+5. Update docs as part of the same PR.
+
+## Typical command set
+
+```bash
+pnpm install --frozen-lockfile
+pnpm docker:up
+pnpm contracts:lint
+pnpm contracts:breaking
+pnpm build
+```
+
+## Service-specific tests
+
+```bash
+pnpm test:auth-service
+pnpm test:user-service
+pnpm test:product-service
+pnpm test:inventory-service
+```
+
+## Definition of done
+
+- Code and docs updated together
+- OpenAPI changes validated and non-breaking unless version bump is intentional
+- CI passes for Node/Java/Go + contracts + docs

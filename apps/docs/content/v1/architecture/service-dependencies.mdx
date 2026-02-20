@@ -1,0 +1,50 @@
+---
+title: Service Dependencies
+description: Dependency direction and runtime coupling across gateway and microservices.
+section: Architecture
+lastUpdated: 2026-02-20
+---
+
+## Dependency model
+
+<MermaidDiagram
+  title="Service dependency graph"
+  chart={`
+flowchart TB
+  subgraph Clients
+    WEB[Next.js Web]
+    MOB[Expo Mobile]
+    ADM[Admin UI]
+  end
+  WEB --> GW
+  MOB --> GW
+  ADM --> GW
+
+  subgraph Platform
+    GW[API Gateway]
+    AUTH[Auth Service]
+    USER[User Service]
+    PROD[Product Service]
+    INV[Inventory Service]
+  end
+
+  GW --> AUTH
+  GW --> USER
+  GW --> PROD
+  GW --> INV
+  USER -. validates token .-> AUTH
+  PROD -. validates token .-> AUTH
+`}
+/>
+
+## Coupling constraints
+
+- Service-to-service calls are intentionally minimized.
+- Token verification is shared via JWT issuer and secret agreement.
+- Contract evolution is managed through `contracts/openapi/*` checks.
+
+## Failure behavior
+
+- If a downstream service is unavailable, gateway returns `502`.
+- Health fanout endpoint exposes per-service status.
+- Rate limiter protects downstream services during incident spikes.

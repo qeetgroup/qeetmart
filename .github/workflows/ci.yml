@@ -14,6 +14,7 @@ jobs:
       go: ${{ steps.filter.outputs.go }}
       contracts: ${{ steps.filter.outputs.contracts }}
       platform: ${{ steps.filter.outputs.platform }}
+      docs: ${{ steps.filter.outputs.docs }}
     steps:
       - uses: actions/checkout@v4
       - id: filter
@@ -41,6 +42,13 @@ jobs:
             platform:
               - 'platform/**'
               - 'helm/**'
+              - '.github/workflows/ci.yml'
+            docs:
+              - 'apps/docs/**'
+              - 'contracts/openapi/**'
+              - 'micros/**/README.md'
+              - 'micros/**/.env.example'
+              - 'docker-compose.dev.yml'
               - '.github/workflows/ci.yml'
 
   node-build:
@@ -111,6 +119,24 @@ jobs:
           node-version: 22
       - run: node tools/ci/openapi-lint.mjs
       - run: node tools/ci/openapi-breaking.mjs
+
+  docs-check:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm docs:drift:check
+      - run: pnpm docs:validate
+      - run: pnpm --filter docs build
 
   platform-validate:
     runs-on: ubuntu-latest

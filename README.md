@@ -9,6 +9,7 @@ Polyglot monorepo for Qeetmart applications and microservices.
 - `packages/` shared contracts and types
 - `contracts/` OpenAPI contracts and governance checks
 - `docs/` architecture and API docs
+- `apps/docs/` Next.js documentation portal
 - `platform/` Kubernetes and deployment platform assets
 - `helm/` Helm chart for runtime deployment
 
@@ -24,6 +25,12 @@ Run gateway + web + admin:
 
 ```bash
 pnpm dev
+```
+
+Run the documentation portal:
+
+```bash
+pnpm dev:docs
 ```
 
 Run full local microservice stack with Docker:
@@ -43,6 +50,13 @@ Validate API contracts:
 ```bash
 pnpm contracts:lint
 pnpm contracts:breaking
+```
+
+Validate documentation quality gates:
+
+```bash
+pnpm docs:drift:check
+pnpm docs:validate
 ```
 
 ## CI
