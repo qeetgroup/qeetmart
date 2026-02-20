@@ -1,14 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Truck, ShieldCheck, RotateCcw, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { getDeliveryEstimate } from "@/lib/api/cart-api";
+import {
+  trackCartAddition,
+  trackProductView,
+} from "@/lib/personalization/profile-engine";
 import { formatCurrency, getDiscountPercentage } from "@/lib/utils";
+import { useExperiment } from "@/hooks/useExperiment";
+import { useTrackEvent } from "@/hooks/useTrackEvent";
 import { useCartStore } from "@/store/cart-store";
+import { StockUrgency } from "@/components/inventory/stock-urgency";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,7 +30,10 @@ interface ProductDetailsClientProps {
 
 export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
   const router = useRouter();
+  const { trackEvent } = useTrackEvent();
+  const pricingExperiment = useExperiment("pricing_presentation");
   const addItem = useCartStore((state) => state.addItem);
+  const trackedViewRef = useRef(false);
   const [quantity, setQuantity] = useState(1);
   const [postalCode, setPostalCode] = useState("560001");
 
@@ -64,6 +74,19 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
     };
   }, [product.stock]);
 
+  useEffect(() => {
+    if (trackedViewRef.current) {
+      return;
+    }
+
+    trackProductView(product);
+    trackEvent("product_view", {
+      productId: product.id,
+      category: product.categorySlug,
+    });
+    trackedViewRef.current = true;
+  }, [product.categorySlug, product.id, trackEvent, product]);
+
   const addToCart = () => {
     addItem({
       productId: product.id,
@@ -71,11 +94,22 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
       variantSelections,
     });
 
+    trackCartAddition(product, quantity);
+    trackEvent("add_to_cart", {
+      productId: product.id,
+      quantity,
+      source: "product_detail",
+    });
     toast.success("Added to cart");
   };
 
   const buyNow = () => {
     addToCart();
+    trackEvent("checkout_step_view", {
+      step: 1,
+      source: "buy_now",
+      productId: product.id,
+    });
     router.push("/checkout");
   };
 
@@ -96,8 +130,18 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
         </p>
         {discount > 0 ? <Badge variant="warning">Save {discount}%</Badge> : null}
       </div>
+      {pricingExperiment.isVariantB ? (
+        <p className="text-sm text-surface-600">
+          Approx monthly ownership:
+          {" "}
+          <span className="font-semibold text-brand-700">
+            {formatCurrency(Math.round(product.price / 12))}
+          </span>
+        </p>
+      ) : null}
 
       <Badge variant={stockStatus.variant}>{stockStatus.label}</Badge>
+      <StockUrgency product={product} />
 
       <p className="text-sm text-surface-700">{product.description}</p>
 

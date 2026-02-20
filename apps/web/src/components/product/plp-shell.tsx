@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { SlidersHorizontal } from "lucide-react";
@@ -14,7 +14,13 @@ import {
   toProductQueryParams,
   type FilterState,
 } from "@/lib/filters";
+import {
+  getProfileUpdateEventName,
+  readPersonalizationProfile,
+  trackCategoryBrowse,
+} from "@/lib/personalization/profile-engine";
 import { queryKeys } from "@/lib/query-keys";
+import { useTrackEvent } from "@/hooks/useTrackEvent";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Drawer } from "@/components/ui/drawer";
@@ -31,10 +37,27 @@ interface PLPShellProps {
 export function PLPShell({ initialCategory }: PLPShellProps) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [personalizationProfile, setPersonalizationProfile] = useState(() =>
+    readPersonalizationProfile(),
+  );
+
+  const { trackEvent } = useTrackEvent();
 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const updateEvent = getProfileUpdateEventName();
+    const onProfileUpdate = () =>
+      setPersonalizationProfile(readPersonalizationProfile());
+
+    window.addEventListener(updateEvent, onProfileUpdate);
+
+    return () => {
+      window.removeEventListener(updateEvent, onProfileUpdate);
+    };
+  }, []);
 
   const parsedFilters = useMemo(() => {
     const parsed = parseFilterState(new URLSearchParams(searchParams.toString()));
@@ -44,6 +67,14 @@ export function PLPShell({ initialCategory }: PLPShellProps) {
     return parsed;
   }, [searchParams, initialCategory]);
 
+  useEffect(() => {
+    if (!parsedFilters.category) {
+      return;
+    }
+
+    trackCategoryBrowse(parsedFilters.category);
+  }, [parsedFilters.category]);
+
   const productFilters = useMemo(
     () =>
       toProductQueryParams({
@@ -51,6 +82,17 @@ export function PLPShell({ initialCategory }: PLPShellProps) {
       }),
     [parsedFilters],
   );
+
+  const effectiveFilters = useMemo(() => {
+    if (parsedFilters.sort !== "personalized") {
+      return productFilters;
+    }
+
+    return {
+      ...productFilters,
+      personalizationProfile,
+    };
+  }, [parsedFilters.sort, personalizationProfile, productFilters]);
 
   const { data: categories = [] } = useQuery({
     queryKey: queryKeys.categories,
@@ -63,8 +105,11 @@ export function PLPShell({ initialCategory }: PLPShellProps) {
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: queryKeys.products(productFilters),
-    queryFn: () => getProducts({ ...productFilters, pageSize: DEFAULT_PAGE_SIZE }),
+    queryKey: queryKeys.products({
+      ...effectiveFilters,
+      pageSize: DEFAULT_PAGE_SIZE,
+    }),
+    queryFn: () => getProducts({ ...effectiveFilters, pageSize: DEFAULT_PAGE_SIZE }),
     placeholderData: (previousData) => previousData,
   });
 
@@ -77,6 +122,11 @@ export function PLPShell({ initialCategory }: PLPShellProps) {
     const query = filterStateToQuery(merged).toString();
     startTransition(() => {
       router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    });
+
+    trackEvent("page_view", {
+      context: "plp_filter_update",
+      query,
     });
   };
 
@@ -95,7 +145,7 @@ export function PLPShell({ initialCategory }: PLPShellProps) {
           {activeCategory ? activeCategory.name : "All Products"}
         </h1>
         <p className="text-sm text-surface-600">
-          Discover curated products with dynamic filters and enterprise-grade catalog UX.
+          Discover curated products with dynamic filters, personalization boosts and enterprise-grade catalog UX.
         </p>
       </div>
 
@@ -117,7 +167,12 @@ export function PLPShell({ initialCategory }: PLPShellProps) {
         <div className="w-[220px]">
           <Select
             value={parsedFilters.sort}
-            onChange={(event) => updateFilters({ sort: event.target.value as FilterState["sort"], page: 1 })}
+            onChange={(event) =>
+              updateFilters({
+                sort: event.target.value as FilterState["sort"],
+                page: 1,
+              })
+            }
             options={SORT_OPTIONS.map((option) => ({
               value: option.value,
               label: option.label,

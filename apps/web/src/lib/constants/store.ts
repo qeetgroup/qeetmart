@@ -5,6 +5,7 @@ export const FREE_SHIPPING_THRESHOLD = 4999;
 export const DEFAULT_PAGE_SIZE = 12;
 
 export const SORT_OPTIONS: Array<{ label: string; value: SortOption }> = [
+  { label: "Recommended", value: "personalized" },
   { label: "Price: Low to High", value: "price-asc" },
   { label: "Price: High to Low", value: "price-desc" },
   { label: "Top Rated", value: "rating" },

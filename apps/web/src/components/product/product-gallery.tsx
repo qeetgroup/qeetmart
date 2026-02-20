@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface ProductGalleryProps {
@@ -12,6 +12,8 @@ interface ProductGalleryProps {
 export default function ProductGallery({ images, title }: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [zoomed, setZoomed] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   const activeImage = images[activeIndex] ?? images[0];
 
@@ -24,6 +26,33 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
         )}
         onMouseEnter={() => setZoomed(true)}
         onMouseLeave={() => setZoomed(false)}
+        onTouchStart={(event) => {
+          touchStartX.current = event.touches[0]?.clientX ?? null;
+        }}
+        onTouchMove={(event) => {
+          touchEndX.current = event.touches[0]?.clientX ?? null;
+        }}
+        onTouchEnd={() => {
+          if (touchStartX.current === null || touchEndX.current === null) {
+            return;
+          }
+
+          const delta = touchStartX.current - touchEndX.current;
+          if (Math.abs(delta) < 40) {
+            return;
+          }
+
+          if (delta > 0) {
+            setActiveIndex((previous) => (previous + 1) % images.length);
+          } else {
+            setActiveIndex(
+              (previous) => (previous - 1 + images.length) % images.length,
+            );
+          }
+
+          touchStartX.current = null;
+          touchEndX.current = null;
+        }}
       >
         <Image
           src={activeImage}

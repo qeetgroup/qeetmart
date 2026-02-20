@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, Space_Grotesk } from "next/font/google";
 import { AppProviders } from "@/components/providers/app-providers";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { BreadcrumbStructuredData } from "@/components/common/breadcrumb-structured-data";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageTransition } from "@/components/common/page-transition";
 import { buildCanonicalUrl } from "@/lib/utils";
@@ -37,6 +38,22 @@ export const metadata: Metadata = {
     siteName: "QeetMart",
     type: "website",
   },
+  manifest: "/manifest.webmanifest",
+  applicationName: "QeetMart",
+  appleWebApp: {
+    capable: true,
+    title: "QeetMart",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#1f5ee7",
 };
 
 export default function RootLayout({
@@ -48,6 +65,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${headingFont.variable} ${bodyFont.variable} min-h-screen bg-surface-100 text-surface-900 antialiased`}>
         <AppProviders>
+          <BreadcrumbStructuredData />
           <SiteHeader />
           <Breadcrumbs />
           <PageTransition>

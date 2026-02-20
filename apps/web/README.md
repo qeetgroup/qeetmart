@@ -1,56 +1,112 @@
 # QeetMart Web Storefront
 
-Production-grade eCommerce storefront foundation built in `apps/web`.
+Enterprise-grade commerce storefront in `apps/web`, built for experimentation, personalization, conversion, and scale.
 
-## Stack
+## Tech Stack
 
-- Next.js 16 (App Router)
+- Next.js 16 App Router
 - TypeScript
 - Tailwind CSS v4
-- shadcn-style UI primitives
+- shadcn-style component primitives
 - React Query (TanStack Query)
-- Zustand (cart/session/wishlist persistence)
+- Zustand (cart/session/wishlist)
 - Mock API + in-memory DB
 
-## Feature Coverage
+## Core Commerce Capabilities
 
-- Home page with hero, category grid, featured carousel, trending, recommendations, and promo banners
-- Product listing (`/products`) with URL-synced filters, sorting, pagination, sticky desktop filters, mobile drawer filters, loading skeletons, and empty state
-- Category route (`/products/category/[category]`)
-- Product detail (`/products/[slug]`) with image gallery, zoom, variants, cart actions, buy now, delivery estimate, rating breakdown, reviews, trust badges, share actions, similar products, and JSON-LD
-- Cart (`/cart`) with quantity updates, coupon validation, free shipping indicator, summary, and localStorage persistence
-- Checkout (`/checkout`) with 5-step flow, validation, delivery/payment selection, order creation, and confirmation
-- Authentication (`/auth/login`, `/auth/signup`) with mock JWT session
-- Protected account dashboard (`/account`) with order history, profile, address management, wishlist, logout
-- Wishlist page (`/wishlist`) persisted per user
-- Global UX: sticky header, mega menu, debounced search + autocomplete, breadcrumbs, theme toggle, route transitions, route loading/error boundaries
+- Amazon-style home, PLP, PDP, cart, checkout, auth, account, wishlist
+- Mock API with product/catalog/auth/order/review layers
+- Responsive UX with sticky header, mega menu, search autocomplete, mini cart
+- Route-level loading/error boundaries
 
-## Mock API Layer
+## Phase Upgrades Implemented
 
-Located in `src/lib/api/`:
+### 1) Personalization Engine
 
-- `mock-db.ts` (in-memory DB)
-- `sample-data.ts` (100+ products, 10+ categories, reviews)
-- `products-api.ts`
-- `categories-api.ts`
-- `cart-api.ts`
-- `orders-api.ts`
-- `auth-api.ts`
-- `reviews-api.ts`
+- Interaction profile tracking (views, category affinity, cart adds)
+- Weighted recommendation scoring and blending
+- Personalized home recommendations
+- Personalized PLP sort (`Recommended`)
 
-## Key Architecture Folders
+### 2) Advanced Search
 
-- `src/app` route structure (App Router)
-- `src/components/layout` header/footer/mega menu/shell
-- `src/components/product` PLP/PDP components
-- `src/components/cart` cart + mini cart drawer
-- `src/components/checkout` multi-step checkout
-- `src/components/account` dashboard + wishlist views
-- `src/components/search` debounced autocomplete UI
-- `src/components/providers` query/theme providers
-- `src/store` Zustand stores
-- `src/lib` APIs, hooks, query client, constants, utilities
-- `src/types` domain types
+- In-memory inverted index
+- Typo-tolerant query matching
+- Category-aware search behavior
+- Weighted ranking by text relevance, popularity, conversion, personal relevance
+- Keyboard navigation support in search dropdown
+
+### 3) A/B Testing Framework
+
+- Experiment engine with feature flags and weighted bucket assignment
+- Persistent variant assignment
+- Exposure tracking events
+- Active experiments:
+  - Homepage hero layout A/B
+  - Pricing presentation A/B
+  - CTA styling A/B
+
+### 4) Conversion Optimization
+
+- Exit intent recovery modal
+- Stock urgency countdown and pressure indicators
+- Recently viewed products section
+- Customers-also-bought recommendation block
+- Cart upsell recommendations
+- Free shipping progress indicator
+
+### 5) Performance & Scalability
+
+- Cached catalog/home/product data access (`unstable_cache`)
+- PDP ISR simulation (`revalidate`)
+- Suspense-based section loading
+- Prefetch-on-hover product card behavior
+- Bundle analyzer integration
+
+### 6) PWA & Mobile
+
+- Service worker registration
+- Offline shell/runtime caching strategy
+- Web app manifest
+- Add-to-home-screen prompt
+- Mobile swipe gestures in PDP gallery
+
+### 7) Analytics
+
+- Internal event tracker with local persistence
+- Tracked events: page views, product clicks, add-to-cart, checkout steps, conversions, experiment exposure
+- Debug analytics panel (open via floating icon or `Shift + A`)
+
+### 8) Inventory Intelligence
+
+- Dynamic stock pressure model
+- Sell-out time estimation
+- Low-stock urgency UI
+- Restock suggestion logic
+
+### 9) SEO
+
+- Product JSON-LD
+- Breadcrumb JSON-LD
+- Dynamic metadata + canonical links
+- `robots.ts`
+- Dynamic sitemap generation (`sitemap.ts`)
+
+### 10) Enterprise Architecture
+
+- Added domain modules under `src/domains/*` for data/logic separation
+- Shared typing upgraded for experiments/search/personalization/analytics
+- Commerce utilities centralized in `src/lib/*`
+
+## Key Folders
+
+- `src/app`: App Router pages and route metadata/sitemap/robots
+- `src/components`: UI, layout, commerce feature components
+- `src/lib`: APIs, engines, query utilities, constants, performance helpers
+- `src/hooks`: experiment, tracking, personalization hooks
+- `src/domains`: domain-oriented data/logic modules
+- `src/store`: Zustand stores
+- `src/types`: shared commerce types
 
 ## Run Locally
 
@@ -63,21 +119,31 @@ pnpm --filter web dev
 
 Open `http://localhost:3000`.
 
-## Validation
+## Validate
 
 ```bash
 pnpm --filter web lint
 pnpm --filter web build
 ```
 
-## Demo Login
+## Bundle Analysis
 
-Use seeded demo account:
+```bash
+ANALYZE=true pnpm --filter web build
+```
+
+## PWA Notes
+
+- Service worker: `public/sw.js`
+- Manifest: `public/manifest.webmanifest`
+- Install prompt appears when browser emits `beforeinstallprompt`
+
+## Demo Credentials
 
 - Email: `demo@qeetmart.com`
 - Password: `demo123`
 
-## Notes
+## Important Runtime Notes
 
-- Data is mock-only and in-memory; restart clears runtime-created orders/users.
-- Client persistence is handled via localStorage-backed Zustand stores.
+- Mock DB is in-memory and resets on server restart.
+- Personalized profile, analytics, experiments, and cart/session data persist in browser local storage.

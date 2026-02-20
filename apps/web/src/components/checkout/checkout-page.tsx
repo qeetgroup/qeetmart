@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { z } from "zod";
@@ -21,6 +21,7 @@ import {
 } from "@/lib/constants/store";
 import { queryKeys } from "@/lib/query-keys";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { useTrackEvent } from "@/hooks/useTrackEvent";
 import { useCartStore } from "@/store/cart-store";
 import { useSessionStore } from "@/store/session-store";
 import { AuthGuard } from "@/components/common/auth-guard";
@@ -47,6 +48,7 @@ export function CheckoutPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [confirmedOrderId, setConfirmedOrderId] = useState<string | null>(null);
   const [confirmedEstimate, setConfirmedEstimate] = useState<string | null>(null);
+  const { trackEvent } = useTrackEvent();
 
   const session = useSessionStore((state) => state.user);
   const upsertAddress = useSessionStore((state) => state.upsertAddress);
@@ -104,6 +106,10 @@ export function CheckoutPage() {
       setStep(5);
       upsertAddress(shippingAddress);
       clearCart();
+      trackEvent("order_completed", {
+        orderId: order.id,
+        total: order.total,
+      });
       toast.success("Order placed successfully");
     },
     onError: (error) => {
@@ -197,6 +203,12 @@ export function CheckoutPage() {
       paymentMethod,
     });
   };
+
+  useEffect(() => {
+    trackEvent("checkout_step_view", {
+      step,
+    });
+  }, [step, trackEvent]);
 
   return (
     <AuthGuard>
@@ -511,6 +523,9 @@ export function CheckoutPage() {
                   <Button
                     onClick={() => {
                       if (canContinue()) {
+                        trackEvent("checkout_step_complete", {
+                          step,
+                        });
                         setStep((current) => Math.min(4, current + 1));
                       }
                     }}

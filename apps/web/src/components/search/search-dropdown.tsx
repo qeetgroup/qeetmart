@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { formatCurrency, highlightText } from "@/lib/utils";
+import { cn, formatCurrency, highlightText } from "@/lib/utils";
 import type { SearchSuggestion } from "@/types";
 
 interface SearchDropdownProps {
@@ -10,8 +10,11 @@ interface SearchDropdownProps {
   suggestions: SearchSuggestion[];
   loading: boolean;
   recentSearches: string[];
+  activeIndex: number;
+  onActiveIndexChange: (index: number) => void;
   onPickRecent: (query: string) => void;
   onSelect: (query: string) => void;
+  onSelectSuggestion: (suggestion: SearchSuggestion) => void;
 }
 
 export function SearchDropdown({
@@ -19,8 +22,11 @@ export function SearchDropdown({
   suggestions,
   loading,
   recentSearches,
+  activeIndex,
+  onActiveIndexChange,
   onPickRecent,
   onSelect,
+  onSelectSuggestion,
 }: SearchDropdownProps) {
   const showSuggestions = query.trim().length > 0;
   const hasSuggestions = suggestions.length > 0;
@@ -32,17 +38,26 @@ export function SearchDropdown({
   return (
     <div className="absolute top-full right-0 left-0 z-50 mt-2 overflow-hidden rounded-xl border border-surface-200 bg-white shadow-2xl">
       {showSuggestions ? (
-        <div className="max-h-[420px] overflow-y-auto">
+        <div className="max-h-[420px] overflow-y-auto" role="listbox" aria-label="Search suggestions">
           {loading ? (
             <p className="p-4 text-sm text-surface-600">Searching products...</p>
           ) : hasSuggestions ? (
             <ul>
-              {suggestions.map((suggestion) => (
+              {suggestions.map((suggestion, index) => (
                 <li key={suggestion.id}>
                   <Link
                     href={`/products/${suggestion.slug}`}
-                    onClick={() => onSelect(suggestion.title)}
-                    className="grid grid-cols-[48px,1fr,auto] items-center gap-3 px-4 py-3 transition hover:bg-surface-100"
+                    onClick={() => {
+                      onSelect(suggestion.title);
+                      onSelectSuggestion(suggestion);
+                    }}
+                    onMouseEnter={() => onActiveIndexChange(index)}
+                    className={cn(
+                      "grid grid-cols-[48px,1fr,auto] items-center gap-3 px-4 py-3 transition",
+                      activeIndex === index ? "bg-brand-50" : "hover:bg-surface-100",
+                    )}
+                    role="option"
+                    aria-selected={activeIndex === index}
                   >
                     <Image
                       src={suggestion.thumbnail}
@@ -53,16 +68,18 @@ export function SearchDropdown({
                     />
                     <div className="space-y-1">
                       <p className="line-clamp-1 text-sm font-medium text-surface-900">
-                        {highlightText(suggestion.title, query).map((part, index) => (
+                        {highlightText(suggestion.title, query).map((part, partIndex) => (
                           <span
-                            key={`${suggestion.id}-${index}`}
+                            key={`${suggestion.id}-${partIndex}`}
                             className={part.match ? "bg-amber-200" : ""}
                           >
                             {part.text}
                           </span>
                         ))}
                       </p>
-                      <p className="text-xs text-surface-600">Product result</p>
+                      <p className="text-xs text-surface-600">
+                        {suggestion.reason} • {suggestion.categorySlug.replace(/-/g, " ")}
+                      </p>
                     </div>
                     <p className="text-sm font-semibold text-brand-700">
                       {formatCurrency(suggestion.price)}

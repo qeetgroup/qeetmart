@@ -1,4 +1,9 @@
-export type SortOption = "price-asc" | "price-desc" | "rating" | "newest";
+export type SortOption =
+  | "price-asc"
+  | "price-desc"
+  | "rating"
+  | "newest"
+  | "personalized";
 
 export interface Category {
   id: string;
@@ -44,6 +49,22 @@ export interface Product {
   isTrending: boolean;
   isNew: boolean;
   createdAt: string;
+}
+
+export interface PersonalizationProfile {
+  viewedProductIds: string[];
+  categoryAffinity: Record<string, number>;
+  brandAffinity: Record<string, number>;
+  cartAddCounts: Record<string, number>;
+  lastInteractedAt: string | null;
+  totalInteractions: number;
+}
+
+export interface ProductScoreBreakdown {
+  finalScore: number;
+  affinityScore: number;
+  trendingScore: number;
+  recencyScore: number;
 }
 
 export interface Review {
@@ -139,6 +160,7 @@ export interface ProductQueryParams {
   sort?: SortOption;
   page?: number;
   pageSize?: number;
+  personalizationProfile?: PersonalizationProfile;
 }
 
 export interface ProductListResponse {
@@ -184,4 +206,35 @@ export interface SearchSuggestion {
   title: string;
   thumbnail: string;
   price: number;
+  categorySlug: string;
+  score: number;
+  matchedTokens: string[];
+  reason: string;
+}
+
+export interface SearchOptions {
+  limit?: number;
+  category?: string;
+  personalizationProfile?: PersonalizationProfile;
+}
+
+export type ExperimentVariant = "A" | "B";
+
+export interface ExperimentDefinition {
+  id: string;
+  variants: Array<{ name: ExperimentVariant; weight: number }>;
+  enabled: boolean;
+}
+
+export interface ExperimentAssignment {
+  experimentId: string;
+  variant: ExperimentVariant;
+  exposedAt: string;
+}
+
+export interface AnalyticsEvent {
+  id: string;
+  event: string;
+  payload: Record<string, unknown>;
+  timestamp: string;
 }

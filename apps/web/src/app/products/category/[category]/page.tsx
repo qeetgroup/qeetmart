@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCategoryBySlug } from "@/lib/api/categories-api";
+import { buildCanonicalUrl } from "@/lib/utils";
 import { PLPShell } from "@/components/product/plp-shell";
 
 interface CategoryPageProps {
@@ -20,6 +21,15 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   return {
     title: `${categoryItem.name} Products`,
     description: categoryItem.description,
+    alternates: {
+      canonical: buildCanonicalUrl(`/products/category/${categoryItem.slug}`),
+    },
+    openGraph: {
+      title: `${categoryItem.name} Products`,
+      description: categoryItem.description,
+      url: buildCanonicalUrl(`/products/category/${categoryItem.slug}`),
+      type: "website",
+    },
   };
 }
 

@@ -1,11 +1,18 @@
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants/store";
 import { mockDb } from "@/lib/api/mock-db";
 import { delay } from "@/lib/utils";
+import {
+  rankProductsWithPersonalization,
+  readPersonalizationProfile,
+} from "@/lib/personalization/profile-engine";
+import { getOrCreateSearchIndex } from "@/lib/search/search-index";
+import { searchWithIndex } from "@/lib/search/search-engine";
 import type {
   HomePagePayload,
   Product,
   ProductListResponse,
   ProductQueryParams,
+  SearchOptions,
   SearchSuggestion,
 } from "@/types";
 
@@ -50,10 +57,10 @@ function applyFilters(products: Product[], params: ProductQueryParams) {
   });
 }
 
-function applySorting(products: Product[], sort = "newest") {
+function applySorting(products: Product[], params: ProductQueryParams) {
   const sorted = [...products];
 
-  switch (sort) {
+  switch (params.sort) {
     case "price-asc": {
       sorted.sort((a, b) => a.price - b.price);
       break;
@@ -65,6 +72,13 @@ function applySorting(products: Product[], sort = "newest") {
     case "rating": {
       sorted.sort((a, b) => b.rating - a.rating);
       break;
+    }
+    case "personalized": {
+      const profile =
+        params.personalizationProfile ?? readPersonalizationProfile();
+      return rankProductsWithPersonalization(sorted, profile, {
+        blendTrendingWeight: 0.32,
+      });
     }
     case "newest":
     default: {
@@ -82,14 +96,14 @@ function applySorting(products: Product[], sort = "newest") {
 export async function getProducts(
   params: ProductQueryParams,
 ): Promise<ProductListResponse> {
-  await delay(320);
+  await delay(280);
 
   const page = params.page && params.page > 0 ? params.page : 1;
   const pageSize =
     params.pageSize && params.pageSize > 0 ? params.pageSize : DEFAULT_PAGE_SIZE;
 
   const filtered = applyFilters(mockDb.products, params);
-  const sorted = applySorting(filtered, params.sort);
+  const sorted = applySorting(filtered, params);
 
   const total = sorted.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -109,6 +123,11 @@ export async function getProducts(
     minAvailablePrice: prices.length ? Math.min(...prices) : 0,
     maxAvailablePrice: prices.length ? Math.max(...prices) : 0,
   };
+}
+
+export async function getAllProducts() {
+  await delay(160);
+  return mockDb.products;
 }
 
 export async function getProductBySlug(slug: string) {
@@ -132,11 +151,41 @@ export async function getSimilarProducts(product: Product, limit = 8) {
     .slice(0, limit);
 }
 
-export async function getHomePageData(userId?: string): Promise<HomePagePayload> {
-  await delay(260);
+export async function getCustomersAlsoBought(product: Product, limit = 6) {
+  await delay(180);
 
-  const featuredProducts = mockDb.products.filter((product) => product.isFeatured).slice(0, 12);
-  const trendingProducts = mockDb.products.filter((product) => product.isTrending).slice(0, 10);
+  const candidates = mockDb.products
+    .filter(
+      (candidate) =>
+        candidate.id !== product.id && candidate.stock > 0,
+    )
+    .map((candidate) => {
+      const categoryBoost =
+        candidate.categorySlug === product.categorySlug ? 0.5 : 0;
+      const popularityBoost = Math.min(candidate.reviewCount / 3000, 1) * 0.35;
+      const ratingBoost = (candidate.rating / 5) * 0.15;
+
+      return {
+        candidate,
+        score: categoryBoost + popularityBoost + ratingBoost,
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((entry) => entry.candidate);
+
+  return candidates;
+}
+
+export async function getHomePageData(userId?: string): Promise<HomePagePayload> {
+  await delay(220);
+
+  const featuredProducts = mockDb.products
+    .filter((product) => product.isFeatured)
+    .slice(0, 12);
+  const trendingProducts = mockDb.products
+    .filter((product) => product.isTrending)
+    .slice(0, 10);
 
   const personalizedSource = userId
     ? mockDb.products.filter((product) => Number(product.id.split("_")[1]) % 2 === 0)
@@ -160,30 +209,36 @@ export async function getHomePageData(userId?: string): Promise<HomePagePayload>
   };
 }
 
-export async function searchProducts(query: string, limit = 8): Promise<SearchSuggestion[]> {
+export async function getPersonalizedRecommendations(
+  limit = 10,
+  excludeProductIds: string[] = [],
+) {
   await delay(180);
 
-  const normalized = query.trim().toLowerCase();
+  const profile = readPersonalizationProfile();
+  return rankProductsWithPersonalization(mockDb.products, profile, {
+    limit,
+    excludeProductIds,
+    blendTrendingWeight: 0.3,
+  });
+}
+
+export async function searchProducts(
+  query: string,
+  options: SearchOptions = {},
+): Promise<SearchSuggestion[]> {
+  await delay(140);
+
+  const normalized = query.trim();
   if (!normalized) {
     return [];
   }
 
-  return mockDb.products
-    .filter((product) => {
-      return (
-        product.title.toLowerCase().includes(normalized) ||
-        product.brand.toLowerCase().includes(normalized) ||
-        product.tags.some((tag) => tag.toLowerCase().includes(normalized))
-      );
-    })
-    .slice(0, limit)
-    .map((product) => ({
-      id: product.id,
-      slug: product.slug,
-      title: product.title,
-      thumbnail: product.images[0],
-      price: product.price,
-    }));
+  const index = getOrCreateSearchIndex(mockDb.products, mockDb.categories);
+  return searchWithIndex(normalized, index, {
+    ...options,
+    limit: options.limit ?? 8,
+  });
 }
 
 export async function getFeaturedProducts(limit = 8) {

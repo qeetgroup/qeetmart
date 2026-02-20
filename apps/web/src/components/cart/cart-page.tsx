@@ -15,7 +15,9 @@ import { getProductsByIds } from "@/lib/api/products-api";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants/store";
 import { queryKeys } from "@/lib/query-keys";
 import { formatCurrency } from "@/lib/utils";
+import { useTrackEvent } from "@/hooks/useTrackEvent";
 import { useCartStore } from "@/store/cart-store";
+import { CartUpsell } from "@/components/cart/cart-upsell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,6 +27,7 @@ import { EmptyState } from "@/components/common/empty-state";
 
 export function CartPage() {
   const [couponInput, setCouponInput] = useState("");
+  const { trackEvent } = useTrackEvent();
 
   const items = useCartStore((state) => state.items);
   const removeItem = useCartStore((state) => state.removeItem);
@@ -162,7 +165,12 @@ export function CartPage() {
                     </p>
                     <button
                       type="button"
-                      onClick={() => removeItem(item.productId)}
+                      onClick={() => {
+                        removeItem(item.productId);
+                        trackEvent("remove_from_cart", {
+                          productId: item.productId,
+                        });
+                      }}
                       className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -244,10 +252,21 @@ export function CartPage() {
             </div>
 
             <Button asChild className="w-full">
-              <Link href="/checkout">Proceed to Checkout</Link>
+              <Link
+                href="/checkout"
+                onClick={() =>
+                  trackEvent("checkout_step_view", {
+                    step: 1,
+                    source: "cart_cta",
+                  })
+                }
+              >
+                Proceed to Checkout
+              </Link>
             </Button>
           </CardContent>
         </Card>
+        <CartUpsell cartProductIds={productIds} />
       </aside>
     </div>
   );

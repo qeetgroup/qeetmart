@@ -6,7 +6,11 @@ export const queryKeys = {
   product: (slug: string) => ["product", slug] as const,
   similarProducts: (slug: string) => ["similar-products", slug] as const,
   home: (userId?: string) => ["home", userId ?? "guest"] as const,
-  search: (query: string) => ["search", query] as const,
+  search: (
+    query: string,
+    category?: string,
+    profileVersion?: number,
+  ) => ["search", query, category ?? "all", profileVersion ?? 0] as const,
   reviews: (productId: string) => ["reviews", productId] as const,
   ratingBreakdown: (productId: string) => ["rating-breakdown", productId] as const,
   cartProducts: (productIds: string[]) => ["cart-products", productIds] as const,
