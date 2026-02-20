@@ -185,32 +185,6 @@
 │  │  ├── qeetmart-auth-user.postman_collection.json
 │  │  └── qeetmart-local.postman_environment.json
 │  └── PROJECT_ANALYSIS.md
-├── inventory-service
-│  ├── .env.example
-│  ├── cmd
-│  │  └── main.go
-│  ├── docker-compose.yml
-│  ├── Dockerfile
-│  ├── go.mod
-│  ├── go.sum
-│  ├── internal
-│  │  ├── config
-│  │  │  └── config.go
-│  │  ├── handlers
-│  │  │  └── inventory_handler.go
-│  │  ├── middleware
-│  │  │  └── logging.go
-│  │  ├── models
-│  │  │  └── inventory.go
-│  │  ├── repository
-│  │  │  └── inventory_repository.go
-│  │  ├── routes
-│  │  │  └── routes.go
-│  │  └── services
-│  │    └── inventory_service.go
-│  ├── migrations
-│  │  └── 001_init.sql
-│  └── README.md
 ├── LICENSE
 ├── micros
 │  ├── .DS_Store
@@ -325,6 +299,31 @@
 │  │            └── auth
 │  │              └── AuthServiceApplicationTests.java
 │  ├── inventory-service
+│  │  ├── .env.example
+│  │  ├── cmd
+│  │  │  └── main.go
+│  │  ├── docker-compose.yml
+│  │  ├── Dockerfile
+│  │  ├── go.mod
+│  │  ├── go.sum
+│  │  ├── internal
+│  │  │  ├── config
+│  │  │  │  └── config.go
+│  │  │  ├── handlers
+│  │  │  │  └── inventory_handler.go
+│  │  │  ├── middleware
+│  │  │  │  └── logging.go
+│  │  │  ├── models
+│  │  │  │  └── inventory.go
+│  │  │  ├── repository
+│  │  │  │  └── inventory_repository.go
+│  │  │  ├── routes
+│  │  │  │  └── routes.go
+│  │  │  └── services
+│  │  │    └── inventory_service.go
+│  │  ├── migrations
+│  │  │  └── 001_init.sql
+│  │  └── README.md
 │  ├── product-service
 │  │  ├── .gitattributes
 │  │  ├── .github
