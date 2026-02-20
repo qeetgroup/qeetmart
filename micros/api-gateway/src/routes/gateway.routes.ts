@@ -1,7 +1,8 @@
-import { Router, type IRouter } from 'express';
+import { Router, type IRouter, type Request, type Response } from 'express';
 import { createProxyMiddleware, Options } from 'http-proxy-middleware';
 import { services, routeConfig } from '../config/services.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
+import { gatewayConfig } from '../config/env.js';
 
 /**
  * Gateway Routes
@@ -12,6 +13,14 @@ export const gatewayRoutes: IRouter = Router();
 // Apply auth middleware to all routes
 gatewayRoutes.use(authMiddleware);
 
+const isExpressResponse = (value: unknown): value is Response => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  return 'status' in value && typeof (value as Response).status === 'function';
+};
+
 // Create proxy middleware for each route
 routeConfig.forEach(({ path, service, stripPrefix = false }) => {
   const serviceConfig = services[service];
@@ -21,46 +30,63 @@ routeConfig.forEach(({ path, service, stripPrefix = false }) => {
     return;
   }
 
-  const proxyOptions: Options = {
+  const proxyOptions: Options<Request, Response> = {
     target: serviceConfig.baseUrl,
     changeOrigin: true,
-    pathRewrite: stripPrefix
+    xfwd: true,
+    ...(stripPrefix
       ? {
-          [`^${path}`]: '', // Remove the path prefix
+          pathRewrite: {
+            [`^${path}`]: '', // Remove the path prefix
+          },
         }
-      : undefined,
-    timeout: serviceConfig.timeout || 5000,
+      : {}),
+    timeout: serviceConfig.timeout || gatewayConfig.proxyTimeoutMs,
+    proxyTimeout: serviceConfig.timeout || gatewayConfig.proxyTimeoutMs,
     on: {
       error: (err, req, res) => {
         console.error(`Proxy error for ${path}:`, err.message);
-        if (!res.headersSent) {
-          res.status(502).json({
+
+        if (isExpressResponse(res) && !res.headersSent) {
+          const correlationId =
+            req.correlationId ??
+            (typeof req.headers['x-correlation-id'] === 'string'
+              ? req.headers['x-correlation-id']
+              : undefined);
+
+          const payload = JSON.stringify({
             success: false,
             error: {
               message: `Service ${serviceConfig.name} is unavailable`,
               code: 'SERVICE_UNAVAILABLE',
+              correlationId,
             },
           });
+
+          res.status(502).type('application/json').send(payload);
         }
       },
       proxyReq: (proxyReq, req) => {
         // Forward correlation ID
-        if (req.headers['x-correlation-id']) {
-          proxyReq.setHeader('x-correlation-id', req.headers['x-correlation-id'] as string);
+        const correlationId =
+          req.correlationId ??
+          (typeof req.headers['x-correlation-id'] === 'string'
+            ? req.headers['x-correlation-id']
+            : undefined);
+
+        if (correlationId) {
+          proxyReq.setHeader('x-correlation-id', correlationId);
+          proxyReq.setHeader('x-request-id', correlationId);
         }
-        
-        // Forward original IP
-        const forwardedFor = req.headers['x-forwarded-for'] || req.ip;
-        proxyReq.setHeader('x-forwarded-for', forwardedFor as string);
-        
+
         // Forward authorization token if present
-        if ((req as any).token) {
-          proxyReq.setHeader('authorization', `Bearer ${(req as any).token}`);
+        if (req.token) {
+          proxyReq.setHeader('authorization', `Bearer ${req.token}`);
         }
       },
     },
   };
 
   console.log(`Setting up proxy: ${path} -> ${serviceConfig.baseUrl}`);
-  gatewayRoutes.use(path, createProxyMiddleware(proxyOptions));
+  gatewayRoutes.use(path, createProxyMiddleware<Request, Response>(proxyOptions));
 });

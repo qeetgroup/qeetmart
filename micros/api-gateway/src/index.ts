@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import type { CorsOptions } from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { gatewayRoutes } from './routes/gateway.routes.js';
@@ -8,31 +9,45 @@ import { loggingMiddleware } from './middleware/logging.middleware.js';
 import { errorHandler } from './middleware/error-handler.middleware.js';
 import { checkServiceHealth } from './utils/health-check.js';
 import { services } from './config/services.js';
+import { gatewayConfig } from './config/env.js';
 
 const app = express();
 
-// Trust proxy (for accurate IP addresses behind reverse proxy)
-app.set('trust proxy', true);
+app.disable('x-powered-by');
+
+// Enable only when deployed behind a trusted reverse proxy
+app.set('trust proxy', gatewayConfig.trustProxy);
 
 // Security middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env['CORS_ORIGIN'] || '*',
-  credentials: true,
-}));
+
+const corsOptions: CorsOptions = {
+  credentials: gatewayConfig.cors.credentials,
+  origin: gatewayConfig.cors.allowAllOrigins
+    ? true
+    : (origin, callback) => {
+        if (!origin || gatewayConfig.cors.origins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+        callback(new Error('CORS origin not allowed'));
+      },
+};
+
+app.use(cors(corsOptions));
 
 // Body parsing middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: gatewayConfig.jsonBodyLimit }));
+app.use(express.urlencoded({ extended: gatewayConfig.urlencodedExtended }));
 
 // Request logging
 app.use(loggingMiddleware);
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 1000, // Higher limit for gateway (distributes to services)
-  message: 'Too many requests from this IP, please try again later.',
+  windowMs: gatewayConfig.rateLimit.windowMs,
+  max: gatewayConfig.rateLimit.max,
+  message: gatewayConfig.rateLimit.message,
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -97,12 +112,34 @@ app.use((_req, res) => {
 app.use(errorHandler);
 
 // Start server
-const port = Number(process.env['PORT']) || 4000;
-const host = process.env['HOST'] || '0.0.0.0';
+const port = gatewayConfig.port;
+const host = gatewayConfig.host;
 
-app.listen(port, host, () => {
+const server = app.listen(port, host, () => {
   console.log(`🚀 API Gateway running on http://${host}:${port}`);
   console.log(`📋 Registered services:`, Object.values(services).map(s => s.name).join(', '));
   console.log(`🔍 Health check: http://${host}:${port}/health`);
   console.log(`📊 Service health: http://${host}:${port}/health/services`);
+});
+
+const shutdownGracePeriodMs = 10_000;
+const shutdownSignals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM'];
+
+shutdownSignals.forEach(signal => {
+  process.on(signal, () => {
+    console.log(`${signal} received, shutting down API Gateway...`);
+
+    server.close(error => {
+      if (error) {
+        console.error('Error while shutting down API Gateway', error);
+        process.exit(1);
+      }
+      process.exit(0);
+    });
+
+    setTimeout(() => {
+      console.error('Forced shutdown after timeout');
+      process.exit(1);
+    }, shutdownGracePeriodMs).unref();
+  });
 });
