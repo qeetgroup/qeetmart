@@ -1,4 +1,10 @@
 ├── .DS_Store
+├── .github
+│  └── java-upgrade
+│    ├── .gitignore
+│    └── 20260219144011
+│      └── logs
+│        └── 0.log
 ├── .gitignore
 ├── .idea
 │  ├── .gitignore
@@ -12,6 +18,9 @@
 │  ├── qeetmart.iml
 │  ├── vcs.xml
 │  └── workspace.xml
+├── .vscode
+│  ├── extensions.json
+│  └── settings.json
 ├── apps
 │  ├── admin
 │  │  ├── .gitignore
@@ -167,19 +176,54 @@
 ├── docs
 │  ├── API_CONTRACTS.md
 │  ├── ARCHITECTURE_GUIDE.md
+│  ├── curl
+│  │  ├── auth-service.md
+│  │  └── user-service.md
 │  ├── IMPLEMENTATION_STEPS.md
 │  ├── LANGUAGE_COMPARISON.md
+│  ├── postman
+│  │  ├── qeetmart-auth-user.postman_collection.json
+│  │  └── qeetmart-local.postman_environment.json
 │  └── PROJECT_ANALYSIS.md
+├── inventory-service
+│  ├── .env.example
+│  ├── cmd
+│  │  └── main.go
+│  ├── docker-compose.yml
+│  ├── Dockerfile
+│  ├── go.mod
+│  ├── go.sum
+│  ├── internal
+│  │  ├── config
+│  │  │  └── config.go
+│  │  ├── handlers
+│  │  │  └── inventory_handler.go
+│  │  ├── middleware
+│  │  │  └── logging.go
+│  │  ├── models
+│  │  │  └── inventory.go
+│  │  ├── repository
+│  │  │  └── inventory_repository.go
+│  │  ├── routes
+│  │  │  └── routes.go
+│  │  └── services
+│  │    └── inventory_service.go
+│  ├── migrations
+│  │  └── 001_init.sql
+│  └── README.md
 ├── LICENSE
 ├── micros
 │  ├── .DS_Store
 │  ├── .gitkeep
 │  ├── api-gateway
+│  │  ├── .env
+│  │  ├── .env.example
 │  │  ├── .gitignore
 │  │  ├── package.json
 │  │  ├── README.md
 │  │  ├── src
 │  │  │  ├── config
+│  │  │  │  ├── env.ts
 │  │  │  │  └── services.ts
 │  │  │  ├── index.ts
 │  │  │  ├── middleware
@@ -188,11 +232,24 @@
 │  │  │  │  └── logging.middleware.ts
 │  │  │  ├── routes
 │  │  │  │  └── gateway.routes.ts
+│  │  │  ├── types
+│  │  │  │  └── express.d.ts
 │  │  │  └── utils
 │  │  │    └── health-check.ts
 │  │  └── tsconfig.json
 │  ├── auth-service
 │  │  ├── .gitattributes
+│  │  ├── .github
+│  │  │  └── java-upgrade
+│  │  │    ├── .gitignore
+│  │  │    ├── 20260219144016
+│  │  │    │  ├── logs
+│  │  │    │  │  ├── 0.log
+│  │  │    │  │  └── 1.generatePlan.log
+│  │  │    │  └── progress.md
+│  │  │    └── 20260219144118
+│  │  │      └── logs
+│  │  │        └── 0.log
 │  │  ├── .gitignore
 │  │  ├── .idea
 │  │  │  ├── .gitignore
@@ -206,6 +263,7 @@
 │  │  │  └── wrapper
 │  │  │    └── maven-wrapper.properties
 │  │  ├── compose.yaml
+│  │  ├── Dockerfile
 │  │  ├── HELP.md
 │  │  ├── mvnw
 │  │  ├── mvnw.cmd
@@ -216,9 +274,46 @@
 │  │    │  │  └── com
 │  │    │  │    └── qeetmart
 │  │    │  │      └── auth
-│  │    │  │        └── AuthServiceApplication.java
+│  │    │  │        ├── AuthServiceApplication.java
+│  │    │  │        ├── config
+│  │    │  │        │  ├── JwtProperties.java
+│  │    │  │        │  └── SecurityConfig.java
+│  │    │  │        ├── controller
+│  │    │  │        │  └── AuthController.java
+│  │    │  │        ├── dto
+│  │    │  │        │  ├── request
+│  │    │  │        │  │  ├── ChangePasswordRequest.java
+│  │    │  │        │  │  ├── LoginRequest.java
+│  │    │  │        │  │  ├── LogoutRequest.java
+│  │    │  │        │  │  ├── RefreshTokenRequest.java
+│  │    │  │        │  │  └── RegisterRequest.java
+│  │    │  │        │  └── response
+│  │    │  │        │    ├── ApiResponse.java
+│  │    │  │        │    ├── AuthResponse.java
+│  │    │  │        │    ├── ErrorResponse.java
+│  │    │  │        │    └── UserMeResponse.java
+│  │    │  │        ├── entity
+│  │    │  │        │  ├── RefreshToken.java
+│  │    │  │        │  ├── Role.java
+│  │    │  │        │  └── UserCredential.java
+│  │    │  │        ├── exception
+│  │    │  │        │  ├── BadRequestException.java
+│  │    │  │        │  ├── GlobalExceptionHandler.java
+│  │    │  │        │  ├── ResourceNotFoundException.java
+│  │    │  │        │  └── UnauthorizedException.java
+│  │    │  │        ├── repository
+│  │    │  │        │  ├── RefreshTokenRepository.java
+│  │    │  │        │  └── UserCredentialRepository.java
+│  │    │  │        ├── security
+│  │    │  │        │  ├── AuthUserDetailsService.java
+│  │    │  │        │  ├── CustomUserDetails.java
+│  │    │  │        │  ├── JwtAuthenticationFilter.java
+│  │    │  │        │  └── JwtService.java
+│  │    │  │        └── service
+│  │    │  │          ├── AuthService.java
+│  │    │  │          └── RefreshTokenService.java
 │  │    │  └── resources
-│  │    │    ├── application.properties
+│  │    │    ├── application.yml
 │  │    │    ├── db
 │  │    │    │  └── migration
 │  │    │    ├── static
@@ -229,18 +324,114 @@
 │  │          └── qeetmart
 │  │            └── auth
 │  │              └── AuthServiceApplicationTests.java
+│  ├── inventory-service
 │  ├── product-service
+│  │  ├── .gitattributes
+│  │  ├── .github
+│  │  │  └── java-upgrade
+│  │  │    ├── .gitignore
+│  │  │    └── 20260219144131
+│  │  │      └── logs
+│  │  │        └── 0.log
+│  │  ├── .gitignore
+│  │  ├── .mvn
+│  │  │  └── wrapper
+│  │  │    └── maven-wrapper.properties
+│  │  ├── compose.yaml
+│  │  ├── Dockerfile
+│  │  ├── HELP.md
+│  │  ├── mvnw
+│  │  ├── mvnw.cmd
+│  │  ├── pom.xml
+│  │  └── src
+│  │    ├── main
+│  │    │  ├── java
+│  │    │  │  └── com
+│  │    │  │    └── qeetmart
+│  │    │  │      └── product
+│  │    │  │        ├── config
+│  │    │  │        │  ├── JwtSecurityProperties.java
+│  │    │  │        │  ├── OpenApiConfig.java
+│  │    │  │        │  └── SecurityConfig.java
+│  │    │  │        ├── controller
+│  │    │  │        │  ├── CategoryController.java
+│  │    │  │        │  ├── ProductController.java
+│  │    │  │        │  └── ProductVariantController.java
+│  │    │  │        ├── dto
+│  │    │  │        │  ├── request
+│  │    │  │        │  │  ├── CategoryCreateRequest.java
+│  │    │  │        │  │  ├── CategoryUpdateRequest.java
+│  │    │  │        │  │  ├── ProductCreateRequest.java
+│  │    │  │        │  │  ├── ProductUpdateRequest.java
+│  │    │  │        │  │  ├── ProductVariantCreateRequest.java
+│  │    │  │        │  │  └── ProductVariantUpdateRequest.java
+│  │    │  │        │  └── response
+│  │    │  │        │    ├── ApiResponse.java
+│  │    │  │        │    ├── CategoryResponse.java
+│  │    │  │        │    ├── ErrorResponse.java
+│  │    │  │        │    ├── PagedResponse.java
+│  │    │  │        │    ├── ProductResponse.java
+│  │    │  │        │    └── ProductVariantResponse.java
+│  │    │  │        ├── entity
+│  │    │  │        │  ├── BaseAuditEntity.java
+│  │    │  │        │  ├── Category.java
+│  │    │  │        │  ├── Product.java
+│  │    │  │        │  ├── ProductStatus.java
+│  │    │  │        │  └── ProductVariant.java
+│  │    │  │        ├── exception
+│  │    │  │        │  ├── BadRequestException.java
+│  │    │  │        │  ├── ConflictException.java
+│  │    │  │        │  ├── GlobalExceptionHandler.java
+│  │    │  │        │  ├── ResourceNotFoundException.java
+│  │    │  │        │  └── UnauthorizedException.java
+│  │    │  │        ├── ProductServiceApplication.java
+│  │    │  │        ├── repository
+│  │    │  │        │  ├── CategoryRepository.java
+│  │    │  │        │  ├── ProductRepository.java
+│  │    │  │        │  └── ProductVariantRepository.java
+│  │    │  │        ├── security
+│  │    │  │        │  └── JwtClaimService.java
+│  │    │  │        ├── service
+│  │    │  │        │  ├── CategoryService.java
+│  │    │  │        │  ├── impl
+│  │    │  │        │  │  ├── CategoryServiceImpl.java
+│  │    │  │        │  │  ├── ProductServiceImpl.java
+│  │    │  │        │  │  └── ProductVariantServiceImpl.java
+│  │    │  │        │  ├── ProductService.java
+│  │    │  │        │  └── ProductVariantService.java
+│  │    │  │        └── specification
+│  │    │  │          └── ProductSpecification.java
+│  │    │  └── resources
+│  │    │    ├── application.yml
+│  │    │    ├── db
+│  │    │    │  └── migration
+│  │    │    ├── static
+│  │    │    └── templates
+│  │    └── test
+│  │      └── java
+│  │        └── com
+│  │          └── qeetmart
+│  │            └── product
+│  │              └── ProductServiceApplicationTests.java
 │  └── user-service
 │    ├── .gitattributes
+│    ├── .github
+│    │  └── java-upgrade
+│    │    ├── .gitignore
+│    │    └── 20260219144138
+│    │      └── logs
+│    │        └── 0.log
 │    ├── .gitignore
 │    ├── .idea
 │    │  ├── .gitignore
 │    │  ├── misc.xml
+│    │  ├── vcs.xml
 │    │  └── workspace.xml
 │    ├── .mvn
 │    │  └── wrapper
 │    │    └── maven-wrapper.properties
 │    ├── compose.yaml
+│    ├── Dockerfile
 │    ├── HELP.md
 │    ├── mvnw
 │    ├── mvnw.cmd
@@ -251,9 +442,50 @@
 │      │  │  └── com
 │      │  │    └── qeetmart
 │      │  │      └── user
+│      │  │        ├── config
+│      │  │        │  ├── JwtSecurityProperties.java
+│      │  │        │  └── SecurityConfig.java
+│      │  │        ├── controller
+│      │  │        │  ├── AddressController.java
+│      │  │        │  └── UserController.java
+│      │  │        ├── dto
+│      │  │        │  ├── request
+│      │  │        │  │  ├── AddressCreateRequest.java
+│      │  │        │  │  ├── AddressUpdateRequest.java
+│      │  │        │  │  ├── UserProfileCreateRequest.java
+│      │  │        │  │  └── UserProfileUpdateRequest.java
+│      │  │        │  └── response
+│      │  │        │    ├── AddressResponse.java
+│      │  │        │    ├── ApiResponse.java
+│      │  │        │    ├── ErrorResponse.java
+│      │  │        │    ├── PagedResponse.java
+│      │  │        │    └── UserProfileResponse.java
+│      │  │        ├── entity
+│      │  │        │  ├── Address.java
+│      │  │        │  └── UserProfile.java
+│      │  │        ├── exception
+│      │  │        │  ├── BadRequestException.java
+│      │  │        │  ├── ConflictException.java
+│      │  │        │  ├── GlobalExceptionHandler.java
+│      │  │        │  ├── ResourceNotFoundException.java
+│      │  │        │  └── UnauthorizedException.java
+│      │  │        ├── mapper
+│      │  │        │  └── UserMapper.java
+│      │  │        ├── repository
+│      │  │        │  ├── AddressRepository.java
+│      │  │        │  └── UserProfileRepository.java
+│      │  │        ├── security
+│      │  │        │  ├── AuthorizationService.java
+│      │  │        │  └── JwtClaimService.java
+│      │  │        ├── service
+│      │  │        │  ├── AddressService.java
+│      │  │        │  ├── impl
+│      │  │        │  │  ├── AddressServiceImpl.java
+│      │  │        │  │  └── UserProfileServiceImpl.java
+│      │  │        │  └── UserProfileService.java
 │      │  │        └── UserServiceApplication.java
 │      │  └── resources
-│      │    ├── application.properties
+│      │    ├── application.yml
 │      │    ├── db
 │      │    │  └── migration
 │      │    ├── static

@@ -1,4 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
+import { gatewayConfig } from '../config/env.js';
+
+const publicPathPrefixes = ['/health', '/info', '/api/v1/auth/login', '/api/v1/auth/register'];
 
 /**
  * Authentication Middleware
@@ -17,19 +20,31 @@ export const authMiddleware = (
   
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7);
-    // Store token in request for downstream services
-    (req as any).token = token;
+    if (token) {
+      // Store token in request for downstream services
+      req.token = token;
+    }
   }
 
-  // For public endpoints, allow through
-  // For protected endpoints, you can add validation here
-  const publicPaths = ['/health', '/info', '/api/v1/auth/login', '/api/v1/auth/register'];
-  
-  if (publicPaths.some(path => req.path.startsWith(path))) {
+  // Public endpoints bypass auth checks.
+  if (publicPathPrefixes.some(path => req.path.startsWith(path))) {
     return next();
   }
 
-  // TODO: Add token validation for protected routes
-  // For now, we'll forward all requests and let services handle auth
+  // Auth is optional by default to preserve pass-through behavior.
+  if (!gatewayConfig.requireAuth) {
+    return next();
+  }
+
+  if (!req.token) {
+    return res.status(401).json({
+      success: false,
+      error: {
+        message: 'Authentication required',
+        code: 'UNAUTHORIZED',
+      },
+    });
+  }
+
   next();
 };

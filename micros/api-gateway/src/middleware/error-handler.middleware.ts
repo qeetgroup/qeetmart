@@ -24,7 +24,7 @@ export const errorHandler = (
     statusCode,
     path: req.path,
     method: req.method,
-    correlationId: req.headers['x-correlation-id'],
+    correlationId: req.correlationId ?? req.headers['x-correlation-id'],
   });
 
   // If response already sent, delegate to default handler

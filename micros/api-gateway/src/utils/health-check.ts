@@ -11,15 +11,16 @@ interface ServiceHealth {
  * Check health of all registered services
  */
 export async function checkServiceHealth(): Promise<ServiceHealth[]> {
-  const healthChecks = Object.entries(services).map(async ([key, config]) => {
+  const healthChecks = Object.entries(services).map(async ([_key, config]): Promise<ServiceHealth> => {
     const startTime = Date.now();
+    let timeoutId: NodeJS.Timeout | undefined;
     
     try {
       const healthPath = config.healthCheckPath || '/health';
       const url = `${config.baseUrl}${healthPath}`;
       
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), config.timeout || 5000);
+      timeoutId = setTimeout(() => controller.abort(), config.timeout || 5000);
       
       const response = await fetch(url, {
         signal: controller.signal,
@@ -27,8 +28,6 @@ export async function checkServiceHealth(): Promise<ServiceHealth[]> {
           'Accept': 'application/json',
         },
       });
-      
-      clearTimeout(timeoutId);
       const responseTime = Date.now() - startTime;
       
       if (response.ok) {
@@ -53,6 +52,10 @@ export async function checkServiceHealth(): Promise<ServiceHealth[]> {
         responseTime,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     }
   });
 
