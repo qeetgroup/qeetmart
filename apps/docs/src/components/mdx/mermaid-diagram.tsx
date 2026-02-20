@@ -1,15 +1,37 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
 type MermaidDiagramProps = {
-  chart: string;
+  chart?: string;
   title?: string;
+  children?: ReactNode;
 };
 
-export function MermaidDiagram({ chart, title }: MermaidDiagramProps) {
+const toChartText = (chart: string | undefined, children: ReactNode): string => {
+  if (typeof chart === "string") {
+    return chart.trim();
+  }
+
+  if (typeof children === "string") {
+    return children.trim();
+  }
+
+  if (Array.isArray(children)) {
+    return children
+      .map((part) => (typeof part === "string" ? part : ""))
+      .join("")
+      .trim();
+  }
+
+  return "";
+};
+
+export function MermaidDiagram({ chart, title, children }: MermaidDiagramProps) {
   const [svg, setSvg] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const chartText = toChartText(chart, children);
 
   const renderId = useMemo(() => {
     const suffix = Math.random().toString(36).slice(2, 9);
@@ -21,15 +43,21 @@ export function MermaidDiagram({ chart, title }: MermaidDiagramProps) {
 
     const render = async () => {
       try {
+        setError(null);
+        if (!chartText) {
+          throw new Error("Mermaid chart content is empty.");
+        }
         const mermaid = (await import("mermaid")).default;
         mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default" });
-        const result = await mermaid.render(renderId, chart);
+        const result = await mermaid.render(renderId, chartText);
         if (isActive) {
           setSvg(result.svg);
         }
-      } catch {
+      } catch (cause) {
         if (isActive) {
-          setError(true);
+          setSvg("");
+          const message = cause instanceof Error ? cause.message : String(cause);
+          setError(message);
         }
       }
     };
@@ -39,13 +67,16 @@ export function MermaidDiagram({ chart, title }: MermaidDiagramProps) {
     return () => {
       isActive = false;
     };
-  }, [chart, renderId]);
+  }, [chartText, renderId]);
 
   return (
     <figure className="diagram-shell">
       {title ? <figcaption>{title}</figcaption> : null}
       {error ? (
-        <p>Unable to render Mermaid diagram.</p>
+        <div>
+          <p>Unable to render Mermaid diagram.</p>
+          {process.env.NODE_ENV !== "production" ? <pre>{error}</pre> : null}
+        </div>
       ) : (
         // The SVG comes from mermaid's renderer output.
         <div dangerouslySetInnerHTML={{ __html: svg }} />

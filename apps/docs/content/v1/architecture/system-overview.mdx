@@ -11,18 +11,18 @@ The system is a polyglot microservices platform centered on a Node.js API gatewa
   title="High-level runtime topology"
   chart={`
 flowchart LR
-  W[Next.js Web] --> G[API Gateway :4000]
-  A[Admin SPA] --> G
-  M[Expo Mobile] --> G
-  G --> AS[Auth Service :8081]
-  G --> US[User Service :8082]
-  G --> PS[Product Service :8083]
-  G --> IS[Inventory Service :8080]
-  AS --> ADB[(auth_db)]
-  US --> UDB[(user_db)]
-  PS --> PDB[(product_db)]
-  IS --> IDB[(inventory_db)]
-  IS --> R[(Redis)]
+  NextJsWeb --> ApiGateway4000
+  AdminUi --> ApiGateway4000
+  ExpoMobile --> ApiGateway4000
+  ApiGateway4000 --> AuthService8081
+  ApiGateway4000 --> UserService8082
+  ApiGateway4000 --> ProductService8083
+  ApiGateway4000 --> InventoryService8080
+  AuthService8081 --> AuthDb
+  UserService8082 --> UserDb
+  ProductService8083 --> ProductDb
+  InventoryService8080 --> InventoryDb
+  InventoryService8080 --> Redis
 `}
 />
 
