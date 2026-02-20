@@ -70,6 +70,7 @@ jobs:
       - run: pnpm --filter @qeetmart/api-gateway test
       - run: pnpm --filter web build
       - run: pnpm --filter admin build
+      - run: pnpm --filter admin bundle:check
 
   java-test:
     runs-on: ubuntu-latest

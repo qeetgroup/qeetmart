@@ -1,16 +1,32 @@
 import path from 'node:path'
 import { defineConfig } from 'vite'
+import type { PluginOption } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { visualizer } from 'rollup-plugin-visualizer'
+
+const analyzeBundle = process.env.BUNDLE_ANALYZE === 'true'
 
 export default defineConfig({
-  plugins: [tailwindcss(), react()],
+  plugins: [
+    tailwindcss(),
+    react(),
+    analyzeBundle &&
+      (visualizer({
+        filename: 'bundle-stats.html',
+        template: 'treemap',
+        gzipSize: true,
+        brotliSize: true,
+        emitFile: true,
+      }) as PluginOption),
+  ].filter(Boolean) as PluginOption[],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
   build: {
+    sourcemap: analyzeBundle,
     rollupOptions: {
       output: {
         manualChunks: {

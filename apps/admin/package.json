@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:analyze": "BUNDLE_ANALYZE=true pnpm build",
+    "bundle:check": "node ./scripts/check-bundle-regression.mjs",
+    "bundle:baseline": "node ./scripts/check-bundle-regression.mjs --write-baseline",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -48,6 +51,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "rollup-plugin-visualizer": "^6.0.8",
     "tailwindcss": "^4.2.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
+import { preloadRouteModule } from '@/app/lazy-routes'
 import { navItems } from '@/app/navigation'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -63,6 +64,10 @@ export function AppSidebar({ mobile = false, onNavigate }: AppSidebarProps) {
         <TooltipProvider delayDuration={100}>
           <nav className="flex-1 space-y-1 p-3" aria-label="Main navigation">
             {visibleItems.map((item, index) => {
+              const handlePrefetch = () => {
+                void preloadRouteModule(item.href)
+              }
+
               const linkNode = ({ isActive }: { isActive: boolean }) => (
                 <motion.div
                   initial={
@@ -111,7 +116,14 @@ export function AppSidebar({ mobile = false, onNavigate }: AppSidebarProps) {
                 return (
                   <Tooltip key={item.href}>
                     <TooltipTrigger asChild>
-                      <NavLink to={item.href} end={item.href === '/'} onClick={onNavigate}>
+                      <NavLink
+                        to={item.href}
+                        end={item.href === '/'}
+                        onClick={onNavigate}
+                        onMouseEnter={handlePrefetch}
+                        onFocus={handlePrefetch}
+                        onTouchStart={handlePrefetch}
+                      >
                         {linkNode}
                       </NavLink>
                     </TooltipTrigger>
@@ -121,7 +133,15 @@ export function AppSidebar({ mobile = false, onNavigate }: AppSidebarProps) {
               }
 
               return (
-                <NavLink key={item.href} to={item.href} end={item.href === '/'} onClick={onNavigate}>
+                <NavLink
+                  key={item.href}
+                  to={item.href}
+                  end={item.href === '/'}
+                  onClick={onNavigate}
+                  onMouseEnter={handlePrefetch}
+                  onFocus={handlePrefetch}
+                  onTouchStart={handlePrefetch}
+                >
                   {linkNode}
                 </NavLink>
               )
