@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { inventoryService } from '@/services'
+import { useTenantStore } from '@/stores/tenant-store'
 
 const InventoryStockChart = lazy(async () => {
   const module = await import('@/components/charts/inventory-stock-chart')
@@ -71,9 +72,10 @@ function InventoryPageSkeleton() {
 }
 
 export function InventoryPage() {
+  const tenantId = useTenantStore((state) => state.tenantId)
   const inventoryQuery = useQuery({
-    queryKey: ['inventory'],
-    queryFn: inventoryService.getInventorySummary,
+    queryKey: ['inventory', tenantId],
+    queryFn: () => inventoryService.getInventorySummary(tenantId),
   })
 
   if (inventoryQuery.isLoading) {

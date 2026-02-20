@@ -6,7 +6,7 @@ import { navItems } from '@/app/navigation'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/stores/auth-store'
+import { hasPermission, useAuthStore } from '@/stores/auth-store'
 import { useUiStore } from '@/stores/ui-store'
 
 interface AppSidebarProps {
@@ -20,9 +20,21 @@ export function AppSidebar({ mobile = false, onNavigate }: AppSidebarProps) {
   const toggleSidebar = useUiStore((state) => state.toggleSidebar)
   const reduceMotion = useReducedMotion()
 
-  const visibleItems = navItems.filter((item) =>
-    item.allowedRoles ? (user ? item.allowedRoles.includes(user.role) : false) : true,
-  )
+  const visibleItems = navItems.filter((item) => {
+    if (!user) {
+      return false
+    }
+
+    if (item.allowedRoles && !item.allowedRoles.includes(user.role)) {
+      return false
+    }
+
+    if (item.requiredPermission && !hasPermission(user, item.requiredPermission)) {
+      return false
+    }
+
+    return true
+  })
 
   return (
     <aside

@@ -1,36 +1,174 @@
 import type {
   AdminAccount,
+  AdminNotification,
+  CreateRolePayload,
   Customer,
+  ModuleAccess,
+  ModuleScope,
   Order,
   Permission,
+  PredictiveInsight,
   Product,
   ProductCategory,
+  RoleDefinition,
   SessionUser,
+  Tenant,
+  UserRole,
 } from './types'
 
-const basePermissions: Record<string, Permission[]> = {
-  super_admin: [
-    'orders.read',
-    'orders.write',
-    'orders.refund',
-    'products.read',
-    'products.write',
-    'customers.read',
-    'inventory.read',
-    'admins.read',
-    'admins.write',
-  ],
-  ops_admin: [
-    'orders.read',
-    'orders.write',
-    'orders.refund',
-    'products.read',
-    'products.write',
-    'customers.read',
-    'inventory.read',
-    'admins.read',
-  ],
-  support_admin: ['orders.read', 'customers.read', 'orders.refund'],
+export const tenantsSeed: Tenant[] = [
+  {
+    id: 'tenant_west_coast',
+    name: 'West Coast Flagship',
+    location: 'San Francisco, CA',
+    timezone: 'America/Los_Angeles',
+    currency: 'USD',
+  },
+  {
+    id: 'tenant_northeast',
+    name: 'Northeast Hub',
+    location: 'New York, NY',
+    timezone: 'America/New_York',
+    currency: 'USD',
+  },
+  {
+    id: 'tenant_south',
+    name: 'Southern Marketplace',
+    location: 'Austin, TX',
+    timezone: 'America/Chicago',
+    currency: 'USD',
+  },
+]
+
+export const moduleScopes: ModuleScope[] = [
+  'dashboard',
+  'analytics',
+  'orders',
+  'products',
+  'customers',
+  'inventory',
+  'insights',
+  'notifications',
+  'admins',
+  'settings',
+]
+
+export const modulePermissionMap: Record<ModuleScope, { read: Permission; write?: Permission }> = {
+  dashboard: { read: 'dashboard.read' },
+  analytics: { read: 'analytics.read' },
+  orders: { read: 'orders.read', write: 'orders.write' },
+  products: { read: 'products.read', write: 'products.write' },
+  customers: { read: 'customers.read' },
+  inventory: { read: 'inventory.read' },
+  insights: { read: 'insights.read' },
+  notifications: { read: 'notifications.read', write: 'notifications.write' },
+  admins: { read: 'admins.read', write: 'admins.write' },
+  settings: { read: 'settings.read' },
+}
+
+export function moduleAccessToPermissions(moduleAccess: ModuleAccess[]) {
+  const permissionSet = new Set<Permission>()
+
+  for (const moduleRule of moduleAccess) {
+    const rule = modulePermissionMap[moduleRule.module]
+
+    if (moduleRule.read) {
+      permissionSet.add(rule.read)
+    }
+
+    if (moduleRule.write && rule.write) {
+      permissionSet.add(rule.write)
+      if (moduleRule.module === 'orders') {
+        permissionSet.add('orders.refund')
+      }
+    }
+  }
+
+  return [...permissionSet]
+}
+
+function createModuleAccess(input: Partial<Record<ModuleScope, { read: boolean; write: boolean }>>): ModuleAccess[] {
+  return moduleScopes.map((module) => ({
+    module,
+    read: input[module]?.read ?? false,
+    write: input[module]?.write ?? false,
+  }))
+}
+
+const systemRolesSeed: RoleDefinition[] = [
+  {
+    id: 'super_admin',
+    name: 'Super Admin',
+    description: 'Full platform access across modules, stores, and admin controls.',
+    moduleAccess: createModuleAccess({
+      dashboard: { read: true, write: false },
+      analytics: { read: true, write: false },
+      orders: { read: true, write: true },
+      products: { read: true, write: true },
+      customers: { read: true, write: false },
+      inventory: { read: true, write: false },
+      insights: { read: true, write: false },
+      notifications: { read: true, write: true },
+      admins: { read: true, write: true },
+      settings: { read: true, write: false },
+    }),
+    permissions: [],
+    isSystem: true,
+    createdAt: '2026-01-01T08:00:00.000Z',
+  },
+  {
+    id: 'ops_admin',
+    name: 'Ops Admin',
+    description: 'Operational control for orders, products, and inventory execution.',
+    moduleAccess: createModuleAccess({
+      dashboard: { read: true, write: false },
+      analytics: { read: true, write: false },
+      orders: { read: true, write: true },
+      products: { read: true, write: true },
+      customers: { read: true, write: false },
+      inventory: { read: true, write: false },
+      insights: { read: true, write: false },
+      notifications: { read: true, write: true },
+      admins: { read: true, write: false },
+      settings: { read: true, write: false },
+    }),
+    permissions: [],
+    isSystem: true,
+    createdAt: '2026-01-01T08:00:00.000Z',
+  },
+  {
+    id: 'support_admin',
+    name: 'Support Admin',
+    description: 'Customer and order support workflows with limited modification rights.',
+    moduleAccess: createModuleAccess({
+      dashboard: { read: true, write: false },
+      analytics: { read: false, write: false },
+      orders: { read: true, write: false },
+      products: { read: false, write: false },
+      customers: { read: true, write: false },
+      inventory: { read: false, write: false },
+      insights: { read: false, write: false },
+      notifications: { read: true, write: false },
+      admins: { read: false, write: false },
+      settings: { read: true, write: false },
+    }),
+    permissions: [],
+    isSystem: true,
+    createdAt: '2026-01-01T08:00:00.000Z',
+  },
+].map(
+  (role): RoleDefinition => ({
+    ...role,
+    id: role.id as UserRole,
+    permissions: moduleAccessToPermissions(role.moduleAccess),
+  }),
+)
+
+export const rolesSeed = [...systemRolesSeed]
+
+function getRolePermissions(roleId: UserRole) {
+  const role = rolesSeed.find((entry) => entry.id === roleId)
+  return role ? [...role.permissions] : []
 }
 
 export const loginUsers: Array<SessionUser & { password: string }> = [
@@ -40,7 +178,7 @@ export const loginUsers: Array<SessionUser & { password: string }> = [
     email: 'admin@qeetmart.com',
     password: 'Admin#1234',
     role: 'super_admin',
-    permissions: basePermissions.super_admin,
+    permissions: getRolePermissions('super_admin'),
   },
   {
     id: 'u2',
@@ -48,7 +186,7 @@ export const loginUsers: Array<SessionUser & { password: string }> = [
     email: 'ops@qeetmart.com',
     password: 'Ops#1234',
     role: 'ops_admin',
-    permissions: basePermissions.ops_admin,
+    permissions: getRolePermissions('ops_admin'),
   },
   {
     id: 'u3',
@@ -56,17 +194,11 @@ export const loginUsers: Array<SessionUser & { password: string }> = [
     email: 'support@qeetmart.com',
     password: 'Support#1234',
     role: 'support_admin',
-    permissions: basePermissions.support_admin,
+    permissions: getRolePermissions('support_admin'),
   },
 ]
 
-const categories: ProductCategory[] = [
-  'Apparel',
-  'Footwear',
-  'Accessories',
-  'Electronics',
-  'Home',
-]
+const categories: ProductCategory[] = ['Apparel', 'Footwear', 'Accessories', 'Electronics', 'Home']
 
 const categoryImage: Record<ProductCategory, string> = {
   Apparel:
@@ -81,26 +213,29 @@ const categoryImage: Record<ProductCategory, string> = {
     'https://images.unsplash.com/photo-1484101403633-562f891dc89a?auto=format&fit=crop&w=600&q=80',
 }
 
-export const productsSeed: Product[] = Array.from({ length: 18 }).map((_, index) => {
+export const productsSeed: Product[] = Array.from({ length: 36 }).map((_, index) => {
   const category = categories[index % categories.length]
-  const price = 24 + index * 7
-  const stock = index % 6 === 0 ? 4 : 30 - index
+  const tenant = tenantsSeed[index % tenantsSeed.length]
+  const price = 28 + index * 5
+  const stock = index % 7 === 0 ? 4 : 44 - (index % 20)
 
   return {
     id: `p-${index + 1}`,
+    tenantId: tenant.id,
     name: `${category} Product ${index + 1}`,
-    sku: `SKU-${1000 + index}`,
+    sku: `SKU-${2000 + index}`,
     category,
     price,
     stock,
     imageUrl: categoryImage[category],
-    updatedAt: `2026-02-${String(2 + (index % 16)).padStart(2, '0')}T10:00:00.000Z`,
+    updatedAt: `2026-02-${String(2 + (index % 18)).padStart(2, '0')}T10:00:00.000Z`,
   }
 })
 
 export const customersSeed: Customer[] = [
   {
     id: 'c-1',
+    tenantId: 'tenant_west_coast',
     name: 'Ava Brooks',
     email: 'ava.brooks@example.com',
     phone: '+1 (415) 555-1042',
@@ -121,16 +256,11 @@ export const customersSeed: Customer[] = [
         detail: 'Requested expedited shipping',
         createdAt: '2026-02-15T15:40:00.000Z',
       },
-      {
-        id: 'ac-3',
-        type: 'wishlist',
-        detail: 'Added 3 products to wishlist',
-        createdAt: '2026-02-11T12:05:00.000Z',
-      },
     ],
   },
   {
     id: 'c-2',
+    tenantId: 'tenant_northeast',
     name: 'Noah Park',
     email: 'noah.park@example.com',
     phone: '+1 (646) 555-2201',
@@ -145,16 +275,11 @@ export const customersSeed: Customer[] = [
         detail: 'Placed order #ORD-1092 for $112',
         createdAt: '2026-02-17T11:10:00.000Z',
       },
-      {
-        id: 'ac-5',
-        type: 'support',
-        detail: 'Updated delivery address',
-        createdAt: '2026-02-13T09:10:00.000Z',
-      },
     ],
   },
   {
     id: 'c-3',
+    tenantId: 'tenant_northeast',
     name: 'Isabella Grant',
     email: 'isabella.grant@example.com',
     phone: '+1 (312) 555-7850',
@@ -169,16 +294,11 @@ export const customersSeed: Customer[] = [
         detail: 'Placed order #ORD-1093 for $398',
         createdAt: '2026-02-18T14:15:00.000Z',
       },
-      {
-        id: 'ac-7',
-        type: 'wishlist',
-        detail: 'Saved new home collection',
-        createdAt: '2026-02-14T10:50:00.000Z',
-      },
     ],
   },
   {
     id: 'c-4',
+    tenantId: 'tenant_west_coast',
     name: 'Liam Quinn',
     email: 'liam.quinn@example.com',
     phone: '+1 (206) 555-9311',
@@ -197,6 +317,7 @@ export const customersSeed: Customer[] = [
   },
   {
     id: 'c-5',
+    tenantId: 'tenant_south',
     name: 'Sophia Kim',
     email: 'sophia.kim@example.com',
     phone: '+1 (214) 555-2678',
@@ -211,20 +332,15 @@ export const customersSeed: Customer[] = [
         detail: 'Placed order #ORD-1095 for $520',
         createdAt: '2026-02-19T13:30:00.000Z',
       },
-      {
-        id: 'ac-10',
-        type: 'support',
-        detail: 'Reported payment issue resolved',
-        createdAt: '2026-02-16T08:45:00.000Z',
-      },
     ],
   },
   {
     id: 'c-6',
+    tenantId: 'tenant_south',
     name: 'Ethan Patel',
     email: 'ethan.patel@example.com',
     phone: '+1 (617) 555-6189',
-    city: 'Boston',
+    city: 'Houston',
     totalSpent: 780,
     joinedAt: '2025-09-03T09:00:00.000Z',
     lastOrderAt: '2026-02-10T10:30:00.000Z',
@@ -239,6 +355,7 @@ export const customersSeed: Customer[] = [
   },
   {
     id: 'c-7',
+    tenantId: 'tenant_south',
     name: 'Mia Hernandez',
     email: 'mia.hernandez@example.com',
     phone: '+1 (305) 555-3370',
@@ -257,6 +374,7 @@ export const customersSeed: Customer[] = [
   },
   {
     id: 'c-8',
+    tenantId: 'tenant_west_coast',
     name: 'Oliver Stone',
     email: 'oliver.stone@example.com',
     phone: '+1 (702) 555-1154',
@@ -286,10 +404,23 @@ const statusPattern: Order['status'][] = [
   'delivered',
 ]
 
-export const ordersSeed: Order[] = Array.from({ length: 24 }).map((_, index) => {
-  const customer = customersSeed[index % customersSeed.length]
-  const primaryProduct = productsSeed[index % productsSeed.length]
-  const secondaryProduct = productsSeed[(index + 3) % productsSeed.length]
+function productsByTenant(tenantId: string) {
+  return productsSeed.filter((entry) => entry.tenantId === tenantId)
+}
+
+function customersByTenant(tenantId: string) {
+  return customersSeed.filter((entry) => entry.tenantId === tenantId)
+}
+
+export const ordersSeed: Order[] = Array.from({ length: 48 }).map((_, index) => {
+  const tenant = tenantsSeed[index % tenantsSeed.length]
+  const tenantCustomers = customersByTenant(tenant.id)
+  const tenantProducts = productsByTenant(tenant.id)
+
+  const customer = tenantCustomers[index % tenantCustomers.length]
+  const primaryProduct = tenantProducts[index % tenantProducts.length]
+  const secondaryProduct = tenantProducts[(index + 2) % tenantProducts.length]
+
   const createdAt = new Date(2026, 1, 1 + (index % 19), 9 + (index % 6), 15)
   const itemAQty = (index % 3) + 1
   const itemBQty = (index % 2) + 1
@@ -315,6 +446,7 @@ export const ordersSeed: Order[] = Array.from({ length: 24 }).map((_, index) => 
 
   return {
     id: `ORD-${1080 + index}`,
+    tenantId: tenant.id,
     customerId: customer.id,
     customerName: customer.name,
     email: customer.email,
@@ -326,19 +458,102 @@ export const ordersSeed: Order[] = Array.from({ length: 24 }).map((_, index) => 
   }
 })
 
-export const salesTrendSeed = [
-  { date: '2026-02-01', sales: 12400, orders: 38 },
-  { date: '2026-02-02', sales: 14100, orders: 44 },
-  { date: '2026-02-03', sales: 15220, orders: 48 },
-  { date: '2026-02-04', sales: 11800, orders: 35 },
-  { date: '2026-02-05', sales: 16110, orders: 52 },
-  { date: '2026-02-06', sales: 17400, orders: 58 },
-  { date: '2026-02-07', sales: 16900, orders: 55 },
-  { date: '2026-02-08', sales: 18640, orders: 62 },
-  { date: '2026-02-09', sales: 19380, orders: 66 },
-  { date: '2026-02-10', sales: 17620, orders: 57 },
-  { date: '2026-02-11', sales: 20120, orders: 70 },
-  { date: '2026-02-12', sales: 20980, orders: 72 },
+export const predictiveInsightsSeed: PredictiveInsight[] = [
+  {
+    id: 'insight-1',
+    tenantId: 'tenant_west_coast',
+    title: 'Sales expected to grow 12% next week',
+    summary:
+      'The model detected rising repeat purchases in electronics and accessories with stable fulfillment SLAs.',
+    metric: 'Revenue growth',
+    confidence: 0.82,
+    predictedChangePercent: 12,
+    horizon: 'Next 7 days',
+    impact: 'positive',
+    recommendations: [
+      'Increase ad budget for top 3 SKUs by 8%.',
+      'Prepare a restock buffer for fast-moving accessories.',
+      'Bundle electronics with warranty upsells in checkout.',
+    ],
+    updatedAt: '2026-02-20T09:42:00.000Z',
+  },
+  {
+    id: 'insight-2',
+    tenantId: 'tenant_northeast',
+    title: 'Order cancellations may rise 6% this weekend',
+    summary: 'Weekend shipping-delay patterns are correlated with increased cancellation rates in this region.',
+    metric: 'Cancellation rate',
+    confidence: 0.74,
+    predictedChangePercent: -6,
+    horizon: 'Next 3 days',
+    impact: 'negative',
+    recommendations: [
+      'Show explicit delivery ETA before payment.',
+      'Prioritize same-day picks for pending high-value orders.',
+      'Trigger proactive support outreach for delayed shipments.',
+    ],
+    updatedAt: '2026-02-20T09:42:00.000Z',
+  },
+  {
+    id: 'insight-3',
+    tenantId: 'tenant_south',
+    title: 'AOV likely to increase 9% with bundle prompts',
+    summary: 'Customers in this store respond strongly to low-friction bundle suggestions on checkout.',
+    metric: 'Average order value',
+    confidence: 0.78,
+    predictedChangePercent: 9,
+    horizon: 'Next 14 days',
+    impact: 'positive',
+    recommendations: [
+      'Enable checkout cross-sell cards for top categories.',
+      'Offer 5% off bundles over $150.',
+      'Place urgency indicators on low-stock companion items.',
+    ],
+    updatedAt: '2026-02-20T09:42:00.000Z',
+  },
+]
+
+export const notificationsSeed: AdminNotification[] = [
+  {
+    id: 'n-1',
+    tenantId: 'tenant_west_coast',
+    title: 'Low stock alert',
+    message: '4 SKUs are below reorder threshold.',
+    type: 'warning',
+    read: false,
+    createdAt: '2026-02-20T10:05:00.000Z',
+    actionUrl: '/inventory',
+  },
+  {
+    id: 'n-2',
+    tenantId: 'tenant_west_coast',
+    title: 'Refund processed',
+    message: 'Refund for ORD-1104 completed successfully.',
+    type: 'success',
+    read: false,
+    createdAt: '2026-02-20T09:20:00.000Z',
+    actionUrl: '/orders',
+  },
+  {
+    id: 'n-3',
+    tenantId: 'tenant_northeast',
+    title: 'Shipping incident',
+    message: 'Carrier API latency is causing delayed label creation.',
+    type: 'error',
+    read: false,
+    createdAt: '2026-02-20T09:54:00.000Z',
+    actionUrl: '/orders',
+  },
+  {
+    id: 'n-4',
+    tenantId: 'tenant_south',
+    title: 'Forecast available',
+    message: 'New weekly AI forecast was generated for your store.',
+    type: 'info',
+    read: true,
+    createdAt: '2026-02-20T08:42:00.000Z',
+    actionUrl: '/insights',
+  },
 ]
 
 export const adminAccountsSeed: AdminAccount[] = [
@@ -347,7 +562,7 @@ export const adminAccountsSeed: AdminAccount[] = [
     name: 'Nia Campbell',
     email: 'admin@qeetmart.com',
     role: 'super_admin',
-    permissions: basePermissions.super_admin,
+    permissions: getRolePermissions('super_admin'),
     status: 'active',
     lastLogin: '2026-02-20T09:10:00.000Z',
   },
@@ -356,7 +571,7 @@ export const adminAccountsSeed: AdminAccount[] = [
     name: 'Mateo Ruiz',
     email: 'ops@qeetmart.com',
     role: 'ops_admin',
-    permissions: basePermissions.ops_admin,
+    permissions: getRolePermissions('ops_admin'),
     status: 'active',
     lastLogin: '2026-02-20T08:42:00.000Z',
   },
@@ -365,7 +580,7 @@ export const adminAccountsSeed: AdminAccount[] = [
     name: 'Jordan Lee',
     email: 'support@qeetmart.com',
     role: 'support_admin',
-    permissions: basePermissions.support_admin,
+    permissions: getRolePermissions('support_admin'),
     status: 'active',
     lastLogin: '2026-02-19T18:30:00.000Z',
   },
@@ -374,7 +589,7 @@ export const adminAccountsSeed: AdminAccount[] = [
     name: 'Riley Morgan',
     email: 'riley.morgan@qeetmart.com',
     role: 'ops_admin',
-    permissions: basePermissions.ops_admin,
+    permissions: getRolePermissions('ops_admin'),
     status: 'active',
     lastLogin: '2026-02-19T17:20:00.000Z',
   },
@@ -383,12 +598,30 @@ export const adminAccountsSeed: AdminAccount[] = [
     name: 'Samira Collins',
     email: 'samira.collins@qeetmart.com',
     role: 'support_admin',
-    permissions: basePermissions.support_admin,
+    permissions: getRolePermissions('support_admin'),
     status: 'suspended',
     lastLogin: '2026-02-15T11:05:00.000Z',
   },
 ]
 
 export function rolePermissions(role: SessionUser['role']) {
-  return basePermissions[role]
+  return getRolePermissions(role)
+}
+
+export function createRoleFromPayload(payload: CreateRolePayload): RoleDefinition {
+  const slug = payload.name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+
+  return {
+    id: `custom_${slug || 'role'}`,
+    name: payload.name,
+    description: payload.description,
+    moduleAccess: payload.moduleAccess,
+    permissions: moduleAccessToPermissions(payload.moduleAccess),
+    isSystem: false,
+    createdAt: new Date().toISOString(),
+  }
 }

@@ -1,5 +1,5 @@
 import { mockDb, withLatency } from './mock-db'
-import type { Customer, CustomerSort, PaginatedResult } from './types'
+import type { Customer, CustomerFilters, CustomerSort, PaginatedResult } from './types'
 
 function sortCustomers(customers: Customer[], sort: CustomerSort) {
   return [...customers].sort((a, b) => {
@@ -21,13 +21,31 @@ function sortCustomers(customers: Customer[], sort: CustomerSort) {
   })
 }
 
+function normalizeFilters(filters: CustomerFilters | string, sortArg?: CustomerSort): CustomerFilters {
+  if (typeof filters === 'string') {
+    return {
+      search: filters,
+      sort: sortArg,
+    }
+  }
+
+  return filters
+}
+
 export const customersService = {
-  async getCustomers(search = '', sort: CustomerSort = 'last_order_desc'): Promise<PaginatedResult<Customer>> {
+  async getCustomers(
+    filters: CustomerFilters | string = '',
+    sortArg?: CustomerSort,
+  ): Promise<PaginatedResult<Customer>> {
     return withLatency(() => {
-      const term = search.toLowerCase().trim()
+      const normalized = normalizeFilters(filters, sortArg)
+      const term = normalized.search?.toLowerCase().trim()
+      const sort = normalized.sort ?? 'last_order_desc'
+      const tenantId = normalized.tenantId ?? mockDb.tenants[0]?.id
 
       const filtered = sortCustomers(
         mockDb.customers
+          .filter((customer) => (tenantId ? customer.tenantId === tenantId : true))
           .filter((customer) =>
             term
               ? customer.name.toLowerCase().includes(term) || customer.email.toLowerCase().includes(term)

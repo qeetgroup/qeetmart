@@ -45,11 +45,25 @@ export const ordersService = {
       const page = filters.page ?? 1
       const pageSize = filters.pageSize ?? 8
       const sort = filters.sort ?? 'date_desc'
+      const customer = filters.customer?.toLowerCase().trim()
+      const tenantId = filters.tenantId ?? mockDb.tenants[0]?.id
 
       const filtered = sortOrders(
         mockDb.orders
+          .filter((order) => (tenantId ? order.tenantId === tenantId : true))
           .filter((order) => (filters.status && filters.status !== 'all' ? order.status === filters.status : true))
-          .filter((order) => inDateRange(order, filters.from, filters.to)),
+          .filter((order) => inDateRange(order, filters.from, filters.to))
+          .filter((order) => {
+            if (!customer) {
+              return true
+            }
+
+            return (
+              order.customerName.toLowerCase().includes(customer) ||
+              order.email.toLowerCase().includes(customer) ||
+              order.id.toLowerCase().includes(customer)
+            )
+          }),
         sort,
       )
 

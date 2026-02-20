@@ -1,8 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowDownUp, ClipboardList } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { DateFilter } from '@/components/filters/date-filter'
+import { SearchInput } from '@/components/filters/search-input'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { ErrorState } from '@/components/feedback/error-state'
 import { TableSkeleton } from '@/components/feedback/table-skeleton'
@@ -10,10 +12,10 @@ import { OrderDetailsDialog } from '@/components/forms/order-details-dialog'
 import { DataPagination } from '@/components/layout/data-pagination'
 import { PageHeader } from '@/components/layout/page-header'
 import { PermissionGate } from '@/guards/permission-gate'
+import { useOrders, useOrdersInfinite } from '@/hooks'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -63,6 +65,7 @@ export function OrdersPage() {
   const [status, setStatus] = useState<OrderStatus | 'all'>('all')
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
+  const [customerSearch, setCustomerSearch] = useState('')
   const [page, setPage] = useState(1)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [isDialogOpen, setDialogOpen] = useState(false)
@@ -90,16 +93,23 @@ export function OrdersPage() {
       status,
       from: fromDate || undefined,
       to: toDate || undefined,
+      customer: customerSearch || undefined,
       page,
       pageSize: 8,
       sort: activeSort,
     }),
-    [activeSort, fromDate, page, status, toDate],
+    [activeSort, customerSearch, fromDate, page, status, toDate],
   )
 
-  const ordersQuery = useQuery({
-    queryKey: ['orders', filters],
-    queryFn: () => ordersService.getOrders(filters),
+  const ordersQuery = useOrders(filters)
+
+  const infiniteOrdersQuery = useOrdersInfinite({
+    status,
+    from: fromDate || undefined,
+    to: toDate || undefined,
+    customer: customerSearch || undefined,
+    sort: activeSort,
+    pageSize: 5,
   })
 
   const updateStatusMutation = useMutation({
@@ -109,6 +119,7 @@ export function OrdersPage() {
       toast.success(`Order ${variables.orderId} status updated.`)
       queryClient.invalidateQueries({ queryKey: ['orders'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard-overview'] })
+      queryClient.invalidateQueries({ queryKey: ['analytics'] })
       setDialogOpen(false)
     },
     onError(error: Error) {
@@ -122,6 +133,7 @@ export function OrdersPage() {
       toast.success(`Refund simulation complete for ${order.id}.`)
       queryClient.invalidateQueries({ queryKey: ['orders'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard-overview'] })
+      queryClient.invalidateQueries({ queryKey: ['analytics'] })
       setDialogOpen(false)
     },
     onError(error: Error) {
@@ -130,6 +142,7 @@ export function OrdersPage() {
   })
 
   const total = ordersQuery.data?.total ?? 0
+  const infiniteOrders = infiniteOrdersQuery.data?.pages.flatMap((entry) => entry.items) ?? []
 
   return (
     <div className="space-y-6 animate-fade-in-up">
@@ -140,7 +153,7 @@ export function OrdersPage() {
 
       <Card>
         <CardContent className="space-y-4 p-4">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground">Status</p>
               <Select
@@ -163,27 +176,18 @@ export function OrdersPage() {
               </Select>
             </div>
 
-            <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">From date</p>
-              <Input
-                type="date"
-                value={fromDate}
-                onChange={(event) => {
-                  setFromDate(event.target.value)
-                  setPage(1)
-                }}
-              />
-            </div>
+            <DateFilter id="orders-from" label="From date" value={fromDate} onChange={setFromDate} />
+            <DateFilter id="orders-to" label="To date" value={toDate} onChange={setToDate} />
 
             <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">To date</p>
-              <Input
-                type="date"
-                value={toDate}
-                onChange={(event) => {
-                  setToDate(event.target.value)
+              <p className="text-xs font-medium text-muted-foreground">Customer</p>
+              <SearchInput
+                value={customerSearch}
+                onDebouncedChange={(value) => {
+                  setCustomerSearch(value)
                   setPage(1)
                 }}
+                placeholder="Name, email, order ID"
               />
             </div>
 
@@ -216,9 +220,7 @@ export function OrdersPage() {
           {ordersQuery.isError ? (
             <ErrorState
               title="Unable to load orders"
-              description={
-                ordersQuery.error instanceof Error ? ordersQuery.error.message : 'Orders request failed.'
-              }
+              description={ordersQuery.error instanceof Error ? ordersQuery.error.message : 'Orders request failed.'}
               onRetry={() => {
                 void ordersQuery.refetch()
               }}
@@ -288,6 +290,43 @@ export function OrdersPage() {
               ) : null}
             </>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Infinite Queue View</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {infiniteOrders.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No queue items for current filters.</p>
+          ) : (
+            <ul className="space-y-2">
+              {infiniteOrders.map((order) => (
+                <li key={`infinite-${order.id}`} className="rounded-md border border-border/70 p-3 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-medium">{order.id}</p>
+                    <Badge variant={statusVariantMap[order.status]} className="capitalize">
+                      {order.status}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {order.customerName} · {formatCurrency(order.total)} · {formatDate(order.createdAt)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <Button
+            variant="outline"
+            onClick={() => {
+              void infiniteOrdersQuery.fetchNextPage()
+            }}
+            disabled={!infiniteOrdersQuery.hasNextPage || infiniteOrdersQuery.isFetchingNextPage}
+          >
+            {infiniteOrdersQuery.isFetchingNextPage ? 'Loading…' : 'Load more'}
+          </Button>
         </CardContent>
       </Card>
 

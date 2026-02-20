@@ -2,16 +2,19 @@ import { useQuery } from '@tanstack/react-query'
 import { motion, useReducedMotion } from 'framer-motion'
 import { lazy, Suspense } from 'react'
 import { DollarSign, ShoppingBag, TrendingUp, Users } from 'lucide-react'
+import { useInsights } from '@/hooks'
 import { DashboardSkeleton } from '@/components/feedback/dashboard-skeleton'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { ErrorState } from '@/components/feedback/error-state'
 import { PageHeader } from '@/components/layout/page-header'
+import { PredictiveInsightCard } from '@/components/insights/predictive-insight-card'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { dashboardService } from '@/services'
+import { useTenantStore } from '@/stores/tenant-store'
 
 const SalesTrendChart = lazy(async () => {
   const module = await import('@/components/charts/sales-trend-chart')
@@ -36,9 +39,12 @@ const easing = [0.22, 1, 0.36, 1] as const
 
 export function DashboardPage() {
   const reduceMotion = useReducedMotion()
+  const tenantId = useTenantStore((state) => state.tenantId)
+  const insights = useInsights()
+
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['dashboard-overview'],
-    queryFn: dashboardService.getOverview,
+    queryKey: ['dashboard-overview', tenantId],
+    queryFn: () => dashboardService.getOverview(tenantId),
   })
 
   if (isLoading) {
@@ -103,7 +109,7 @@ export function DashboardPage() {
               <CardTitle className="text-2xl">{formatCurrency(data.totalSales)}</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center gap-2 text-xs text-muted-foreground">
-              <DollarSign className="size-4 text-chart-1" /> +12.4% vs last month
+              <DollarSign className="size-4 text-chart-1" /> Tenant-aware metrics
             </CardContent>
           </Card>
         </motion.div>
@@ -115,7 +121,7 @@ export function DashboardPage() {
               <CardTitle className="text-2xl">{data.totalOrders}</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center gap-2 text-xs text-muted-foreground">
-              <ShoppingBag className="size-4 text-chart-2" /> +8.2% week-over-week
+              <ShoppingBag className="size-4 text-chart-2" /> Fulfillment throughput
             </CardContent>
           </Card>
         </motion.div>
@@ -127,13 +133,13 @@ export function DashboardPage() {
               <CardTitle className="text-2xl">{data.totalCustomers}</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Users className="size-4 text-chart-4" /> +5.6% retention uplift
+              <Users className="size-4 text-chart-4" /> Active customer count
             </CardContent>
           </Card>
         </motion.div>
       </section>
 
-      <motion.section {...reveal(0.11)} className="grid gap-4 xl:grid-cols-2">
+      <motion.section {...reveal(0.11)} className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
         <Card>
           <CardHeader>
             <CardTitle>Sales Trend</CardTitle>
@@ -146,6 +152,22 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
+        {insights.data && insights.data.length > 0 ? (
+          <PredictiveInsightCard insight={insights.data[0]} />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>AI-Assisted Insight</CardTitle>
+              <CardDescription>Forecast panel</CardDescription>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Predictive insight will appear here once enough data is available.
+            </CardContent>
+          </Card>
+        )}
+      </motion.section>
+
+      <motion.section {...reveal(0.12)}>
         <Card>
           <CardHeader>
             <CardTitle>Orders Over Time</CardTitle>

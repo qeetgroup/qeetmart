@@ -4,8 +4,8 @@ import type {
   Product,
   ProductCategory,
   ProductFilters,
-  ProductSort,
   ProductPayload,
+  ProductSort,
 } from './types'
 
 export const productCategories: Array<ProductCategory | 'all'> = [
@@ -37,6 +37,18 @@ function sortProducts(products: Product[], sort: ProductSort) {
   })
 }
 
+function resolveCategories(filters: ProductFilters) {
+  if (filters.categories && filters.categories.length > 0) {
+    return filters.categories
+  }
+
+  if (filters.category && filters.category !== 'all') {
+    return [filters.category]
+  }
+
+  return []
+}
+
 export const productsService = {
   async getProducts(filters: ProductFilters = {}): Promise<PaginatedResult<Product>> {
     return withLatency(() => {
@@ -44,17 +56,20 @@ export const productsService = {
       const pageSize = filters.pageSize ?? 8
       const search = filters.search?.toLowerCase().trim()
       const sort = filters.sort ?? 'updated_desc'
+      const categories = resolveCategories(filters)
+      const tenantId = filters.tenantId ?? mockDb.tenants[0]?.id
 
       const filtered = sortProducts(
         mockDb.products
+          .filter((product) => (tenantId ? product.tenantId === tenantId : true))
           .filter((product) =>
             search
               ? product.name.toLowerCase().includes(search) || product.sku.toLowerCase().includes(search)
               : true,
           )
-          .filter((product) =>
-            filters.category && filters.category !== 'all' ? product.category === filters.category : true,
-          ),
+          .filter((product) => (categories.length > 0 ? categories.includes(product.category) : true))
+          .filter((product) => (typeof filters.priceMin === 'number' ? product.price >= filters.priceMin : true))
+          .filter((product) => (typeof filters.priceMax === 'number' ? product.price <= filters.priceMax : true)),
         sort,
       )
 
@@ -71,9 +86,15 @@ export const productsService = {
 
   async createProduct(payload: ProductPayload) {
     return withLatency(() => {
+      const tenantId = payload.tenantId ?? mockDb.tenants[0]?.id
+      if (!tenantId) {
+        throw new Error('Store location is required.')
+      }
+
       const newProduct: Product = {
         id: `p-${mockDb.products.length + 1}`,
         ...payload,
+        tenantId,
         updatedAt: new Date().toISOString(),
       }
       mockDb.products.unshift(newProduct)
@@ -88,7 +109,10 @@ export const productsService = {
         throw new Error('Product not found')
       }
 
-      Object.assign(product, payload, { updatedAt: new Date().toISOString() })
+      Object.assign(product, payload, {
+        tenantId: payload.tenantId ?? product.tenantId,
+        updatedAt: new Date().toISOString(),
+      })
       return product
     }, 500)
   },

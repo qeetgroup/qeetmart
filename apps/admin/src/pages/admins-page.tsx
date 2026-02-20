@@ -2,7 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ShieldCheck } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { useRoles } from '@/hooks'
+import { SearchInput } from '@/components/filters/search-input'
 import { PermissionGate } from '@/guards/permission-gate'
+import { PageHeader } from '@/components/layout/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -25,17 +28,26 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatDate } from '@/lib/utils'
-import { adminsService, allPermissionOptions, roleOptions } from '@/services'
+import { adminsService, allPermissionOptions } from '@/services'
 import type { AdminAccount, Permission, UserRole } from '@/services'
+
+function roleLabel(role: string) {
+  return role
+    .replace('custom_', '')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
 
 export function AdminsPage() {
   const queryClient = useQueryClient()
+  const roles = useRoles()
+  const [search, setSearch] = useState('')
   const [selectedAdmin, setSelectedAdmin] = useState<AdminAccount | null>(null)
   const [draftPermissions, setDraftPermissions] = useState<Permission[]>([])
 
   const adminsQuery = useQuery({
-    queryKey: ['admins'],
-    queryFn: adminsService.getAdmins,
+    queryKey: ['admins', search],
+    queryFn: () => adminsService.getAdmins(search),
   })
 
   const updateRoleMutation = useMutation({
@@ -76,16 +88,24 @@ export function AdminsPage() {
 
   const admins = adminsQuery.data ?? []
 
+  const roleOptions = useMemo(() => roles.data?.map((role) => role.id) ?? [], [roles.data])
   const permissionCount = useMemo(() => draftPermissions.length, [draftPermissions])
 
   return (
     <div className="space-y-6 animate-fade-in-up">
+      <PageHeader
+        title="Admin Users"
+        description="Manage admin users, assign role workflows, and control account status."
+      />
+
       <Card>
         <CardHeader>
           <CardTitle>Admin Accounts</CardTitle>
           <CardDescription>Assign roles, control statuses, and manage granular permissions.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <SearchInput value={search} onDebouncedChange={setSearch} placeholder="Search by name, email, or role" />
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -105,20 +125,23 @@ export function AdminsPage() {
                     <p className="text-xs text-muted-foreground">{admin.email}</p>
                   </TableCell>
                   <TableCell>
-                    <PermissionGate permission="admins.write" fallback={<span className="capitalize">{admin.role.replace('_', ' ')}</span>}>
+                    <PermissionGate
+                      permission="admins.write"
+                      fallback={<span className="capitalize">{roleLabel(admin.role)}</span>}
+                    >
                       <Select
                         value={admin.role}
                         onValueChange={(value) =>
                           updateRoleMutation.mutate({ adminId: admin.id, role: value as UserRole })
                         }
                       >
-                        <SelectTrigger className="w-[160px] capitalize">
+                        <SelectTrigger className="w-[220px]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {roleOptions.map((role) => (
-                            <SelectItem key={role} value={role} className="capitalize">
-                              {role.replace('_', ' ')}
+                            <SelectItem key={role} value={role}>
+                              {roleLabel(role)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -182,7 +205,7 @@ export function AdminsPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3">
+          <div className="max-h-[360px] space-y-3 overflow-auto pr-1">
             {allPermissionOptions.map((permission) => {
               const checked = draftPermissions.includes(permission)
               return (

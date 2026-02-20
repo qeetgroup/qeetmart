@@ -31,6 +31,16 @@ export const DashboardPage = lazyWithPreload(async () => {
   return { default: module.DashboardPage }
 })
 
+export const AnalyticsPage = lazyWithPreload(async () => {
+  const module = await import('@/pages/analytics-page')
+  return { default: module.AnalyticsPage }
+})
+
+export const InsightsPage = lazyWithPreload(async () => {
+  const module = await import('@/pages/insights-page')
+  return { default: module.InsightsPage }
+})
+
 export const OrdersPage = lazyWithPreload(async () => {
   const module = await import('@/pages/orders-page')
   return { default: module.OrdersPage }
@@ -51,6 +61,11 @@ export const InventoryPage = lazyWithPreload(async () => {
   return { default: module.InventoryPage }
 })
 
+export const NotificationsPage = lazyWithPreload(async () => {
+  const module = await import('@/pages/notifications-page')
+  return { default: module.NotificationsPage }
+})
+
 export const SettingsPage = lazyWithPreload(async () => {
   const module = await import('@/pages/settings-page')
   return { default: module.SettingsPage }
@@ -61,6 +76,11 @@ export const AdminsPage = lazyWithPreload(async () => {
   return { default: module.AdminsPage }
 })
 
+export const RolesPage = lazyWithPreload(async () => {
+  const module = await import('@/pages/roles-page')
+  return { default: module.RolesPage }
+})
+
 export const NotFoundPage = lazyWithPreload(async () => {
   const module = await import('@/pages/not-found-page')
   return { default: module.NotFoundPage }
@@ -68,12 +88,16 @@ export const NotFoundPage = lazyWithPreload(async () => {
 
 const routePreloaders: Record<string, Array<() => Promise<unknown>>> = {
   '/': [DashboardLayout.preload, DashboardPage.preload],
+  '/analytics': [DashboardLayout.preload, AnalyticsPage.preload],
+  '/insights': [DashboardLayout.preload, InsightsPage.preload],
   '/orders': [DashboardLayout.preload, OrdersPage.preload],
   '/products': [DashboardLayout.preload, ProductsPage.preload],
   '/customers': [DashboardLayout.preload, CustomersPage.preload],
   '/inventory': [DashboardLayout.preload, InventoryPage.preload],
+  '/notifications': [DashboardLayout.preload, NotificationsPage.preload],
   '/settings': [DashboardLayout.preload, SettingsPage.preload],
   '/admins': [DashboardLayout.preload, AdminsPage.preload],
+  '/roles': [DashboardLayout.preload, RolesPage.preload],
   '/login': [LoginPage.preload],
   '/forbidden': [ForbiddenPage.preload],
 }

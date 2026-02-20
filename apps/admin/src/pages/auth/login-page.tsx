@@ -1,12 +1,13 @@
 import { Navigate } from 'react-router-dom'
 import { LoginForm } from '@/components/forms/login-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAuthStore } from '@/stores/auth-store'
+import { hasPermission, useAuthStore } from '@/stores/auth-store'
 
 export function LoginPage() {
   const token = useAuthStore((state) => state.token)
+  const user = useAuthStore((state) => state.user)
 
-  if (token) {
+  if (token && user && hasPermission(user, 'dashboard.read')) {
     return <Navigate to="/" replace />
   }
 

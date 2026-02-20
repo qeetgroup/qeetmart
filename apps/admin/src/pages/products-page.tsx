@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowDownUp, PackageSearch, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { SearchInput } from '@/components/filters/search-input'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { ErrorState } from '@/components/feedback/error-state'
 import { TableSkeleton } from '@/components/feedback/table-skeleton'
@@ -10,9 +11,16 @@ import { ProductFormDialog } from '@/components/forms/product-form-dialog'
 import { DataPagination } from '@/components/layout/data-pagination'
 import { PageHeader } from '@/components/layout/page-header'
 import { PermissionGate } from '@/guards/permission-gate'
+import { useProducts } from '@/hooks'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -25,6 +33,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { productCategories, productsService } from '@/services'
 import type { Product, ProductCategory, ProductPayload, ProductSort } from '@/services'
+import { useTenantStore } from '@/stores/tenant-store'
+
+const availableCategories = productCategories.filter((category) => category !== 'all') as ProductCategory[]
 
 const productSortOptions: Array<{ value: ProductSort; label: string }> = [
   { value: 'updated_desc', label: 'Recently updated' },
@@ -39,11 +50,14 @@ const defaultProductSort: ProductSort = 'updated_desc'
 
 export function ProductsPage() {
   const queryClient = useQueryClient()
+  const tenantId = useTenantStore((state) => state.tenantId)
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-  const [category, setCategory] = useState<ProductCategory | 'all'>('all')
+  const [categories, setCategories] = useState<ProductCategory[]>([])
+  const [priceMin, setPriceMin] = useState('')
+  const [priceMax, setPriceMax] = useState('')
   const [isDialogOpen, setDialogOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
 
@@ -70,23 +84,23 @@ export function ProductsPage() {
       page,
       pageSize: 8,
       search,
-      category,
+      categories,
+      priceMin: priceMin ? Number(priceMin) : undefined,
+      priceMax: priceMax ? Number(priceMax) : undefined,
       sort: activeSort,
     }),
-    [activeSort, category, page, search],
+    [activeSort, categories, page, priceMax, priceMin, search],
   )
 
-  const productsQuery = useQuery({
-    queryKey: ['products', filters],
-    queryFn: () => productsService.getProducts(filters),
-  })
+  const productsQuery = useProducts(filters)
 
   const createMutation = useMutation({
-    mutationFn: (payload: ProductPayload) => productsService.createProduct(payload),
+    mutationFn: (payload: ProductPayload) => productsService.createProduct({ ...payload, tenantId }),
     onSuccess: () => {
       toast.success('Product created successfully.')
       queryClient.invalidateQueries({ queryKey: ['products'] })
       queryClient.invalidateQueries({ queryKey: ['inventory'] })
+      queryClient.invalidateQueries({ queryKey: ['analytics'] })
       setDialogOpen(false)
     },
     onError(error: Error) {
@@ -96,11 +110,12 @@ export function ProductsPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ productId, payload }: { productId: string; payload: ProductPayload }) =>
-      productsService.updateProduct(productId, payload),
+      productsService.updateProduct(productId, { ...payload, tenantId }),
     onSuccess: () => {
       toast.success('Product updated successfully.')
       queryClient.invalidateQueries({ queryKey: ['products'] })
       queryClient.invalidateQueries({ queryKey: ['inventory'] })
+      queryClient.invalidateQueries({ queryKey: ['analytics'] })
       setDialogOpen(false)
       setEditingProduct(null)
     },
@@ -117,6 +132,16 @@ export function ProductsPage() {
   function handleEdit(product: Product) {
     setEditingProduct(product)
     setDialogOpen(true)
+  }
+
+  function toggleCategory(category: ProductCategory, checked: boolean) {
+    setCategories((current) => {
+      if (checked) {
+        return [...new Set([...current, category])]
+      }
+      return current.filter((entry) => entry !== category)
+    })
+    setPage(1)
   }
 
   const items = productsQuery.data?.items ?? []
@@ -137,39 +162,67 @@ export function ProductsPage() {
 
       <Card>
         <CardContent className="space-y-4 p-4">
-          <div className="grid gap-3 sm:grid-cols-[1fr_200px] xl:grid-cols-[1fr_200px_220px]">
+          <div className="grid gap-3 xl:grid-cols-[1fr_220px_120px_120px_220px]">
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground">Search</p>
-              <Input
+              <SearchInput
                 value={search}
                 placeholder="Search by name or SKU"
-                onChange={(event) => {
-                  setSearch(event.target.value)
+                onDebouncedChange={(value) => {
+                  setSearch(value)
                   setPage(1)
                 }}
               />
             </div>
+
             <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">Category</p>
-              <Select
-                value={category}
-                onValueChange={(value) => {
-                  setCategory(value as ProductCategory | 'all')
+              <p className="text-xs font-medium text-muted-foreground">Categories</p>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    {categories.length > 0 ? `${categories.length} selected` : 'All categories'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  {availableCategories.map((category) => (
+                    <DropdownMenuCheckboxItem
+                      key={category}
+                      checked={categories.includes(category)}
+                      onCheckedChange={(checked) => toggleCategory(category, Boolean(checked))}
+                    >
+                      {category}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Min price</p>
+              <Input
+                type="number"
+                min={0}
+                value={priceMin}
+                onChange={(event) => {
+                  setPriceMin(event.target.value)
                   setPage(1)
                 }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {productCategories.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
+
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Max price</p>
+              <Input
+                type="number"
+                min={0}
+                value={priceMax}
+                onChange={(event) => {
+                  setPriceMax(event.target.value)
+                  setPage(1)
+                }}
+              />
+            </div>
+
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground">Sort</p>
               <Select
@@ -227,7 +280,7 @@ export function ProductsPage() {
                       <TableCell colSpan={6} className="py-4">
                         <EmptyState
                           title="No products found"
-                          description="Try adjusting search keywords or category filters."
+                          description="Try adjusting search keywords, categories, or price filters."
                           icon={<PackageSearch className="size-4" aria-hidden="true" />}
                           className="min-h-36"
                         />

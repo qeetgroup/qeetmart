@@ -5,9 +5,9 @@ import { useSearchParams } from 'react-router-dom'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { ErrorState } from '@/components/feedback/error-state'
 import { TableSkeleton } from '@/components/feedback/table-skeleton'
+import { SearchInput } from '@/components/filters/search-input'
 import { PageHeader } from '@/components/layout/page-header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -20,6 +20,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { customersService } from '@/services'
 import type { CustomerSort } from '@/services'
+import { useTenantStore } from '@/stores/tenant-store'
 
 const customerSortOptions: Array<{ value: CustomerSort; label: string }> = [
   { value: 'last_order_desc', label: 'Recent orders first' },
@@ -57,6 +58,7 @@ function CustomerDetailSkeleton() {
 export function CustomersPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState('')
+  const tenantId = useTenantStore((state) => state.tenantId)
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('')
 
   const activeSort = useMemo<CustomerSort>(() => {
@@ -78,8 +80,8 @@ export function CustomersPage() {
   }
 
   const customersQuery = useQuery({
-    queryKey: ['customers', search, activeSort],
-    queryFn: () => customersService.getCustomers(search, activeSort),
+    queryKey: ['customers', tenantId, search, activeSort],
+    queryFn: () => customersService.getCustomers({ search, sort: activeSort, tenantId }),
   })
 
   const customers = customersQuery.data?.items ?? []
@@ -111,10 +113,10 @@ export function CustomersPage() {
               <CardDescription>Search customers by name or email</CardDescription>
             </div>
             <div className="grid gap-3 sm:grid-cols-[1fr_220px]">
-              <Input
+              <SearchInput
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search customers"
+                onDebouncedChange={setSearch}
               />
               <Select value={activeSort} onValueChange={(value) => updateSort(value as CustomerSort)}>
                 <SelectTrigger>

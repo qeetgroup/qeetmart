@@ -2,9 +2,14 @@ import { mockDb, withLatency } from './mock-db'
 import type { InventorySummary } from './types'
 
 export const inventoryService = {
-  async getInventorySummary(): Promise<InventorySummary> {
+  async getInventorySummary(tenantId?: string): Promise<InventorySummary> {
     return withLatency(() => {
-      const items = mockDb.products.map((product) => ({
+      const resolvedTenantId = tenantId ?? mockDb.tenants[0]?.id
+      const tenantProducts = mockDb.products.filter((product) =>
+        resolvedTenantId ? product.tenantId === resolvedTenantId : true,
+      )
+
+      const items = tenantProducts.map((product) => ({
         productId: product.id,
         productName: product.name,
         category: product.category,
@@ -17,6 +22,7 @@ export const inventoryService = {
       const totalUnits = items.reduce((sum, item) => sum + item.stock, 0)
 
       return {
+        tenantId: resolvedTenantId ?? 'unknown',
         totalUnits,
         lowStockCount,
         outOfStockCount,
