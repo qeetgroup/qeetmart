@@ -7,7 +7,10 @@ Polyglot monorepo for Qeetmart applications and microservices.
 - `apps/` client applications (`web`, `admin`, `mobile`)
 - `micros/` backend services (`api-gateway`, `auth-service`, `user-service`, `product-service`, `inventory-service`)
 - `packages/` shared contracts and types
+- `contracts/` OpenAPI contracts and governance checks
 - `docs/` architecture and API docs
+- `platform/` Kubernetes and deployment platform assets
+- `helm/` Helm chart for runtime deployment
 
 ## Local Development
 
@@ -33,6 +36,13 @@ Stop the local Docker stack:
 
 ```bash
 pnpm docker:down
+```
+
+Validate API contracts:
+
+```bash
+pnpm contracts:lint
+pnpm contracts:breaking
 ```
 
 ## CI

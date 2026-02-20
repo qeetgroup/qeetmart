@@ -1,0 +1,83 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Inventory Service API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost:8080" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "operationId": "inventoryHealth",
+        "responses": { "200": { "description": "Healthy" } }
+      }
+    },
+    "/inventory/{productId}": {
+      "parameters": [
+        { "name": "productId", "in": "path", "required": true, "schema": { "type": "string" } }
+      ],
+      "get": {
+        "summary": "Get inventory",
+        "operationId": "getInventory",
+        "responses": {
+          "200": { "description": "Inventory details" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/inventory/add-stock": {
+      "post": {
+        "summary": "Add stock",
+        "operationId": "addStock",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["productId", "quantity"],
+                "properties": {
+                  "productId": { "type": "string" },
+                  "quantity": { "type": "integer", "minimum": 1 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Stock updated" },
+          "400": { "description": "Invalid request" }
+        }
+      }
+    },
+    "/inventory/reserve": {
+      "post": {
+        "summary": "Reserve stock",
+        "operationId": "reserveStock",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["productId", "orderId", "quantity"],
+                "properties": {
+                  "productId": { "type": "string" },
+                  "orderId": { "type": "string" },
+                  "quantity": { "type": "integer", "minimum": 1 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Reserved" },
+          "409": { "description": "Insufficient stock" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,189 @@
+global:
+  imagePullSecrets: []
+  config:
+    JWT_ISSUER_URI: "http://auth-service:8081"
+    JPA_DDL_AUTO: "validate"
+    GIN_MODE: "release"
+  secrets:
+    JWT_SECRET: "CHANGE_ME"
+    AUTH_DB_PASSWORD: "CHANGE_ME"
+    USER_DB_PASSWORD: "CHANGE_ME"
+    PRODUCT_DB_PASSWORD: "CHANGE_ME"
+    INVENTORY_DB_PASSWORD: "CHANGE_ME"
+
+ingress:
+  enabled: true
+  className: nginx
+  host: api.qeetmart.local
+  annotations: {}
+
+services:
+  apiGateway:
+    enabled: true
+    replicas: 2
+    port: 4000
+    servicePort: 80
+    image:
+      repository: ghcr.io/qeetgroup/qeetmart/api-gateway
+      tag: latest
+      pullPolicy: IfNotPresent
+    livenessPath: /health
+    readinessPath: /health
+    env:
+      PORT: "4000"
+      HOST: "0.0.0.0"
+      TRUST_PROXY: "true"
+      REQUIRE_AUTH: "true"
+      AUTH_SERVICE_URL: "http://auth-service:8081"
+      USER_SERVICE_URL: "http://user-service:8082"
+      PRODUCT_SERVICE_URL: "http://product-service:8083"
+      INVENTORY_SERVICE_URL: "http://inventory-service:8080"
+      JWT_ISSUER: "$(JWT_ISSUER_URI)"
+      JWT_SECRET: "$(JWT_SECRET)"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 20
+      targetCPUUtilizationPercentage: 70
+
+  authService:
+    enabled: true
+    replicas: 2
+    port: 8081
+    servicePort: 8081
+    image:
+      repository: ghcr.io/qeetgroup/qeetmart/auth-service
+      tag: latest
+      pullPolicy: IfNotPresent
+    livenessPath: /actuator/health/liveness
+    readinessPath: /actuator/health/readiness
+    env:
+      SERVER_PORT: "8081"
+      DB_HOST: auth-postgres
+      DB_PORT: "5432"
+      DB_NAME: auth_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: "$(AUTH_DB_PASSWORD)"
+      JWT_SECRET: "$(JWT_SECRET)"
+      JWT_ISSUER_URI: "$(JWT_ISSUER_URI)"
+      JPA_DDL_AUTO: "$(JPA_DDL_AUTO)"
+    resources:
+      requests:
+        cpu: 150m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 20
+      targetCPUUtilizationPercentage: 70
+
+  userService:
+    enabled: true
+    replicas: 2
+    port: 8082
+    servicePort: 8082
+    image:
+      repository: ghcr.io/qeetgroup/qeetmart/user-service
+      tag: latest
+      pullPolicy: IfNotPresent
+    livenessPath: /actuator/health/liveness
+    readinessPath: /actuator/health/readiness
+    env:
+      SERVER_PORT: "8082"
+      DB_HOST: user-postgres
+      DB_PORT: "5432"
+      DB_NAME: user_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: "$(USER_DB_PASSWORD)"
+      JWT_SECRET: "$(JWT_SECRET)"
+      JWT_ISSUER_URI: "$(JWT_ISSUER_URI)"
+      JPA_DDL_AUTO: "$(JPA_DDL_AUTO)"
+    resources:
+      requests:
+        cpu: 150m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 20
+      targetCPUUtilizationPercentage: 70
+
+  productService:
+    enabled: true
+    replicas: 2
+    port: 8083
+    servicePort: 8083
+    image:
+      repository: ghcr.io/qeetgroup/qeetmart/product-service
+      tag: latest
+      pullPolicy: IfNotPresent
+    livenessPath: /actuator/health/liveness
+    readinessPath: /actuator/health/readiness
+    env:
+      SERVER_PORT: "8083"
+      DB_HOST: product-postgres
+      DB_PORT: "5432"
+      DB_NAME: product_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: "$(PRODUCT_DB_PASSWORD)"
+      JWT_SECRET: "$(JWT_SECRET)"
+      JWT_ISSUER_URI: "$(JWT_ISSUER_URI)"
+      JPA_DDL_AUTO: "$(JPA_DDL_AUTO)"
+    resources:
+      requests:
+        cpu: 150m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 20
+      targetCPUUtilizationPercentage: 70
+
+  inventoryService:
+    enabled: true
+    replicas: 2
+    port: 8080
+    servicePort: 8080
+    image:
+      repository: ghcr.io/qeetgroup/qeetmart/inventory-service
+      tag: latest
+      pullPolicy: IfNotPresent
+    livenessPath: /health
+    readinessPath: /health
+    env:
+      PORT: "8080"
+      GIN_MODE: "$(GIN_MODE)"
+      DATABASE_URL: "postgres://postgres:$(INVENTORY_DB_PASSWORD)@inventory-postgres:5432/inventory?sslmode=disable"
+      REDIS_ADDR: inventory-redis:6379
+      REDIS_PASSWORD: ""
+      REDIS_DB: "0"
+      RESERVATION_TTL: "10m"
+      EXPIRATION_POLL_INTERVAL: "30s"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 800m
+        memory: 512Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 20
+      targetCPUUtilizationPercentage: 70

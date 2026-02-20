@@ -31,6 +31,8 @@
     "test:user-service": "cd micros/user-service && ./mvnw -B test",
     "test:product-service": "cd micros/product-service && ./mvnw -B test",
     "test:inventory-service": "cd micros/inventory-service && GOCACHE=../../.cache/go-build go test ./...",
+    "contracts:lint": "node tools/ci/openapi-lint.mjs",
+    "contracts:breaking": "node tools/ci/openapi-breaking.mjs",
     "docker:up": "docker compose -f docker-compose.dev.yml up --build",
     "docker:down": "docker compose -f docker-compose.dev.yml down -v"
   },

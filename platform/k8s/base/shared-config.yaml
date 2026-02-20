@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qeetmart-shared-config
+data:
+  JWT_ISSUER_URI: "http://auth-service:8081"
+  JPA_DDL_AUTO: "validate"
+  GIN_MODE: "release"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: qeetmart-shared-secrets
+type: Opaque
+stringData:
+  JWT_SECRET: "CHANGE_ME"
+  AUTH_DB_PASSWORD: "CHANGE_ME"
+  USER_DB_PASSWORD: "CHANGE_ME"
+  PRODUCT_DB_PASSWORD: "CHANGE_ME"
+  INVENTORY_DB_PASSWORD: "CHANGE_ME"

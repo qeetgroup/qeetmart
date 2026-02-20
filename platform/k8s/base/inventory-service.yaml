@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-service
+  labels:
+    app.kubernetes.io/name: inventory-service
+    app.kubernetes.io/part-of: qeetmart
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inventory-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: inventory-service
+        app.kubernetes.io/part-of: qeetmart
+    spec:
+      containers:
+        - name: inventory-service
+          image: ghcr.io/qeetgroup/qeetmart/inventory-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: PORT
+              value: "8080"
+            - name: GIN_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: qeetmart-shared-config
+                  key: GIN_MODE
+            - name: DATABASE_URL
+              value: "postgres://postgres:$(DB_PASSWORD)@inventory-postgres:5432/inventory?sslmode=disable"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: qeetmart-shared-secrets
+                  key: INVENTORY_DB_PASSWORD
+            - name: REDIS_ADDR
+              value: "inventory-redis:6379"
+            - name: REDIS_PASSWORD
+              value: ""
+            - name: REDIS_DB
+              value: "0"
+            - name: RESERVATION_TTL
+              value: "10m"
+            - name: EXPIRATION_POLL_INTERVAL
+              value: "30s"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 800m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-service
+  labels:
+    app.kubernetes.io/name: inventory-service
+spec:
+  selector:
+    app.kubernetes.io/name: inventory-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: inventory-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: inventory-service
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
