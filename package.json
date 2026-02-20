@@ -16,14 +16,23 @@
   "main": "index.js",
   "scripts": {
     "generate:tree": "struct -i .next -i target -i dist -i .pnpm-store -o project.tree",
-    "dev:api": "pnpm --filter @qeetmart/api dev",
     "dev:gateway": "pnpm --filter @qeetmart/api-gateway dev",
     "dev:web": "pnpm --filter web dev",
     "dev:admin": "pnpm --filter admin dev",
-    "build:api": "pnpm --filter @qeetmart/api build",
+    "dev:mobile": "pnpm --filter mobile start",
+    "dev": "pnpm -r --parallel --filter @qeetmart/shared --filter @qeetmart/api-gateway --filter web --filter admin dev",
     "build:gateway": "pnpm --filter @qeetmart/api-gateway build",
     "build:shared": "pnpm --filter @qeetmart/shared build",
-    "build": "pnpm build:shared && pnpm build:api"
+    "build:web": "pnpm --filter web build",
+    "build:admin": "pnpm --filter admin build",
+    "build": "pnpm build:shared && pnpm build:gateway && pnpm build:web && pnpm build:admin",
+    "test:gateway": "pnpm --filter @qeetmart/api-gateway build",
+    "test:auth-service": "cd micros/auth-service && ./mvnw -B test",
+    "test:user-service": "cd micros/user-service && ./mvnw -B test",
+    "test:product-service": "cd micros/product-service && ./mvnw -B test",
+    "test:inventory-service": "cd micros/inventory-service && GOCACHE=../../.cache/go-build go test ./...",
+    "docker:up": "docker compose -f docker-compose.dev.yml up --build",
+    "docker:down": "docker compose -f docker-compose.dev.yml down -v"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

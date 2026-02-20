@@ -41,11 +41,10 @@ public class AuthService {
             throw new BadRequestException("Email is already registered");
         }
 
-        Role role = request.getRole() == null ? Role.USER : request.getRole();
         UserCredential user = UserCredential.builder()
             .email(request.getEmail())
             .passwordHash(passwordEncoder.encode(request.getPassword()))
-            .role(role)
+            .role(Role.USER)
             .build();
 
         UserCredential savedUser = userCredentialRepository.save(user);

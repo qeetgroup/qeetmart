@@ -316,16 +316,15 @@ resp, err := client.R().Get("http://service-name:port/api/endpoint")
 
 ## Port Allocation
 
-Standard port allocation for services:
+Standard local development port allocation for services:
 
 - **Gateway**: 4000
-- **User Service**: 4001
-- **Product Service**: 4002
-- **Order Service**: 4003
-- **Payment Service**: 4004
-- **Inventory Service**: 4005
-- **Notification Service**: 4006 (if needed)
-- **Analytics Service**: 4007 (if needed)
+- **Auth Service**: 8081
+- **User Service**: 8082
+- **Product Service**: 8083
+- **Order Service**: 8084 (if implemented)
+- **Payment Service**: 8085 (if implemented)
+- **Inventory Service**: 8080
 
 ## Implementation Checklist
 

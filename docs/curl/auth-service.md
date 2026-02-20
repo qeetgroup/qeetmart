@@ -8,19 +8,17 @@ curl -X POST http://localhost:8081/auth/register \
   -H 'Content-Type: application/json' \
   -d '{
     "email": "user1@example.com",
-    "password": "Password@123",
-    "role": "USER"
+    "password": "Password@123"
   }'
 ```
 
-## 2. Register ADMIN
+## 2. Register Another User
 ```bash
 curl -X POST http://localhost:8081/auth/register \
   -H 'Content-Type: application/json' \
   -d '{
-    "email": "admin1@example.com",
-    "password": "Password@123",
-    "role": "ADMIN"
+    "email": "user2@example.com",
+    "password": "Password@123"
   }'
 ```
 
@@ -39,7 +37,7 @@ curl -X POST http://localhost:8081/auth/login \
 curl -X POST http://localhost:8081/auth/login \
   -H 'Content-Type: application/json' \
   -d '{
-    "email": "admin1@example.com",
+    "email": "user2@example.com",
     "password": "Password@123"
   }'
 ```

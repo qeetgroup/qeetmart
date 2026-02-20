@@ -18,6 +18,9 @@ public class JwtProperties {
     @NotBlank
     private String secret;
 
+    @NotBlank
+    private String issuer;
+
     @Min(60000)
     private long accessTokenExpirationMs;
 

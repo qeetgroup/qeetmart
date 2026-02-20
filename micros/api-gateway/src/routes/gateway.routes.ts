@@ -21,8 +21,10 @@ const isExpressResponse = (value: unknown): value is Response => {
   return 'status' in value && typeof (value as Response).status === 'function';
 };
 
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // Create proxy middleware for each route
-routeConfig.forEach(({ path, service, stripPrefix = false }) => {
+routeConfig.forEach(({ path, service, upstreamPath }) => {
   const serviceConfig = services[service];
   
   if (!serviceConfig) {
@@ -34,13 +36,9 @@ routeConfig.forEach(({ path, service, stripPrefix = false }) => {
     target: serviceConfig.baseUrl,
     changeOrigin: true,
     xfwd: true,
-    ...(stripPrefix
-      ? {
-          pathRewrite: {
-            [`^${path}`]: '', // Remove the path prefix
-          },
-        }
-      : {}),
+    pathRewrite: {
+      [`^${escapeRegExp(path)}`]: upstreamPath,
+    },
     timeout: serviceConfig.timeout || gatewayConfig.proxyTimeoutMs,
     proxyTimeout: serviceConfig.timeout || gatewayConfig.proxyTimeoutMs,
     on: {

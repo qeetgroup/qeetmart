@@ -1,0 +1,31 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      image_tag:
+        description: 'Image tag to deploy (for example, sha-abc1234)'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate deployment input
+        run: |
+          test -n "${{ inputs.image_tag }}"
+      - name: Deployment placeholder
+        run: |
+          echo "Deploying tag ${{ inputs.image_tag }} to ${{ inputs.environment }}"
+          echo "Hook this job to Argo CD or Helm release automation."

@@ -8,7 +8,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${JPA_DDL_AUTO:validate}
     show-sql: false
     open-in-view: false
     properties:
@@ -17,10 +17,20 @@ spring:
 
 app:
   jwt:
-    # For production, set JWT_SECRET as a strong Base64 secret (>= 32 bytes decoded)
-    secret: ${JWT_SECRET:QXV0aFNlcnZpY2VTaWduaW5nS2V5Rm9ySldUMzJCeXRlcys=}
+    secret: ${JWT_SECRET}
+    issuer: ${JWT_ISSUER_URI}
     access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}
     refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
 
 server:
   port: ${SERVER_PORT:8081}
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus

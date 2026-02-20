@@ -96,6 +96,7 @@ public class JwtService {
         return Jwts.builder()
             .claims(claims)
             .subject(subject)
+            .issuer(jwtProperties.getIssuer())
             .issuedAt(Date.from(now))
             .expiration(Date.from(now.plusMillis(expirationMs)))
             .signWith(getSigningKey())

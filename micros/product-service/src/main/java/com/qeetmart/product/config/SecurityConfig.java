@@ -20,9 +20,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
-import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
-import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
@@ -66,8 +64,7 @@ public class SecurityConfig {
             .build();
 
         OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(
-            JwtValidators.createDefault(),
-            issuerValidator(jwtSecurityProperties.getIssuer())
+            JwtValidators.createDefaultWithIssuer(jwtSecurityProperties.getIssuer())
         );
         decoder.setJwtValidator(validator);
         return decoder;
@@ -104,24 +101,5 @@ public class SecurityConfig {
         } catch (IllegalArgumentException ignored) {
             return secret.getBytes(StandardCharsets.UTF_8);
         }
-    }
-
-    private OAuth2TokenValidator<Jwt> issuerValidator(String expectedIssuer) {
-        return jwt -> {
-            if (jwt.getIssuer() == null || jwt.getIssuer().toString().isBlank()) {
-                return OAuth2TokenValidatorResult.success();
-            }
-
-            if (jwt.getIssuer().toString().equals(expectedIssuer)) {
-                return OAuth2TokenValidatorResult.success();
-            }
-
-            OAuth2Error error = new OAuth2Error(
-                "invalid_token",
-                "Invalid token issuer. Expected: " + expectedIssuer,
-                null
-            );
-            return OAuth2TokenValidatorResult.failure(error);
-        };
     }
 }
