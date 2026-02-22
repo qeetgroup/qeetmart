@@ -15,6 +15,7 @@ import {
 import { useTrackEvent } from "@/hooks/useTrackEvent";
 import { Input } from "@/components/ui/input";
 import { SearchDropdown } from "@/components/search/search-dropdown";
+import { cn } from "@/lib/utils";
 
 export function SearchBar() {
   const router = useRouter();
@@ -143,10 +144,18 @@ export function SearchBar() {
   };
 
   return (
-    <div className="relative w-full max-w-2xl">
+    <div
+      className={cn(
+        "relative w-full mx-auto transition-all duration-300 ease-out",
+        focused ? "max-w-3xl" : "max-w-xl"
+      )}
+    >
       <form onSubmit={onSubmit}>
-        <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-surface-500" />
+        <div className="relative group">
+          <Search className={cn(
+            "pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 transition-colors duration-200",
+            focused ? "text-brand-600" : "text-surface-400 group-hover:text-surface-600"
+          )} />
           <Input
             value={value}
             onFocus={() => setFocused(true)}
@@ -158,8 +167,13 @@ export function SearchBar() {
               setValue(event.target.value);
               setActiveIndex(0);
             }}
-            placeholder="Search for products, brands and categories"
-            className="h-11 rounded-full border-surface-300 pl-10"
+            placeholder="Search for products, brands and categories..."
+            className={cn(
+              "h-12 w-full rounded-full border-surface-200 bg-surface-50 pl-12 pr-4 text-base shadow-sm outline-none transition-all duration-300 placeholder:text-surface-400 dark:border-surface-800 dark:bg-surface-900",
+              focused
+                ? "border-brand-500 bg-white ring-4 ring-brand-500/20 dark:bg-surface-950 dark:ring-brand-500/30"
+                : "hover:border-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800"
+            )}
             aria-label="Search products"
           />
         </div>

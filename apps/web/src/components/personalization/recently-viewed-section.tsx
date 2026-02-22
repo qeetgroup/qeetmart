@@ -38,17 +38,20 @@ export function RecentlyViewedSection() {
   }
 
   return (
-    <section className="space-y-4">
-      <div>
-        <h2 className="text-2xl font-black tracking-tight text-surface-900">
+    <section className="border-t border-surface-200/60 py-12 md:py-16">
+      <div className="mb-6 flex flex-col items-center text-center">
+        <h2 className="text-2xl font-semibold tracking-tight text-surface-900">
           Recently Viewed
         </h2>
-        <p className="text-sm text-surface-600">Pick up where you left off.</p>
+        <p className="mt-1 text-sm text-surface-500">Pick up exactly where you left off.</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {/* Horizontal scroll container on mobile, grid on larger screens */}
+      <div className="flex -mx-4 overflow-x-auto snap-x snap-mandatory px-4 pb-8 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:snap-none sm:px-0 sm:pb-0 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <div key={product.id} className="min-w-[240px] max-w-[280px] shrink-0 snap-start sm:min-w-0 sm:max-w-none">
+            <ProductCard product={product} />
+          </div>
         ))}
       </div>
     </section>

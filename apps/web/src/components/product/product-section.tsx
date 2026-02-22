@@ -11,23 +11,27 @@ interface ProductSectionProps {
 }
 
 export function ProductSection({ title, subtitle, products, href }: ProductSectionProps) {
+  if (!products?.length) return null;
+
   return (
-    <section className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <section className="w-full">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black tracking-tight text-surface-900">{title}</h2>
-          <p className="text-sm text-surface-600">{subtitle}</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-surface-900 md:text-3xl">{title}</h2>
+          <p className="mt-2 text-surface-600 md:text-lg">{subtitle}</p>
         </div>
         {href ? (
-          <Button variant="outline" asChild>
-            <Link href={href}>View all</Link>
+          <Button variant="outline" asChild className="rounded-full px-6">
+            <Link href={href}>View Collection</Link>
           </Button>
         ) : null}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="flex -mx-4 overflow-x-auto snap-x snap-mandatory px-4 pb-8 sm:mx-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible sm:snap-none sm:px-0 sm:pb-0 gap-4 md:gap-6">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <div key={product.id} className="min-w-[280px] shrink-0 snap-start sm:min-w-0 sm:max-w-none">
+            <ProductCard product={product} />
+          </div>
         ))}
       </div>
     </section>

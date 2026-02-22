@@ -4,10 +4,9 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { SlidersHorizontal } from "lucide-react";
 import { getCategories } from "@/lib/api/categories-api";
 import { getProducts } from "@/lib/api/products-api";
-import { DEFAULT_PAGE_SIZE, SORT_OPTIONS } from "@/lib/constants/store";
+import { DEFAULT_PAGE_SIZE } from "@/lib/constants/store";
 import {
   filterStateToQuery,
   parseFilterState,
@@ -21,14 +20,13 @@ import {
 } from "@/lib/personalization/profile-engine";
 import { queryKeys } from "@/lib/query-keys";
 import { useTrackEvent } from "@/hooks/useTrackEvent";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Drawer } from "@/components/ui/drawer";
-import { Select } from "@/components/ui/select";
 import { EmptyState } from "@/components/common/empty-state";
 import { ProductCard } from "@/components/product/product-card";
 import { ProductGridSkeleton } from "@/components/product/product-grid-skeleton";
 import { PLPFilters } from "@/components/product/plp-filters";
+import { PLPHeader } from "@/components/product/plp-header";
+import { MobileFilterDrawer } from "@/components/product/mobile-filter-drawer";
+import { PLPPagination } from "@/components/product/plp-pagination";
 
 interface PLPShellProps {
   initialCategory?: string;
@@ -140,97 +138,52 @@ export function PLPShell({ initialCategory }: PLPShellProps) {
 
   return (
     <div className="container mx-auto space-y-6 px-4 py-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-black tracking-tight text-surface-900 md:text-3xl">
-          {activeCategory ? activeCategory.name : "All Products"}
-        </h1>
-        <p className="text-sm text-surface-600">
-          Discover curated products with dynamic filters, personalization boosts and enterprise-grade catalog UX.
-        </p>
-      </div>
+      <PLPHeader
+        title={activeCategory ? activeCategory.name : "All Products"}
+        totalResults={productResponse?.total ?? 0}
+        isUpdating={isFetching || isPending}
+        filters={parsedFilters}
+        onChange={updateFilters}
+        onClearAll={clearAll}
+        onMobileFiltersOpen={() => setMobileFiltersOpen(true)}
+      />
 
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-surface-200 bg-white p-3">
-        <Button
-          variant="outline"
-          className="md:hidden"
-          onClick={() => setMobileFiltersOpen(true)}
-        >
-          <SlidersHorizontal className="h-4 w-4" />
-          Filters
-        </Button>
-
-        <p className="text-sm text-surface-700">
-          {productResponse?.total ?? 0} results
-          {isFetching || isPending ? " • updating..." : ""}
-        </p>
-
-        <div className="w-[220px]">
-          <Select
-            value={parsedFilters.sort}
-            onChange={(event) =>
-              updateFilters({
-                sort: event.target.value as FilterState["sort"],
-                page: 1,
-              })
-            }
-            options={SORT_OPTIONS.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
+      <div className="flex flex-col md:grid md:grid-cols-[240px_1fr] lg:grid-cols-[260px_1fr] gap-8 items-start">
+        <aside className="hidden md:block md:sticky md:top-24 h-[calc(100vh-8rem)] w-full self-start z-20">
+          <PLPFilters
+            className="bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] p-5 border border-surface-200/60 overflow-hidden"
+            categories={categories}
+            availableBrands={productResponse?.availableBrands ?? []}
+            minAvailablePrice={productResponse?.minAvailablePrice ?? 0}
+            maxAvailablePrice={productResponse?.maxAvailablePrice ?? 200000}
+            filters={parsedFilters}
+            onChange={updateFilters}
+            onReset={clearAll}
           />
-        </div>
-      </div>
+        </aside>
 
-      <div className="grid gap-6 md:grid-cols-[280px,1fr]">
-        <Card className="hidden h-fit md:sticky md:top-24 md:block">
-          <CardContent className="p-4">
-            <PLPFilters
-              categories={categories}
-              availableBrands={productResponse?.availableBrands ?? []}
-              minAvailablePrice={productResponse?.minAvailablePrice ?? 0}
-              maxAvailablePrice={productResponse?.maxAvailablePrice ?? 200000}
-              filters={parsedFilters}
-              onChange={updateFilters}
-              onReset={clearAll}
-            />
-          </CardContent>
-        </Card>
-
-        <section className="space-y-5">
+        <section className="flex-1 space-y-5 min-w-0 w-full">
           {isLoading ? (
             <ProductGridSkeleton count={12} />
           ) : productResponse && productResponse.items.length > 0 ? (
             <>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                 {productResponse.items.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-              <div className="flex items-center justify-between rounded-lg border border-surface-200 bg-white p-3">
-                <Button
-                  variant="outline"
-                  disabled={productResponse.page <= 1}
-                  onClick={() => updateFilters({ page: productResponse.page - 1 })}
-                >
-                  Previous
-                </Button>
-                <p className="text-sm text-surface-600">
-                  Page {productResponse.page} of {productResponse.totalPages}
-                </p>
-                <Button
-                  variant="outline"
-                  disabled={productResponse.page >= productResponse.totalPages}
-                  onClick={() => updateFilters({ page: productResponse.page + 1 })}
-                >
-                  Next
-                </Button>
-              </div>
+              <PLPPagination
+                currentPage={productResponse.page}
+                totalPages={productResponse.totalPages}
+                onPageChange={(page) => updateFilters({ page })}
+              />
             </>
           ) : (
             <EmptyState
               title="No products match your filters"
               description="Try broadening your filters, switching categories, or searching another keyword."
               actionHref="/products"
+              onReset={clearAll}
             />
           )}
 
@@ -251,24 +204,18 @@ export function PLPShell({ initialCategory }: PLPShellProps) {
         </section>
       </div>
 
-      <Drawer
+      <MobileFilterDrawer
         open={mobileFiltersOpen}
         onClose={() => setMobileFiltersOpen(false)}
-        title="Filters"
-        side="left"
-      >
-        <PLPFilters
-          categories={categories}
-          availableBrands={productResponse?.availableBrands ?? []}
-          minAvailablePrice={productResponse?.minAvailablePrice ?? 0}
-          maxAvailablePrice={productResponse?.maxAvailablePrice ?? 200000}
-          filters={parsedFilters}
-          onChange={(next) => {
-            updateFilters(next);
-          }}
-          onReset={clearAll}
-        />
-      </Drawer>
+        categories={categories}
+        availableBrands={productResponse?.availableBrands ?? []}
+        minAvailablePrice={productResponse?.minAvailablePrice ?? 0}
+        maxAvailablePrice={productResponse?.maxAvailablePrice ?? 200000}
+        filters={parsedFilters}
+        onChange={updateFilters}
+        onReset={clearAll}
+        totalResults={productResponse?.total ?? 0}
+      />
     </div>
   );
 }
