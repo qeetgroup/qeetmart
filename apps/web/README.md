@@ -1,36 +1,149 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QeetMart Web Storefront
 
-## Getting Started
+Enterprise-grade commerce storefront in `apps/web`, built for experimentation, personalization, conversion, and scale.
 
-First, run the development server:
+## Tech Stack
+
+- Next.js 16 App Router
+- TypeScript
+- Tailwind CSS v4
+- shadcn-style component primitives
+- React Query (TanStack Query)
+- Zustand (cart/session/wishlist)
+- Mock API + in-memory DB
+
+## Core Commerce Capabilities
+
+- Amazon-style home, PLP, PDP, cart, checkout, auth, account, wishlist
+- Mock API with product/catalog/auth/order/review layers
+- Responsive UX with sticky header, mega menu, search autocomplete, mini cart
+- Route-level loading/error boundaries
+
+## Phase Upgrades Implemented
+
+### 1) Personalization Engine
+
+- Interaction profile tracking (views, category affinity, cart adds)
+- Weighted recommendation scoring and blending
+- Personalized home recommendations
+- Personalized PLP sort (`Recommended`)
+
+### 2) Advanced Search
+
+- In-memory inverted index
+- Typo-tolerant query matching
+- Category-aware search behavior
+- Weighted ranking by text relevance, popularity, conversion, personal relevance
+- Keyboard navigation support in search dropdown
+
+### 3) A/B Testing Framework
+
+- Experiment engine with feature flags and weighted bucket assignment
+- Persistent variant assignment
+- Exposure tracking events
+- Active experiments:
+  - Homepage hero layout A/B
+  - Pricing presentation A/B
+  - CTA styling A/B
+
+### 4) Conversion Optimization
+
+- Exit intent recovery modal
+- Stock urgency countdown and pressure indicators
+- Recently viewed products section
+- Customers-also-bought recommendation block
+- Cart upsell recommendations
+- Free shipping progress indicator
+
+### 5) Performance & Scalability
+
+- Cached catalog/home/product data access (`unstable_cache`)
+- PDP ISR simulation (`revalidate`)
+- Suspense-based section loading
+- Prefetch-on-hover product card behavior
+- Bundle analyzer integration
+
+### 6) PWA & Mobile
+
+- Service worker registration
+- Offline shell/runtime caching strategy
+- Web app manifest
+- Add-to-home-screen prompt
+- Mobile swipe gestures in PDP gallery
+
+### 7) Analytics
+
+- Internal event tracker with local persistence
+- Tracked events: page views, product clicks, add-to-cart, checkout steps, conversions, experiment exposure
+- Debug analytics panel (open via floating icon or `Shift + A`)
+
+### 8) Inventory Intelligence
+
+- Dynamic stock pressure model
+- Sell-out time estimation
+- Low-stock urgency UI
+- Restock suggestion logic
+
+### 9) SEO
+
+- Product JSON-LD
+- Breadcrumb JSON-LD
+- Dynamic metadata + canonical links
+- `robots.ts`
+- Dynamic sitemap generation (`sitemap.ts`)
+
+### 10) Enterprise Architecture
+
+- Added domain modules under `src/domains/*` for data/logic separation
+- Shared typing upgraded for experiments/search/personalization/analytics
+- Commerce utilities centralized in `src/lib/*`
+
+## Key Folders
+
+- `src/app`: App Router pages and route metadata/sitemap/robots
+- `src/components`: UI, layout, commerce feature components
+- `src/lib`: APIs, engines, query utilities, constants, performance helpers
+- `src/hooks`: experiment, tracking, personalization hooks
+- `src/domains`: domain-oriented data/logic modules
+- `src/store`: Zustand stores
+- `src/types`: shared commerce types
+
+## Run Locally
+
+From repository root:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm --filter web dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Validate
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm --filter web lint
+pnpm --filter web build
+```
 
-## Learn More
+## Bundle Analysis
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+ANALYZE=true pnpm --filter web build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## PWA Notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Service worker: `public/sw.js`
+- Manifest: `public/manifest.webmanifest`
+- Install prompt appears when browser emits `beforeinstallprompt`
 
-## Deploy on Vercel
+## Demo Credentials
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Email: `demo@qeetmart.com`
+- Password: `demo123`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Important Runtime Notes
+
+- Mock DB is in-memory and resets on server restart.
+- Personalized profile, analytics, experiments, and cart/session data persist in browser local storage.
