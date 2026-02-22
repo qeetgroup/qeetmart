@@ -15,17 +15,30 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
-  const activeImage = images[activeIndex] ?? images[0];
+  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!zoomed) return;
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setMousePosition({ x, y });
+  };
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-4 w-full max-w-[600px] mx-auto lg:mr-0 lg:ml-auto">
+      {/* Main Image */}
       <div
         className={cn(
-          "relative overflow-hidden rounded-xl border border-surface-200 bg-surface-50",
-          zoomed ? "cursor-zoom-out" : "cursor-zoom-in",
+          "relative aspect-square w-full flex-1 overflow-hidden rounded-2xl border border-surface-200 bg-surface-50 shadow-sm transition-all duration-300",
+          zoomed ? "cursor-zoom-out" : "cursor-zoom-in"
         )}
         onMouseEnter={() => setZoomed(true)}
-        onMouseLeave={() => setZoomed(false)}
+        onMouseLeave={() => {
+          setZoomed(false);
+          setMousePosition({ x: 50, y: 50 });
+        }}
+        onMouseMove={handleMouseMove}
         onTouchStart={(event) => {
           touchStartX.current = event.touches[0]?.clientX ?? null;
         }}
@@ -54,38 +67,47 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
           touchEndX.current = null;
         }}
       >
-        <Image
-          src={activeImage}
-          alt={title}
-          width={900}
-          height={900}
-          className={cn(
-            "aspect-square w-full object-cover transition duration-300",
-            zoomed ? "scale-[1.6]" : "scale-100",
-          )}
-          priority
-        />
+        {images.map((image, index) => (
+          <Image
+            key={image}
+            src={image}
+            alt={`${title} ${index + 1}`}
+            fill
+            className={cn(
+              "object-cover transition-all duration-500 ease-out",
+              index === activeIndex ? "z-10 opacity-100" : "z-0 opacity-0",
+              zoomed && index === activeIndex ? "scale-[2]" : "scale-100"
+            )}
+            style={{
+              transformOrigin:
+                zoomed && index === activeIndex
+                  ? `${mousePosition.x}% ${mousePosition.y}%`
+                  : "center center",
+            }}
+            priority={index === 0}
+          />
+        ))}
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      {/* Thumbnails */}
+      <div className="grid grid-cols-5 gap-3 [&::-webkit-scrollbar]:hidden">
         {images.map((image, index) => (
           <button
             key={`${image}-${index}`}
             type="button"
             onClick={() => setActiveIndex(index)}
             className={cn(
-              "overflow-hidden rounded-md border bg-white",
+              "relative aspect-square w-full overflow-hidden rounded-xl border-2 transition-all hover:opacity-100",
               index === activeIndex
-                ? "border-brand-500 ring-2 ring-brand-200"
-                : "border-surface-200",
+                ? "border-brand-600 opacity-100 shadow-sm"
+                : "border-transparent opacity-60 hover:border-surface-300"
             )}
           >
             <Image
               src={image}
               alt={`${title} preview ${index + 1}`}
-              width={120}
-              height={120}
-              className="aspect-square w-full object-cover"
+              fill
+              className="object-cover"
             />
           </button>
         ))}

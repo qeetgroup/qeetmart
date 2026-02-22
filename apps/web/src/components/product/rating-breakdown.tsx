@@ -22,22 +22,25 @@ export function RatingBreakdown({ productId }: RatingBreakdownProps) {
   const total = Object.values(data).reduce((sum, value) => sum + value, 0);
 
   return (
-    <div className="space-y-3 rounded-xl border border-surface-200 bg-white p-4">
-      <h3 className="text-sm font-semibold tracking-wide text-surface-700 uppercase">
-        Rating breakdown
+    <div className="space-y-6 rounded-3xl border border-surface-200 bg-white p-8 shadow-sm">
+      <h3 className="font-bold text-surface-900 text-xl tracking-tight">
+        Rating Snapshot
       </h3>
-      {[5, 4, 3, 2, 1].map((rating) => {
-        const count = data[rating as keyof typeof data];
-        const percentage = total === 0 ? 0 : Math.round((count / total) * 100);
+      <div className="space-y-3">
+        {[5, 4, 3, 2, 1].map((rating) => {
+          const count = data[rating as keyof typeof data];
+          const percentage = total === 0 ? 0 : Math.round((count / total) * 100);
 
-        return (
-          <div key={rating} className="grid grid-cols-[40px,1fr,36px] items-center gap-2">
-            <span className="text-sm text-surface-700">{rating}★</span>
-            <Progress value={percentage} />
-            <span className="text-xs text-surface-500">{count}</span>
-          </div>
-        );
-      })}
+          return (
+            <div key={rating} className="grid grid-cols-[40px,1fr,40px] items-center gap-3">
+              <span className="text-sm font-bold text-surface-700">{rating} ★</span>
+              {/* @ts-ignore -- assuming Progress takes className and value */}
+              <Progress value={percentage} className="h-2.5 bg-surface-100 [&>div]:bg-brand-500" />
+              <span className="text-sm font-medium text-surface-500 text-right">{count}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

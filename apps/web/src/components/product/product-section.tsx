@@ -14,14 +14,14 @@ export function ProductSection({ title, subtitle, products, href }: ProductSecti
   if (!products?.length) return null;
 
   return (
-    <section className="w-full">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-surface-900 md:text-3xl">{title}</h2>
-          <p className="mt-2 text-surface-600 md:text-lg">{subtitle}</p>
+    <section className="w-full py-8 md:py-16">
+      <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-2">
+          <h2 className="text-3xl font-black tracking-tight text-surface-900 md:text-4xl">{title}</h2>
+          <p className="text-surface-600 font-medium md:text-lg">{subtitle}</p>
         </div>
         {href ? (
-          <Button variant="outline" asChild className="rounded-full px-6">
+          <Button variant="outline" asChild className="rounded-full px-8 h-12 font-bold text-surface-800">
             <Link href={href}>View Collection</Link>
           </Button>
         ) : null}
