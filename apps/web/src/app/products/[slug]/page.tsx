@@ -9,6 +9,9 @@ import { getCustomersAlsoBought } from "@/lib/api/products-api";
 import { buildCanonicalUrl, formatCurrency } from "@/lib/utils";
 import { ProductDetailsClient } from "@/components/product/product-details-client";
 import { ProductSection } from "@/components/product/product-section";
+import { ProductStory } from "@/components/product/product-story";
+import { FaqAccordion } from "@/components/product/faq-accordion";
+import { Button } from "@/components/ui/button";
 
 const ProductGallery = dynamic(() => import("@/components/product/product-gallery"), {
   loading: () => (
@@ -117,7 +120,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   };
 
   return (
-    <div className="container mx-auto space-y-8 px-4 py-6">
+    <div className="container mx-auto space-y-12 px-4 py-8 md:py-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -125,41 +128,38 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         }}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr,1fr]">
-        <ProductGallery images={product.images} title={product.title} />
-        <ProductDetailsClient product={product} />
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex-1 lg:max-w-[55%]">
+          <ProductGallery images={product.images} title={product.title} />
+        </div>
+        <div className="flex-1 lg:sticky lg:top-24 lg:max-w-[40%]">
+          <ProductDetailsClient product={product} />
+        </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[320px,1fr]">
-        <RatingBreakdown productId={product.id} />
-        <div className="rounded-xl border border-surface-200 bg-white p-4">
-          <h3 className="mb-3 text-sm font-semibold tracking-wide text-surface-700 uppercase">
-            Specifications
-          </h3>
-          <dl className="grid gap-2 text-sm">
-            {product.specs.map((spec) => (
-              <div
-                key={spec.label}
-                className="grid grid-cols-[140px,1fr] gap-2 border-b border-surface-100 py-1 last:border-b-0"
-              >
-                <dt className="text-surface-500">{spec.label}</dt>
-                <dd className="font-medium text-surface-800">{spec.value}</dd>
-              </div>
-            ))}
-          </dl>
-          <div className="mt-4 rounded-lg bg-surface-50 p-3 text-sm text-surface-700">
-            MRP: <span className="font-semibold">{formatCurrency(product.originalPrice)}</span>
+      <ProductStory product={product} />
+
+      <div className="mx-auto max-w-7xl pt-8 pb-16">
+        <div className="mb-12 space-y-2 text-center">
+          <h2 className="text-3xl font-black tracking-tight text-surface-900 md:text-5xl">Real reviews from <br className="hidden md:block" /><span className="text-brand-600">real customers.</span></h2>
+          <p className="text-lg text-surface-600 font-medium">See what others are saying about the {product.title}.</p>
+        </div>
+        <div className="grid gap-12 lg:grid-cols-[300px_1fr] xl:grid-cols-[380px_1fr] items-start">
+          <div className="space-y-8 lg:sticky lg:top-24 h-fit z-10 bg-white">
+            <RatingBreakdown productId={product.id} />
+            <div className="space-y-4 rounded-3xl bg-surface-50 p-8 text-center shadow-inner">
+              <h3 className="font-bold text-surface-900 text-xl tracking-tight">Got something to share?</h3>
+              <p className="text-surface-600 text-sm pb-2">If you’ve used this product, share your thoughts with other customers.</p>
+              <Button className="w-full h-12 rounded-xl text-base font-bold shadow-md transition-transform hover:-translate-y-0.5">Write a Review</Button>
+            </div>
+          </div>
+          <div>
+            <ReviewList productId={product.id} />
           </div>
         </div>
       </div>
 
-      <ProductSection
-        title="Customers Also Bought"
-        subtitle="Basket affinity picks based on category and popularity"
-        products={customersAlsoBought}
-      />
-
-      <ReviewList productId={product.id} />
+      <FaqAccordion />
 
       <ProductSection
         title="Similar Products"

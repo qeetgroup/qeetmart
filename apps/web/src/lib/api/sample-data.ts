@@ -365,7 +365,7 @@ function buildProduct(index: number): Product {
     rating,
     reviewCount,
     stock,
-    images: Array.from({ length: 4 }, (_, imageIndex) => {
+    images: Array.from({ length: 5 }, (_, imageIndex) => {
       return `https://picsum.photos/seed/${slug}-${imageIndex + 1}/1200/1200`;
     }),
     variants: buildVariants(category.slug, index + 11),
